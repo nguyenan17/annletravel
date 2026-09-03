@@ -13,22 +13,46 @@ let tours = [];
 
 async function loadTours() {
 
-    // Nếu đã load rồi thì không load lại
     if (tours.length > 0) {
         return tours;
     }
 
     try {
 
-        const response = await fetch("data/tours.json");
+        const { data, error } =
+            await supabaseClient
+                .from("tours")
+                .select("*")
+                .order("departure", {
+                    ascending: true
+                });
 
-        tours = await response.json();
+        if (error) {
+            throw error;
+        }
+
+        tours = data.map(tour => ({
+
+            ...tour,
+
+            displayDate:
+                new Intl.DateTimeFormat("vi-VN")
+                    .format(
+                        new Date(
+                            tour.departure + "T00:00:00"
+                        )
+                    )
+
+        }));
 
         return tours;
 
     } catch (error) {
 
-        console.error("Không thể tải danh sách tour:", error);
+        console.error(
+            "Không thể tải danh sách tour từ Supabase:",
+            error
+        );
 
         return [];
 
@@ -1109,20 +1133,40 @@ function closeBookingModal() {
 // SUBMIT BOOKING
 // ================================
 
-function submitBooking(event, tourId) {
+async function submitBooking(event, tourId) {
 
     event.preventDefault();
 
 
     const name =
-        document.getElementById("bookingName").value.trim();
+        document
+            .getElementById("bookingName")
+            .value
+            .trim();
 
     const phone =
-        document.getElementById("bookingPhone").value.trim();
+        document
+            .getElementById("bookingPhone")
+            .value
+            .trim();
 
     const people =
-        document.getElementById("bookingPeople").value;
+        Number(
+            document
+                .getElementById("bookingPeople")
+                .value
+        );
 
+    const note =
+        document
+            .getElementById("bookingNote")
+            ?.value
+            .trim() || "";
+
+
+    // ================================
+    // VALIDATE
+    // ================================
 
     if (!name || !phone) {
 
@@ -1134,26 +1178,136 @@ function submitBooking(event, tourId) {
     }
 
 
-    console.log("BOOKING:", {
+    if (people <= 0) {
 
-        tourId: tourId,
+        alert(
+            "Số người đăng ký không hợp lệ."
+        );
 
-        name: name,
-
-        phone: phone,
-
-        people: people
-
-    });
+        return;
+    }
 
 
-    alert(
-        "Đăng ký thành công!\n\n" +
-        "YOUR TRAVEL sẽ liên hệ với bạn sớm nhất."
-    );
+    // ================================
+    // FIND TOUR
+    // ================================
+
+    const data =
+        await loadTours();
+
+    const tour =
+        data.find(
+            item => item.id === tourId
+        );
 
 
-    closeBookingModal();
+    if (!tour) {
+
+        alert(
+            "Không tìm thấy tour."
+        );
+
+        return;
+    }
+
+
+    // ================================
+    // CHECK SEATS
+    // ================================
+
+    if (tour.seats <= 0) {
+
+        alert(
+            "Tour này hiện đã hết chỗ."
+        );
+
+        return;
+    }
+
+
+    if (people > tour.seats) {
+
+        alert(
+            `Tour chỉ còn ${tour.seats} chỗ.\n\n` +
+            `Vui lòng giảm số người đăng ký.`
+        );
+
+        return;
+    }
+
+
+    // ================================
+    // INSERT BOOKING
+    // ================================
+
+    try {
+
+        const {
+            data: booking,
+            error
+        } =
+            await supabaseClient
+                .from("bookings")
+                .insert({
+
+                    tour_id: tourId,
+
+                    customer_name: name,
+
+                    phone: phone,
+
+                    people: people,
+
+                    note: note,
+
+                    status: "PENDING"
+
+                })
+                .select()
+                .single();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        console.log(
+            "BOOKING CREATED:",
+            booking
+        );
+
+
+        // ================================
+        // SUCCESS
+        // ================================
+
+        alert(
+            "Đăng ký tour thành công! 🎉\n\n" +
+            "ANNLETRAVEL sẽ liên hệ với bạn " +
+            "sớm nhất để xác nhận thông tin."
+        );
+
+
+        closeBookingModal();
+
+
+    } catch (error) {
+
+        console.error(
+            "Booking error:",
+            error
+        );
+
+
+        alert(
+            "Không thể gửi đăng ký tour.\n\n" +
+            "Vui lòng thử lại sau."
+        );
+
+    }
 
 }
 
