@@ -2115,3 +2115,36 @@ footer p {
         padding: 8px 11px;
     }
 }
+
+/* =========================
+   TOUR ITINERARY
+========================= */
+
+.itinerary-day {
+    padding: 18px 20px;
+    margin-bottom: 15px;
+
+    background: var(--bg-light);
+
+    border-left: 4px solid var(--primary);
+
+    border-radius: 8px;
+}
+
+
+.itinerary-day h3 {
+    margin: 0 0 10px;
+
+    font-size: 18px;
+
+    color: var(--text);
+}
+
+
+.itinerary-day p {
+    margin: 0;
+
+    line-height: 1.7;
+
+    color: var(--text-light);
+}

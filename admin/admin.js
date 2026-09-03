@@ -4,6 +4,10 @@ let bookings = [];
 
 let editingTourId = null;
 
+let editingItineraryTourId = null;
+
+let itineraryItems = [];
+
 
 // =========================
 // ELEMENTS
@@ -53,6 +57,38 @@ const refreshBookingButton =
 
 const bookingStatusFilter =
     document.getElementById("bookingStatusFilter");
+
+const itineraryModal =
+    document.getElementById("itineraryModal");
+
+const itineraryModalTitle =
+    document.getElementById("itineraryModalTitle");
+
+const itineraryTourName =
+    document.getElementById("itineraryTourName");
+
+const itineraryList =
+    document.getElementById("itineraryList");
+
+const addItineraryDayButton =
+    document.getElementById(
+        "addItineraryDayButton"
+    );
+
+const saveItineraryButton =
+    document.getElementById(
+        "saveItineraryButton"
+    );
+
+const closeItineraryModalButton =
+    document.getElementById(
+        "closeItineraryModalButton"
+    );
+
+const cancelItineraryButton =
+    document.getElementById(
+        "cancelItineraryButton"
+    );
 
 
 // =========================
@@ -919,6 +955,13 @@ function renderTours() {
                             </button>
 
                             <button
+                                class="edit-button"
+                                onclick="manageItinerary('${tour.id}')"
+                            >
+                                Lịch trình
+                            </button>
+
+                            <button
                                 class="delete-button"
                                 onclick="deleteTour('${tour.id}')"
                             >
@@ -1108,6 +1151,453 @@ window.editTour =
             "hidden"
         );
     };
+
+// =========================
+// MANAGE ITINERARY
+// =========================
+
+window.manageItinerary =
+    async function (tourId) {
+
+        const tour =
+            tours.find(
+                item => item.id === tourId
+            );
+
+        if (!tour) {
+            alert("Không tìm thấy tour.");
+            return;
+        }
+
+        editingItineraryTourId =
+            tourId;
+
+        itineraryModalTitle.textContent =
+            "Lịch trình";
+
+        itineraryTourName.textContent =
+            tour.name;
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("tour_itineraries")
+                    .select("*")
+                    .eq(
+                        "tour_id",
+                        tourId
+                    )
+                    .order(
+                        "day",
+                        {
+                            ascending: true
+                        }
+                    );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            itineraryItems =
+                data || [];
+
+
+            renderItinerary();
+
+
+            itineraryModal.classList.remove(
+                "hidden"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Load itinerary error:",
+                error
+            );
+
+            alert(
+                "Không thể tải lịch trình.\n\n" +
+                error.message
+            );
+        }
+    };
+
+
+// =========================
+// RENDER ITINERARY
+// =========================
+
+function renderItinerary() {
+
+    if (
+        !itineraryItems ||
+        itineraryItems.length === 0
+    ) {
+
+        itineraryList.innerHTML = `
+            <div class="itinerary-empty">
+                Chưa có lịch trình.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    itineraryList.innerHTML =
+        itineraryItems
+            .map(
+                (item, index) => `
+
+                <div
+                    class="itinerary-item"
+                    data-index="${index}"
+                >
+
+                    <div class="itinerary-item-header">
+
+                        <div class="itinerary-day-title">
+                            Ngày ${item.day}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="itinerary-delete-button"
+                            onclick="removeItineraryDay(${index})"
+                        >
+                            Xóa ngày
+                        </button>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Tiêu đề
+                        </label>
+
+                        <input
+                            type="text"
+                            class="itinerary-title"
+                            value="${escapeHtml(
+                    item.title || ""
+                )}"
+                            placeholder="Ví dụ: Hà Nội → Seoul"
+                            oninput="updateItineraryItem(
+                                ${index},
+                                'title',
+                                this.value
+                            )"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Nội dung
+                        </label>
+
+                        <textarea
+                            class="itinerary-description"
+                            placeholder="Mô tả lịch trình trong ngày..."
+                            oninput="updateItineraryItem(
+                                ${index},
+                                'description',
+                                this.value
+                            )"
+                        >${escapeHtml(
+                    item.description || ""
+                )}</textarea>
+
+                    </div>
+
+                </div>
+
+            `
+            )
+            .join("");
+}
+
+
+// =========================
+// UPDATE ITINERARY ITEM
+// =========================
+
+window.updateItineraryItem =
+    function (
+        index,
+        field,
+        value
+    ) {
+
+        if (!itineraryItems[index]) {
+            return;
+        }
+
+        itineraryItems[index][field] =
+            value;
+    };
+
+
+// =========================
+// ADD ITINERARY DAY
+// =========================
+
+addItineraryDayButton.addEventListener(
+    "click",
+    function () {
+
+        const nextDay =
+            itineraryItems.length + 1;
+
+
+        itineraryItems.push({
+
+            id: null,
+
+            tour_id:
+                editingItineraryTourId,
+
+            day:
+                nextDay,
+
+            title:
+                "",
+
+            description:
+                ""
+
+        });
+
+
+        renderItinerary();
+    }
+);
+
+
+// =========================
+// REMOVE ITINERARY DAY
+// =========================
+
+window.removeItineraryDay =
+    function (index) {
+
+        if (!itineraryItems[index]) {
+            return;
+        }
+
+
+        const confirmed =
+            confirm(
+                `Bạn có chắc muốn xóa Ngày ${itineraryItems[index].day}?`
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        itineraryItems.splice(
+            index,
+            1
+        );
+
+
+        // Đánh lại số ngày
+
+        itineraryItems.forEach(
+            (item, itemIndex) => {
+
+                item.day =
+                    itemIndex + 1;
+
+            }
+        );
+
+
+        renderItinerary();
+    };
+
+
+// =========================
+// SAVE ITINERARY
+// =========================
+
+saveItineraryButton.addEventListener(
+    "click",
+    async function () {
+
+        if (!editingItineraryTourId) {
+            return;
+        }
+
+
+        // Kiểm tra tiêu đề
+
+        const invalidItem =
+            itineraryItems.find(
+                item =>
+                    !item.title ||
+                    !item.title.trim()
+            );
+
+
+        if (invalidItem) {
+
+            alert(
+                `Vui lòng nhập tiêu đề cho Ngày ${invalidItem.day}.`
+            );
+
+            return;
+        }
+
+
+        try {
+
+            saveItineraryButton.disabled =
+                true;
+
+            saveItineraryButton.textContent =
+                "Đang lưu...";
+
+
+            // Xóa toàn bộ lịch trình cũ
+
+            const {
+                error: deleteError
+            } =
+                await supabaseClient
+                    .from("tour_itineraries")
+                    .delete()
+                    .eq(
+                        "tour_id",
+                        editingItineraryTourId
+                    );
+
+
+            if (deleteError) {
+                throw deleteError;
+            }
+
+
+            // Nếu có lịch trình mới thì insert
+
+            if (itineraryItems.length > 0) {
+
+                const rows =
+                    itineraryItems.map(
+                        item => ({
+
+                            tour_id:
+                                editingItineraryTourId,
+
+                            day:
+                                item.day,
+
+                            title:
+                                item.title.trim(),
+
+                            description:
+                                item.description
+                                    ? item.description.trim()
+                                    : ""
+
+                        })
+                    );
+
+
+                const {
+                    error: insertError
+                } =
+                    await supabaseClient
+                        .from(
+                            "tour_itineraries"
+                        )
+                        .insert(rows);
+
+
+                if (insertError) {
+                    throw insertError;
+                }
+            }
+
+
+            alert(
+                "Lưu lịch trình thành công!"
+            );
+
+
+            closeItineraryModal();
+
+
+        } catch (error) {
+
+            console.error(
+                "Save itinerary error:",
+                error
+            );
+
+
+            alert(
+                "Không thể lưu lịch trình.\n\n" +
+                error.message
+            );
+
+
+        } finally {
+
+            saveItineraryButton.disabled =
+                false;
+
+            saveItineraryButton.textContent =
+                "Lưu lịch trình";
+        }
+    }
+);
+
+
+// =========================
+// CLOSE ITINERARY MODAL
+// =========================
+
+function closeItineraryModal() {
+
+    itineraryModal.classList.add(
+        "hidden"
+    );
+
+    editingItineraryTourId =
+        null;
+
+    itineraryItems = [];
+
+    itineraryList.innerHTML = "";
+}
+
+
+closeItineraryModalButton.addEventListener(
+    "click",
+    closeItineraryModal
+);
+
+
+cancelItineraryButton.addEventListener(
+    "click",
+    closeItineraryModal
+);
 
 
 // =========================

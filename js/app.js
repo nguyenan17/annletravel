@@ -700,12 +700,12 @@ async function renderTourDetail() {
 
     // Nếu không tìm thấy
     // lấy tour đầu tiên
-
     if (!tour) {
         tour = data[0];
     }
 
 
+    // Không có tour
     if (!tour) {
 
         container.innerHTML = `
@@ -715,12 +715,11 @@ async function renderTourDetail() {
         `;
 
         return;
-
     }
 
 
     document.title =
-        tour.name + " - YOUR TRAVEL";
+        tour.name + " - ANNLETRAVEL";
 
 
     container.innerHTML = `
@@ -813,28 +812,15 @@ async function renderTourDetail() {
                     <br>
 
 
-                    <p>
-                        <strong>Ngày 1:</strong>
-                        Khởi hành và nhận phòng.
-                    </p>
+                    <!-- ITINERARY -->
 
+                    <div id="tourItinerary">
 
-                    <p>
-                        <strong>Ngày 2:</strong>
-                        Tham quan các địa điểm nổi bật.
-                    </p>
+                        <p>
+                            Đang tải lịch trình...
+                        </p>
 
-
-                    <p>
-                        <strong>Ngày 3:</strong>
-                        Khám phá văn hóa và ẩm thực địa phương.
-                    </p>
-
-
-                    <p>
-                        <strong>Ngày cuối:</strong>
-                        Mua sắm và trở về.
-                    </p>
+                    </div>
 
 
                 </div>
@@ -898,6 +884,101 @@ async function renderTourDetail() {
         </section>
 
     `;
+
+
+    // Load lịch trình từ Supabase
+    await loadTourItinerary(tour.id);
+
+}
+
+async function loadTourItinerary(tourId) {
+
+    const container =
+        document.getElementById("tourItinerary");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("tour_itineraries")
+                .select(
+                    "day, title, description"
+                )
+                .eq("tour_id", tourId)
+                .order(
+                    "day",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        // Không có lịch trình
+        if (!data || data.length === 0) {
+
+            container.innerHTML = `
+                <p>
+                    Lịch trình đang được cập nhật.
+                </p>
+            `;
+
+            return;
+        }
+
+
+        container.innerHTML =
+            data.map(item => `
+
+                <div class="itinerary-day">
+
+                    <h3>
+                        Ngày ${item.day}: ${item.title}
+                    </h3>
+
+                    ${
+                        item.description
+                            ? `
+                                <p>
+                                    ${item.description}
+                                </p>
+                              `
+                            : ""
+                    }
+
+                </div>
+
+            `).join("");
+
+
+    } catch (error) {
+
+        console.error(
+            "Load itinerary error:",
+            error
+        );
+
+
+        container.innerHTML = `
+            <p>
+                Không thể tải lịch trình.
+            </p>
+        `;
+
+    }
 
 }
 

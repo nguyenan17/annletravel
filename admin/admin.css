@@ -704,3 +704,66 @@ td {
     padding: 30px !important;
     color: #66727D;
 }
+
+/* =========================
+   ITINERARY
+========================= */
+
+.itinerary-modal-box {
+    max-width: 850px;
+}
+
+.itinerary-container {
+    margin-top: 20px;
+}
+
+.itinerary-item {
+    border: 1px solid #E1EAF0;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 15px;
+    background: #F9FCFD;
+}
+
+.itinerary-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.itinerary-day-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0077B6;
+}
+
+.itinerary-delete-button {
+    border: none;
+    background: transparent;
+    color: #C0392B;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.itinerary-delete-button:hover {
+    text-decoration: underline;
+}
+
+.itinerary-item .form-group {
+    margin-bottom: 12px;
+}
+
+.itinerary-item textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.itinerary-empty {
+    text-align: center;
+    padding: 25px;
+    color: #66727D;
+    border: 1px dashed #E1EAF0;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
