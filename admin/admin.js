@@ -8,6 +8,12 @@ let editingItineraryTourId = null;
 
 let itineraryItems = [];
 
+let editingTourImages = [];
+let selectedGalleryFiles = [];
+
+// Các ảnh cũ sẽ xóa khỏi Storage sau khi lưu thành công
+let imagesToDelete = [];
+
 
 // =========================
 // ELEMENTS
@@ -89,6 +95,12 @@ const cancelItineraryButton =
     document.getElementById(
         "cancelItineraryButton"
     );
+
+const tourGalleryFiles =
+    document.getElementById("tourGalleryFiles");
+
+const galleryPreview =
+    document.getElementById("galleryPreview");
 
 
 // =========================
@@ -1005,12 +1017,21 @@ addTourButton.addEventListener(
 
         editingTourId = null;
 
+        imagesToDelete = [];
+
         document.getElementById(
             "modalTitle"
         ).textContent = "Thêm tour";
 
         tourForm.reset();
+
         imagePreview.innerHTML = "";
+
+        galleryPreview.innerHTML = "";
+
+        editingTourImages = [];
+
+        selectedGalleryFiles = [];
 
         document.getElementById(
             "tourId"
@@ -1033,6 +1054,10 @@ const imagePreview =
     document.getElementById("imagePreview");
 
 
+// =========================
+// MAIN IMAGE PREVIEW
+// =========================
+
 tourImageFile.addEventListener(
     "change",
     function () {
@@ -1044,17 +1069,96 @@ tourImageFile.addEventListener(
             return;
         }
 
+
         const imageUrl =
             URL.createObjectURL(file);
 
+
         imagePreview.innerHTML = `
+
             <img
                 src="${imageUrl}"
                 alt="Preview"
             >
+
         `;
     }
 );
+
+
+// =========================
+// GALLERY PREVIEW
+// =========================
+
+tourGalleryFiles.addEventListener(
+    "change",
+    function () {
+
+        selectedGalleryFiles =
+            Array.from(this.files);
+
+
+        renderGalleryPreview();
+
+    }
+);
+
+
+function renderGalleryPreview() {
+
+    galleryPreview.innerHTML = "";
+
+
+    selectedGalleryFiles.forEach(
+        (file, index) => {
+
+            const imageUrl =
+                URL.createObjectURL(file);
+
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "gallery-preview-item";
+
+
+            item.innerHTML = `
+
+                <img
+                    src="${imageUrl}"
+                    alt="Gallery ${index + 1}"
+                >
+
+                <button
+                    type="button"
+                    onclick="removeGalleryFile(${index})"
+                >
+                    ×
+                </button>
+
+            `;
+
+
+            galleryPreview.appendChild(item);
+
+        }
+    );
+}
+
+
+window.removeGalleryFile =
+    function (index) {
+
+        selectedGalleryFiles.splice(
+            index,
+            1
+        );
+
+
+        renderGalleryPreview();
+
+    };
 
 
 // =========================
@@ -1125,6 +1229,19 @@ window.editTour =
         ).value =
             tour.image || "";
 
+        editingTourImages =
+            Array.isArray(tour.images)
+                ? [...tour.images]
+                : [];
+
+        selectedGalleryFiles = [];
+
+        imagesToDelete = [];
+
+        tourGalleryFiles.value = "";
+
+        renderExistingGallery();
+
         if (tour.image) {
 
             imagePreview.innerHTML = `
@@ -1150,6 +1267,75 @@ window.editTour =
         tourModal.classList.remove(
             "hidden"
         );
+    };
+
+function renderExistingGallery() {
+
+    galleryPreview.innerHTML = "";
+
+
+    editingTourImages.forEach(
+        (imageUrl, index) => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "gallery-preview-item";
+
+
+            item.innerHTML = `
+
+                <img
+                    src="${imageUrl}"
+                    alt="Gallery"
+                >
+
+                <button
+                    type="button"
+                    onclick="removeExistingGalleryImage(${index})"
+                >
+                    ×
+                </button>
+
+            `;
+
+
+            galleryPreview.appendChild(item);
+
+        }
+    );
+}
+
+window.removeExistingGalleryImage =
+    function (index) {
+
+        const imageUrl =
+            editingTourImages[index];
+
+        if (!imageUrl) {
+            return;
+        }
+
+        const confirmed =
+            confirm(
+                "Bạn có chắc muốn xóa ảnh này?"
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        // Đánh dấu ảnh để xóa khỏi Storage
+        imagesToDelete.push(imageUrl);
+
+        // Xóa khỏi danh sách gallery hiện tại
+        editingTourImages.splice(
+            index,
+            1
+        );
+
+        renderExistingGallery();
     };
 
 // =========================
@@ -1630,6 +1816,22 @@ window.deleteTour =
 
         try {
 
+            // =========================
+            // LẤY TOÀN BỘ ẢNH
+            // =========================
+
+            const imagesToRemove = [
+                tour.image,
+                ...(Array.isArray(tour.images)
+                    ? tour.images
+                    : [])
+            ].filter(Boolean);
+
+
+            // =========================
+            // XÓA TOUR TRONG DATABASE
+            // =========================
+
             const { error } =
                 await supabaseClient
                     .from("tours")
@@ -1639,6 +1841,29 @@ window.deleteTour =
 
             if (error) {
                 throw error;
+            }
+
+
+            // =========================
+            // XÓA ẢNH KHỎI STORAGE
+            // =========================
+
+            if (imagesToRemove.length > 0) {
+
+                try {
+
+                    await deleteTourStorageImages(
+                        imagesToRemove
+                    );
+
+                } catch (storageError) {
+
+                    console.error(
+                        "Tour đã xóa nhưng ảnh Storage chưa xóa hết:",
+                        storageError
+                    );
+
+                }
             }
 
 
@@ -1664,32 +1889,120 @@ window.deleteTour =
         }
     };
 
+// =========================
+// IMAGE COMPRESSION
+// =========================
+
+async function compressImage(file) {
+
+    const maxWidth = 1600;
+    const maxHeight = 1200;
+    const quality = 0.82;
+
+    const bitmap =
+        await createImageBitmap(file);
+
+    let width = bitmap.width;
+    let height = bitmap.height;
+
+    const ratio =
+        Math.min(
+            maxWidth / width,
+            maxHeight / height,
+            1
+        );
+
+    width =
+        Math.round(width * ratio);
+
+    height =
+        Math.round(height * ratio);
+
+
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.width = width;
+    canvas.height = height;
+
+
+    const ctx =
+        canvas.getContext("2d");
+
+    ctx.drawImage(
+        bitmap,
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    const blob =
+        await new Promise(resolve => {
+
+            canvas.toBlob(
+                resolve,
+                "image/webp",
+                quality
+            );
+
+        });
+
+
+    if (!blob) {
+        throw new Error(
+            "Không thể nén ảnh."
+        );
+    }
+
+
+    return new File(
+        [blob],
+        `${crypto.randomUUID()}.webp`,
+        {
+            type: "image/webp"
+        }
+    );
+}
+
+
+// =========================
+// UPLOAD ONE IMAGE
+// =========================
+
 async function uploadTourImage(file) {
 
     if (!file) {
         return null;
     }
 
-    const fileExtension =
-        file.name.split(".").pop();
+
+    const compressedFile =
+        await compressImage(file);
+
 
     const fileName =
-        `${crypto.randomUUID()}.${fileExtension}`;
+        `${crypto.randomUUID()}.webp`;
+
 
     const filePath =
         `tours/${fileName}`;
 
 
-    const { error: uploadError } =
+    const {
+        error: uploadError
+    } =
         await supabaseClient
             .storage
             .from("tour-images")
             .upload(
                 filePath,
-                file,
+                compressedFile,
                 {
                     cacheControl: "3600",
-                    upsert: false
+                    upsert: false,
+                    contentType: "image/webp"
                 }
             );
 
@@ -1705,10 +2018,171 @@ async function uploadTourImage(file) {
         supabaseClient
             .storage
             .from("tour-images")
-            .getPublicUrl(filePath);
+            .getPublicUrl(
+                filePath
+            );
 
 
     return data.publicUrl;
+}
+
+// =========================
+// UPLOAD GALLERY
+// =========================
+
+async function uploadTourGallery(files) {
+
+    if (!files || files.length === 0) {
+        return [];
+    }
+
+
+    const urls = [];
+
+
+    for (const file of files) {
+
+        const url =
+            await uploadTourImage(file);
+
+        if (url) {
+            urls.push(url);
+        }
+
+    }
+
+
+    return urls;
+}
+
+// =========================
+// GET STORAGE PATH
+// =========================
+
+function getTourStoragePath(imageUrl) {
+
+    if (!imageUrl) {
+        return null;
+    }
+
+    const marker =
+        "/storage/v1/object/public/tour-images/";
+
+    const index =
+        imageUrl.indexOf(marker);
+
+    if (index === -1) {
+        console.warn(
+            "Không xác định được Storage path:",
+            imageUrl
+        );
+
+        return null;
+    }
+
+    return decodeURIComponent(
+        imageUrl.substring(
+            index + marker.length
+        )
+    );
+}
+
+// =========================
+// DELETE IMAGES FROM STORAGE
+// =========================
+
+async function deleteTourStorageImages(imageUrls = []) {
+
+    const paths = [
+        ...new Set(
+            imageUrls
+                .map(getTourStoragePath)
+                .filter(Boolean)
+        )
+    ];
+
+    if (paths.length === 0) {
+        console.log("Không có ảnh cần xóa.");
+        return;
+    }
+
+    console.log("========== STORAGE DELETE ==========");
+    console.log("Bucket:", "tour-images");
+    console.log("Paths:", paths);
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .storage
+        .from("tour-images")
+        .remove(paths);
+
+    console.log("REMOVE DATA:", data);
+    console.log("REMOVE ERROR:", error);
+
+    if (error) {
+        console.error(
+            "❌ STORAGE DELETE ERROR:",
+            error
+        );
+
+        throw error;
+    }
+
+    console.log(
+        "✅ REMOVE REQUEST SUCCESS"
+    );
+
+    // =========================
+    // KIỂM TRA FILE CÒN TRONG STORAGE KHÔNG
+    // =========================
+
+    const { data: files, error: listError } =
+        await supabaseClient
+            .storage
+            .from("tour-images")
+            .list("tours", {
+                limit: 1000
+            });
+
+    if (listError) {
+
+        console.error(
+            "❌ Không thể kiểm tra Storage:",
+            listError
+        );
+
+        return;
+    }
+
+    const existingFiles =
+        new Set(
+            (files || []).map(
+                file => `tours/${file.name}`
+            )
+        );
+
+    console.log(
+        "========== STORAGE CHECK =========="
+    );
+
+    paths.forEach(path => {
+
+        console.log(
+            path,
+            existingFiles.has(path)
+                ? "❌ VẪN CÒN"
+                : "✅ ĐÃ XÓA"
+        );
+
+    });
+
+    console.log(
+        "===================================="
+    );
+
+    return data;
 }
 
 // =========================
@@ -1741,6 +2215,18 @@ tourForm.addEventListener(
                 .getElementById("tourImageFile")
                 .files[0];
 
+        const oldTour =
+            editingTourId
+                ? tours.find(
+                    tour =>
+                        tour.id === editingTourId
+                )
+                : null;
+
+        const oldCoverImage =
+            oldTour?.image || null;
+
+
         let imageUrl =
             document
                 .getElementById("tourImage")
@@ -1754,6 +2240,39 @@ tourForm.addEventListener(
                 await uploadTourImage(
                     imageFile
                 );
+
+        }
+
+        // =========================
+        // UPLOAD GALLERY
+        // =========================
+
+        let newGalleryUrls = [];
+
+
+        if (selectedGalleryFiles.length > 0) {
+
+            newGalleryUrls =
+                await uploadTourGallery(
+                    selectedGalleryFiles
+                );
+
+        }
+
+        let finalGalleryImages = [];
+
+
+        if (editingTourId) {
+
+            finalGalleryImages = [
+                ...editingTourImages,
+                ...newGalleryUrls
+            ];
+
+        } else {
+
+            finalGalleryImages =
+                newGalleryUrls;
 
         }
 
@@ -1801,6 +2320,9 @@ tourForm.addEventListener(
 
             image: imageUrl,
 
+            images:
+                finalGalleryImages,
+
             short:
                 document
                     .getElementById("tourShort")
@@ -1836,6 +2358,9 @@ tourForm.addEventListener(
                             image:
                                 tourData.image,
 
+                            images:
+                                tourData.images,
+
                             short:
                                 tourData.short,
 
@@ -1854,8 +2379,68 @@ tourForm.addEventListener(
                 }
 
 
+                // =========================
+                // XÓA ẢNH CŨ KHỎI STORAGE
+                // =========================
+
+                const storageImagesToDelete = [
+                    ...imagesToDelete
+                ];
+
+                // Nếu thay ảnh đại diện
+                if (
+                    imageFile &&
+                    oldCoverImage &&
+                    oldCoverImage !== imageUrl
+                ) {
+                    storageImagesToDelete.push(
+                        oldCoverImage
+                    );
+                }
+
+
+                // Không xóa nhầm ảnh vẫn đang được sử dụng
+                const finalImagesSet =
+                    new Set([
+                        tourData.image,
+                        ...tourData.images
+                    ]);
+
+                const safeImagesToDelete =
+                    storageImagesToDelete.filter(
+                        imageUrl =>
+                            !finalImagesSet.has(imageUrl)
+                    );
+
+
+                if (safeImagesToDelete.length > 0) {
+
+                    try {
+
+                        await deleteTourStorageImages(
+                            safeImagesToDelete
+                        );
+
+                    } catch (storageError) {
+
+                        console.error(
+                            "Storage delete error:",
+                            storageError
+                        );
+
+                        alert(
+                            "Tour đã cập nhật nhưng có ảnh chưa xóa được khỏi Storage.\n\n" +
+                            storageError.message
+                        );
+
+                    }
+                }
+
+                // ✅ THÔNG BÁO THÀNH CÔNG
                 alert(
-                    "Cập nhật tour thành công!"
+                    oldTour
+                        ? "✅ Cập nhật tour thành công!"
+                        : "✅ Thêm tour thành công!"
                 );
 
             } else {
@@ -1912,9 +2497,17 @@ function closeModal() {
 
     editingTourId = null;
 
+    editingTourImages = [];
+
+    selectedGalleryFiles = [];
+
+    imagesToDelete = [];
+
     tourForm.reset();
 
     imagePreview.innerHTML = "";
+
+    galleryPreview.innerHTML = "";
 }
 
 

@@ -6,6 +6,24 @@
 // Danh sách tour
 let tours = [];
 
+// ================================
+// TOUR GALLERY STATE
+// ================================
+
+let currentGalleryImages = [];
+let currentGalleryIndex = 0;
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
 
 // ================================
 // LOAD TOURS
@@ -690,7 +708,10 @@ async function renderTourDetail() {
         params.get("id");
 
 
-    // Tìm tour
+    // ================================
+    // FIND TOUR
+    // ================================
+
     let tour =
         data.find(
             item =>
@@ -705,12 +726,19 @@ async function renderTourDetail() {
     }
 
 
-    // Không có tour
+    // ================================
+    // NO TOUR
+    // ================================
+
     if (!tour) {
 
         container.innerHTML = `
             <div class="container section">
-                <h2>Không tìm thấy tour.</h2>
+
+                <h2>
+                    Không tìm thấy tour.
+                </h2>
+
             </div>
         `;
 
@@ -718,13 +746,56 @@ async function renderTourDetail() {
     }
 
 
+    // ================================
+    // TOUR IMAGES
+    // ================================
+
+    const galleryImages =
+        Array.isArray(tour.images)
+            ? tour.images.filter(Boolean)
+            : [];
+
+
+    // Ảnh cover
+    const heroImage =
+        tour.image ||
+        galleryImages[0] ||
+        "";
+
+
+    // ================================
+    // LIGHTBOX IMAGES
+    // ================================
+
+    // Đưa cover vào lightbox trước
+    // Sau đó thêm các ảnh gallery
+    currentGalleryImages = [
+        heroImage,
+        ...galleryImages
+    ]
+        .filter(Boolean)
+        .filter(
+            (image, index, array) =>
+                array.indexOf(image) === index
+        );
+
+
+    currentGalleryIndex = 0;
+
+
     document.title =
         tour.name + " - ANNLETRAVEL";
 
 
+    // ================================
+    // RENDER
+    // ================================
+
     container.innerHTML = `
 
-        <!-- DETAIL IMAGE -->
+        <!-- ================================= -->
+        <!-- TOUR IMAGE GALLERY -->
+        <!-- ================================= -->
 
         <section class="detail-hero">
 
@@ -732,15 +803,113 @@ async function renderTourDetail() {
                 class="detail-image"
                 style="
                     background-image:
-                    url('${tour.image}')
+                    url('${heroImage}')
                 "
+                onclick="openTourLightbox(0)"
             >
+
+                ${heroImage
+            ? `
+                            <button
+                                type="button"
+                                class="detail-image-view"
+                                onclick="event.stopPropagation(); openTourLightbox(0)"
+                            >
+                                ⛶ Xem ảnh
+                            </button>
+                        `
+            : ""
+        }
+
             </div>
 
         </section>
 
 
+        ${currentGalleryImages.length > 1
+            ? `
+
+                    <section class="tour-gallery">
+
+                        <div class="container">
+
+                            <div class="tour-gallery-header">
+
+                                <div>
+
+                                    <span class="section-label">
+                                        HÌNH ẢNH
+                                    </span>
+
+                                    <h2>
+                                        Khám phá hành trình
+                                    </h2>
+
+                                </div>
+
+                                <span class="gallery-count">
+                                    ${currentGalleryImages.length} ảnh
+                                </span>
+
+                            </div>
+
+
+                            <div class="tour-gallery-grid">
+
+                                ${currentGalleryImages
+                .map(
+                    (image, index) => `
+
+                                            <button
+                                                type="button"
+                                                class="
+                                                    tour-gallery-item
+                                                    ${index === 0 ? "active" : ""}
+                                                "
+                                                onclick="openTourLightbox(${index})"
+                                                aria-label="Xem ảnh ${index + 1}"
+                                            >
+
+                                                <img
+                                                    src="${image}"
+                                                    alt="${escapeHtml(tour.name)} - ảnh ${index + 1}"
+                                                    loading="lazy"
+                                                >
+
+                                                ${index === 0
+                            ? `
+                                                            <span class="gallery-cover-badge">
+                                                                Ảnh chính
+                                                            </span>
+                                                        `
+                            : ""
+                        }
+
+                                                <span class="gallery-zoom">
+                                                    ⛶
+                                                </span>
+
+                                            </button>
+
+                                        `
+                )
+                .join("")
+            }
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                `
+            : ""
+        }
+
+
+        <!-- ================================= -->
         <!-- DETAIL CONTENT -->
+        <!-- ================================= -->
 
         <section class="section">
 
@@ -752,17 +921,17 @@ async function renderTourDetail() {
                 <div>
 
                     <p class="section-label">
-                        ${tour.destination}
+                        ${escapeHtml(tour.destination)}
                     </p>
 
 
                     <h1>
-                        ${tour.name}
+                        ${escapeHtml(tour.name)}
                     </h1>
 
 
                     <p class="lead">
-                        ${tour.short}
+                        ${escapeHtml(tour.short)}
                     </p>
 
 
@@ -796,7 +965,7 @@ async function renderTourDetail() {
                     <p>
                         📍 Điểm đến:
                         <strong>
-                            ${tour.destination}
+                            ${escapeHtml(tour.destination)}
                         </strong>
                     </p>
 
@@ -832,7 +1001,7 @@ async function renderTourDetail() {
 
 
                     <h3>
-                        ${tour.name}
+                        ${escapeHtml(tour.name)}
                     </h3>
 
 
@@ -883,13 +1052,340 @@ async function renderTourDetail() {
 
         </section>
 
+
+        <!-- ================================= -->
+        <!-- LIGHTBOX -->
+        <!-- ================================= -->
+
+        <div
+            id="tourLightbox"
+            class="tour-lightbox"
+            onclick="handleLightboxBackgroundClick(event)"
+            aria-hidden="true"
+        >
+
+            <button
+                type="button"
+                class="lightbox-close"
+                onclick="closeTourLightbox()"
+                aria-label="Đóng"
+            >
+                ×
+            </button>
+
+
+            <button
+                type="button"
+                class="lightbox-prev"
+                onclick="event.stopPropagation(); previousTourImage()"
+                aria-label="Ảnh trước"
+            >
+                ←
+            </button>
+
+
+            <div
+                class="lightbox-content"
+                onclick="event.stopPropagation()"
+            >
+
+                <img
+                    id="lightboxImage"
+                    src=""
+                    alt=""
+                >
+
+                <div
+                    id="lightboxCounter"
+                    class="lightbox-counter"
+                >
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="lightbox-next"
+                onclick="event.stopPropagation(); nextTourImage()"
+                aria-label="Ảnh tiếp theo"
+            >
+                →
+            </button>
+
+        </div>
+
     `;
 
 
-    // Load lịch trình từ Supabase
+    // ================================
+    // LOAD ITINERARY
+    // ================================
+
     await loadTourItinerary(tour.id);
 
 }
+
+// ================================
+// OPEN LIGHTBOX
+// ================================
+
+function openTourLightbox(index) {
+
+    if (
+        !currentGalleryImages ||
+        currentGalleryImages.length === 0
+    ) {
+        return;
+    }
+
+
+    if (
+        index < 0 ||
+        index >= currentGalleryImages.length
+    ) {
+        return;
+    }
+
+
+    currentGalleryIndex = index;
+
+
+    const lightbox =
+        document.getElementById("tourLightbox");
+
+    const image =
+        document.getElementById("lightboxImage");
+
+    const counter =
+        document.getElementById("lightboxCounter");
+
+
+    if (!lightbox || !image) {
+        return;
+    }
+
+
+    image.src =
+        currentGalleryImages[currentGalleryIndex];
+
+
+    image.alt =
+        `Ảnh ${currentGalleryIndex + 1}`;
+
+
+    if (counter) {
+
+        counter.textContent =
+            `${currentGalleryIndex + 1} / ${currentGalleryImages.length}`;
+
+    }
+
+
+    lightbox.classList.add("active");
+
+    lightbox.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document.body.classList.add(
+        "lightbox-open"
+    );
+
+}
+
+
+// ================================
+// CLOSE LIGHTBOX
+// ================================
+
+function closeTourLightbox() {
+
+    const lightbox =
+        document.getElementById("tourLightbox");
+
+
+    if (!lightbox) {
+        return;
+    }
+
+
+    lightbox.classList.remove("active");
+
+    lightbox.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    document.body.classList.remove(
+        "lightbox-open"
+    );
+
+}
+
+
+// ================================
+// PREVIOUS IMAGE
+// ================================
+
+function previousTourImage() {
+
+    if (
+        !currentGalleryImages ||
+        currentGalleryImages.length <= 1
+    ) {
+        return;
+    }
+
+
+    currentGalleryIndex--;
+
+
+    if (currentGalleryIndex < 0) {
+
+        currentGalleryIndex =
+            currentGalleryImages.length - 1;
+
+    }
+
+
+    updateLightboxImage();
+
+}
+
+
+// ================================
+// NEXT IMAGE
+// ================================
+
+function nextTourImage() {
+
+    if (
+        !currentGalleryImages ||
+        currentGalleryImages.length <= 1
+    ) {
+        return;
+    }
+
+
+    currentGalleryIndex++;
+
+
+    if (
+        currentGalleryIndex >=
+        currentGalleryImages.length
+    ) {
+
+        currentGalleryIndex = 0;
+
+    }
+
+
+    updateLightboxImage();
+
+}
+
+
+// ================================
+// UPDATE LIGHTBOX
+// ================================
+
+function updateLightboxImage() {
+
+    const image =
+        document.getElementById("lightboxImage");
+
+    const counter =
+        document.getElementById("lightboxCounter");
+
+
+    if (!image) {
+        return;
+    }
+
+
+    image.src =
+        currentGalleryImages[currentGalleryIndex];
+
+
+    image.alt =
+        `Ảnh ${currentGalleryIndex + 1}`;
+
+
+    if (counter) {
+
+        counter.textContent =
+            `${currentGalleryIndex + 1} / ${currentGalleryImages.length}`;
+
+    }
+
+}
+
+
+// ================================
+// LIGHTBOX BACKGROUND
+// ================================
+
+function handleLightboxBackgroundClick(event) {
+
+    if (
+        event.target.classList.contains(
+            "tour-lightbox"
+        )
+    ) {
+
+        closeTourLightbox();
+
+    }
+
+}
+
+
+// ================================
+// KEYBOARD CONTROL
+// ================================
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        const lightbox =
+            document.getElementById("tourLightbox");
+
+
+        if (
+            !lightbox ||
+            !lightbox.classList.contains("active")
+        ) {
+            return;
+        }
+
+
+        if (event.key === "Escape") {
+
+            closeTourLightbox();
+
+        }
+
+
+        else if (event.key === "ArrowLeft") {
+
+            previousTourImage();
+
+        }
+
+
+        else if (event.key === "ArrowRight") {
+
+            nextTourImage();
+
+        }
+
+    }
+);
 
 async function loadTourItinerary(tourId) {
 
@@ -949,15 +1445,14 @@ async function loadTourItinerary(tourId) {
                         Ngày ${item.day}: ${item.title}
                     </h3>
 
-                    ${
-                        item.description
-                            ? `
+                    ${item.description
+                    ? `
                                 <p>
                                     ${item.description}
                                 </p>
                               `
-                            : ""
-                    }
+                    : ""
+                }
 
                 </div>
 

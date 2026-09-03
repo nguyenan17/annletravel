@@ -377,13 +377,29 @@
 
                         <div class="form-group">
 
-                            <label>Ảnh tour</label>
+                            <label>Ảnh đại diện</label>
 
                             <input type="file" id="tourImageFile" accept="image/*">
 
                             <div id="imagePreview" class="image-preview"></div>
 
                             <input type="hidden" id="tourImage">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>Ảnh thư viện tour</label>
+
+                            <input type="file" id="tourGalleryFiles" accept="image/*" multiple>
+
+                            <p class="image-help">
+                                Có thể chọn nhiều ảnh cùng lúc.
+                                Nên sử dụng ảnh JPG/PNG/WebP.
+                            </p>
+
+                            <div id="galleryPreview" class="gallery-preview"></div>
 
                         </div>
 
