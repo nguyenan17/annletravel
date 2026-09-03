@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AnnLeTravel - Niềm tin trên mọi hành trình</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+    <header class="header">
+
+        <div class="container header-container">
+
+            <!-- LOGO -->
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="ANNLETRAVEL">
+            </a>
+
+            <!-- MENU -->
+            <nav class="menu">
+
+                <a href="index.html">
+                    Trang chủ
+                </a>
+
+                <a href="tours.html">
+                    Tour
+                </a>
+
+                <div class="nav-dropdown">
+
+                    <a href="#">
+                        Điểm đến ▾
+                    </a>
+
+                    <ul id="destinationMenu" class="dropdown-menu">
+                        <!-- JavaScript tự động tạo -->
+                    </ul>
+
+                </div>
+
+                <a href="#">
+                    Dịch vụ
+                </a>
+
+                <a href="#">
+                    Về chúng tôi
+                </a>
+
+                <a href="#">
+                    Liên hệ
+                </a>
+
+            </nav>
+
+            <!-- NÚT SALE -->
+            <a href="#contact" class="btn btn-header">
+                Tư vấn ngay
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= HERO ================= -->
+
+    <section class="hero">
+
+        <!--
+            SAU NÀY BẠN CÓ THỂ THAY ẢNH Ở ĐÂY.
+
+            Ví dụ:
+
+            <img src="images/hero.jpg" alt="Travel">
+
+            Hoặc có thể dùng video.
+        -->
+
+        <div class="hero-background">
+
+            <video autoplay muted loop playsinline>
+                <source src="images/hero/travel.mp4" type="video/mp4">
+            </video>
+
+        </div>
+
+
+        <div class="hero-overlay"></div>
+
+
+        <div class="container hero-content">
+
+            <p class="hero-small">
+                TRAVEL • EXPLORE • EXPERIENCE
+            </p>
+
+            <h1>
+                Khám phá hành trình<br>
+                của riêng bạn
+            </h1>
+
+            <p class="hero-description">
+                Những chuyến đi đáng nhớ,
+                những trải nghiệm tuyệt vời
+                và hành trình dành riêng cho bạn.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="tours.html" class="btn">
+                    Khám phá tour
+                </a>
+
+                <a href="#contact" class="btn btn-outline">
+                    Nhận tư vấn
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= SEARCH TOUR ================= -->
+
+    <section class="search-section">
+
+        <div class="container">
+
+            <div class="search-box">
+
+                <div class="search-item">
+
+                    <label>
+                        Điểm đến
+                    </label>
+
+                    <input type="text" id="searchDestination" placeholder="Ví dụ: Hàn Quốc, Nhật Bản...">
+
+                </div>
+
+
+                <div class="search-item">
+
+                    <label>
+                        Ngày khởi hành
+                    </label>
+
+                    <input type="date" id="searchDate">
+
+                </div>
+
+
+                <div class="search-item">
+
+                    <label>
+                        Khoảng giá
+                    </label>
+
+                    <select id="searchPrice">
+
+                        <option value="">
+                            Tất cả mức giá
+                        </option>
+
+                        <option value="under10">
+                            Dưới 10 triệu
+                        </option>
+
+                        <option value="10to20">
+                            10 - 20 triệu
+                        </option>
+
+                        <option value="over20">
+                            Trên 20 triệu
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <button type="button" class="btn search-button" onclick="searchTours()">
+
+                    Tìm tour
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= TOUR NỔI BẬT ================= -->
+
+    <section class="section">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <div>
+
+                    <p class="section-label">
+                        FEATURED TOURS
+                    </p>
+
+                    <h2>
+                        Tour nổi bật
+                    </h2>
+
+                </div>
+
+
+                <a href="tours.html" class="view-all">
+                    Xem tất cả →
+                </a>
+
+            </div>
+
+
+            <div id="featuredTours" class="tour-grid">
+
+                <!-- JavaScript tự render tour -->
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= ĐIỂM ĐẾN ================= -->
+
+    <section class="section section-light">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <div>
+
+                    <p class="section-label">
+                        DESTINATIONS
+                    </p>
+
+                    <h2>
+                        Điểm đến yêu thích
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="destination-grid">
+
+
+                <div class="destination-card">
+
+                    <div class="destination-placeholder">
+                        ẢNH
+                    </div>
+
+                    <div class="destination-name">
+                        Hàn Quốc
+                    </div>
+
+                </div>
+
+
+                <div class="destination-card">
+
+                    <div class="destination-placeholder">
+                        ẢNH
+                    </div>
+
+                    <div class="destination-name">
+                        Nhật Bản
+                    </div>
+
+                </div>
+
+
+                <div class="destination-card">
+
+                    <div class="destination-placeholder">
+                        ẢNH
+                    </div>
+
+                    <div class="destination-name">
+                        Thái Lan
+                    </div>
+
+                </div>
+
+
+                <div class="destination-card">
+
+                    <div class="destination-placeholder">
+                        ẢNH
+                    </div>
+
+                    <div class="destination-name">
+                        Việt Nam
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= TOUR KHỞI HÀNH ================= -->
+
+    <section class="section">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <div>
+
+                    <p class="section-label">
+                        DEPARTURES
+                    </p>
+
+                    <h2>
+                        Tour khởi hành trong tháng
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div id="monthlyTours" class="departure-list">
+
+                <!-- JavaScript tự render -->
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= TẠI SAO CHỌN ================= -->
+
+    <section class="section section-light">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <div>
+
+                    <p class="section-label">
+                        WHY US
+                    </p>
+
+                    <h2>
+                        Vì sao chọn chúng tôi?
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="feature-grid">
+
+
+                <div class="feature-card">
+
+                    <span>
+                        01
+                    </span>
+
+                    <h3>
+                        Giá tốt
+                    </h3>
+
+                    <p>
+                        Giá tour cạnh tranh,
+                        thông tin chi phí minh bạch.
+                    </p>
+
+                </div>
+
+
+                <div class="feature-card">
+
+                    <span>
+                        02
+                    </span>
+
+                    <h3>
+                        Lịch trình rõ ràng
+                    </h3>
+
+                    <p>
+                        Chương trình được trình bày
+                        rõ ràng và dễ theo dõi.
+                    </p>
+
+                </div>
+
+
+                <div class="feature-card">
+
+                    <span>
+                        03
+                    </span>
+
+                    <h3>
+                        Hỗ trợ tận tâm
+                    </h3>
+
+                    <p>
+                        Sale đồng hành cùng khách
+                        trước và trong chuyến đi.
+                    </p>
+
+                </div>
+
+
+                <div class="feature-card">
+
+                    <span>
+                        04
+                    </span>
+
+                    <h3>
+                        Nhiều điểm đến
+                    </h3>
+
+                    <p>
+                        Nhiều lựa chọn tour
+                        trong nước và quốc tế.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= CONTACT / SALE ================= -->
+
+    <section class="contact-section" id="contact">
+
+        <div class="container contact-container">
+
+            <div class="contact-text">
+
+                <p class="section-label">
+                    NEED HELP?
+                </p>
+
+                <h2>
+                    Chưa biết chọn tour nào?
+                </h2>
+
+                <p>
+                    Để lại thông tin,
+                    nhân viên tư vấn sẽ liên hệ
+                    và giúp bạn lựa chọn hành trình phù hợp.
+                </p>
+
+            </div>
+
+
+            <form class="contact-form">
+
+                <input type="text" placeholder="Họ và tên" required>
+
+                <input type="tel" placeholder="Số điện thoại" required>
+
+                <select>
+
+                    <option>
+                        Tôi quan tâm đến...
+                    </option>
+
+                    <option>
+                        Hàn Quốc
+                    </option>
+
+                    <option>
+                        Nhật Bản
+                    </option>
+
+                    <option>
+                        Thái Lan
+                    </option>
+
+                    <option>
+                        Việt Nam
+                    </option>
+
+                </select>
+
+                <button type="submit" class="btn">
+                    Nhận tư vấn
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="container footer-container">
+
+
+            <div>
+
+                <div class="footer-logo">
+                    YOUR TRAVEL
+                </div>
+
+                <p>
+                    Công ty du lịch của bạn.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <h4>
+                    Liên hệ
+                </h4>
+
+                <p>
+                    Hotline: 0900 000 000
+                </p>
+
+                <p>
+                    Email: sales@yourtravel.vn
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <h4>
+                    Địa chỉ
+                </h4>
+
+                <p>
+                    Thay bằng địa chỉ công ty
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="copyright">
+
+            © 2026 YOUR TRAVEL. All rights reserved.
+
+        </div>
+
+    </footer>
+
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>

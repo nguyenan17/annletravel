@@ -1,0 +1,79 @@
+[
+  {
+    "id": "seoul-5n4d",
+    "name": "Seoul 5N4Đ",
+    "destination": "Hàn Quốc",
+    "departure": "2026-09-15",
+    "displayDate": "15/09/2026",
+    "seats": 8,
+    "price": 12990000,
+    "image": "images/korea.jpg",
+    "short": "Khám phá Seoul, đảo Nami và những địa điểm nổi tiếng của Hàn Quốc."
+  },
+  {
+    "id": "tokyo-fuji-5n4d",
+    "name": "Tokyo - Fuji 5N4Đ",
+    "destination": "Nhật Bản",
+    "departure": "2026-09-20",
+    "displayDate": "20/09/2026",
+    "seats": 5,
+    "price": 18990000,
+    "image": "images/japan.jpg",
+    "short": "Khám phá Tokyo, núi Phú Sĩ và những trải nghiệm đặc sắc của Nhật Bản."
+  },
+  {
+    "id": "phuket-4n3d",
+    "name": "Phuket 4N3Đ",
+    "destination": "Thái Lan",
+    "departure": "2026-09-25",
+    "displayDate": "25/09/2026",
+    "seats": 7,
+    "price": 9990000,
+    "image": "images/thailand.jpg",
+    "short": "Nghỉ dưỡng và khám phá biển đảo Phuket."
+  },
+  {
+    "id": "sapa-3n2d",
+    "name": "Sapa 3N2Đ",
+    "destination": "Việt Nam",
+    "departure": "2026-09-28",
+    "displayDate": "28/09/2026",
+    "seats": 12,
+    "price": 4990000,
+    "image": "images/vietnam.jpg",
+    "short": "Khám phá núi rừng Tây Bắc và văn hóa bản địa."
+  },
+  {
+    "id": "busan-5n4d",
+    "name": "Busan 5N4Đ",
+    "destination": "Hàn Quốc",
+    "departure": "2026-10-05",
+    "displayDate": "05/10/2026",
+    "seats": 10,
+    "price": 13990000,
+    "image": "images/korea.jpg",
+    "short": "Khám phá biển Busan, Gamcheon và những địa điểm nổi bật."
+  },
+  {
+    "id": "osaka-kyoto-6n5d",
+    "name": "Osaka - Kyoto 6N5Đ",
+    "destination": "Nhật Bản",
+    "departure": "2026-10-12",
+    "displayDate": "12/10/2026",
+    "seats": 6,
+    "price": 20990000,
+    "image": "images/japan.jpg",
+    "short": "Kết hợp Osaka, Kyoto và những địa danh truyền thống của Nhật Bản."
+  },
+  {
+    "id": "singapore-4n3d",
+    "name": "Singapore 4N3Đ",
+    "destination": "Singapore",
+    "departure": "2026-11-10",
+    "displayDate": "10/11/2026",
+    "seats": 10,
+    "price": 11990000,
+    "image": "images/singapore.jpg",
+    "short": "Khám phá Singapore hiện đại và Gardens by the Bay."
+}
+]

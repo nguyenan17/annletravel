@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tất cả Tour - Your Travel</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="container header-container">
+
+            <!-- LOGO -->
+            <a href="index.html" class="logo">
+                YOUR TRAVEL
+            </a>
+
+            <!-- MENU -->
+            <nav class="menu">
+
+                <a href="index.html">
+                    Trang chủ
+                </a>
+
+                <a href="tours.html" class="active">
+                    Tour
+                </a>
+
+                <div class="nav-dropdown">
+
+                    <a href="#">
+                        Điểm đến ▾
+                    </a>
+
+                    <ul id="destinationMenu" class="dropdown-menu">
+                        <!-- JavaScript tự động tạo -->
+                    </ul>
+
+                </div>
+
+                <a href="index.html#services">
+                    Dịch vụ
+                </a>
+
+                <a href="index.html#about">
+                    Về chúng tôi
+                </a>
+
+                <a href="index.html#contact">
+                    Liên hệ
+                </a>
+
+            </nav>
+
+            <!-- NÚT TƯ VẤN -->
+            <a href="index.html#contact" class="btn btn-header">
+                Tư vấn ngay
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <!-- PAGE HERO -->
+        <section class="page-hero">
+            <div class="container">
+                <span class="section-label">KHÁM PHÁ</span>
+
+                <h1>Tất cả hành trình</h1>
+
+                <p>
+                    Chọn hành trình phù hợp và bắt đầu chuyến đi tiếp theo của bạn.
+                </p>
+            </div>
+        </section>
+
+
+        <!-- FILTER -->
+        <section class="tour-filter">
+            <div class="container">
+
+                <div class="filter-box">
+
+                    <!-- ĐIỂM ĐẾN -->
+                    <div class="filter-item">
+
+                        <label>Điểm đến</label>
+
+                        <select id="filterDestination">
+                            <option value="">Tất cả điểm đến</option>
+                            <option value="Hàn Quốc">Hàn Quốc</option>
+                            <option value="Nhật Bản">Nhật Bản</option>
+                            <option value="Thái Lan">Thái Lan</option>
+                            <option value="Việt Nam">Việt Nam</option>
+                        </select>
+
+                    </div>
+
+
+                    <!-- NGÀY -->
+                    <div class="filter-item">
+
+                        <label>Ngày khởi hành</label>
+
+                        <input type="date" id="filterDate">
+
+                    </div>
+
+
+                    <!-- GIÁ -->
+                    <div class="filter-item">
+
+                        <label>Khoảng giá</label>
+
+                        <select id="filterPrice">
+
+                            <option value="">
+                                Không giới hạn
+                            </option>
+
+                            <option value="under10">
+                                Dưới 10 triệu
+                            </option>
+
+                            <option value="10to20">
+                                10 - 20 triệu
+                            </option>
+
+                            <option value="over20">
+                                Trên 20 triệu
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SORT -->
+                    <div class="filter-item">
+
+                        <label>Sắp xếp</label>
+
+                        <select id="filterSort">
+
+                            <option value="">
+                                Mặc định
+                            </option>
+
+                            <option value="priceAsc">
+                                Giá thấp → cao
+                            </option>
+
+                            <option value="priceDesc">
+                                Giá cao → thấp
+                            </option>
+
+                            <option value="dateAsc">
+                                Khởi hành gần nhất
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <button type="button" class="btn" onclick="filterTours()">
+                        Lọc tour
+                    </button>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- TOURS -->
+        <section class="section">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="section-label">TOUR CỦA CHÚNG TÔI</span>
+
+                        <h2>Chọn hành trình của bạn</h2>
+                    </div>
+
+                    <span id="tourCount"></span>
+
+                </div>
+
+
+                <div id="allTours" class="tour-grid">
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <div class="footer-grid">
+
+                <div>
+                    <div class="logo">
+                        YOUR <span>TRAVEL</span>
+                    </div>
+
+                    <p>
+                        Cùng bạn khám phá những hành trình đáng nhớ.
+                    </p>
+                </div>
+
+
+                <div>
+                    <h4>Khám phá</h4>
+
+                    <a href="tours.html">Tất cả tour</a>
+                    <a href="index.html#destinations">Điểm đến</a>
+                </div>
+
+
+                <div>
+                    <h4>Liên hệ</h4>
+
+                    <p>Hotline: 09xx xxx xxx</p>
+                    <p>Email: hello@yourtravel.vn</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
