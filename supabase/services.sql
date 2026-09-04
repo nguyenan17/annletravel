@@ -59,6 +59,7 @@ VALUES
 ('flights', 'Vé máy bay', 'flights', '✈️', 'Tìm và tư vấn vé máy bay trong nước, quốc tế.', 10),
 ('hotels', 'Khách sạn', 'hotels', '🏨', 'Đặt phòng khách sạn phù hợp với hành trình.', 20),
 ('visa', 'Visa', 'visa', '🛂', 'Tư vấn và hỗ trợ hồ sơ visa du lịch.', 30),
+('passport', 'Hộ chiếu', 'passport', '🪪', 'Hỗ trợ tư vấn và thủ tục làm hộ chiếu.', 35),
 ('tickets', 'Vé tham quan', 'tickets', '🎫', 'Vé các khu vui chơi và điểm tham quan.', 40),
 ('transport', 'Xe đưa đón', 'transport', '🚗', 'Dịch vụ xe sân bay và đưa đón theo yêu cầu.', 50),
 ('trains', 'Vé tàu', 'trains', '🚆', 'Đặt vé tàu cho các hành trình du lịch.', 60),
@@ -77,6 +78,7 @@ VALUES
 ('flight-international', 'flights', 'Vé máy bay quốc tế', 'flight-international', 'Vé máy bay đi Hàn Quốc, Nhật Bản, Thái Lan và nhiều điểm đến.', 'Tư vấn hành trình bay quốc tế theo lịch tour hoặc nhu cầu riêng.', true, 20),
 ('hotel-booking', 'hotels', 'Đặt khách sạn', 'hotel-booking', 'Khách sạn từ phổ thông đến cao cấp.', 'Tư vấn và hỗ trợ đặt phòng theo ngân sách và lịch trình.', true, 10),
 ('visa-korea', 'visa', 'Visa Hàn Quốc', 'visa-korea', 'Hỗ trợ hồ sơ visa Hàn Quốc.', 'Tư vấn điều kiện và chuẩn bị hồ sơ visa du lịch Hàn Quốc.', false, 10),
+('passport-service', 'passport', 'Làm hộ chiếu', 'passport-service', 'Tư vấn thủ tục và hỗ trợ làm hộ chiếu.', 'Hỗ trợ tư vấn hồ sơ, quy trình và các bước cần thiết để làm hoặc cấp lại hộ chiếu.', true, 10),
 ('airport-transfer', 'transport', 'Xe đưa đón sân bay', 'airport-transfer', 'Đưa đón sân bay riêng hoặc theo nhóm.', 'Đặt xe theo số lượng khách và lịch bay.', false, 10)
 ON CONFLICT (id) DO UPDATE SET
 category_id = EXCLUDED.category_id, name = EXCLUDED.name, slug = EXCLUDED.slug,
