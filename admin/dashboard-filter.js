@@ -1,303 +1,221 @@
-// ANNLETRAVEL - Dashboard 2.0 date filters
-// Filters booking KPIs and trend charts by 7 days / 30 days / 6 months / 1 year.
+// ANNLETRAVEL - Dashboard 2.1
+// Filters by period, tour and destination + previous-period comparison.
 
 let dashboardRange = "6m";
+let dashboardTourId = "ALL";
+let dashboardDestination = "ALL";
 let dashboardFilteredBookings = [];
-let dashboardTrendBookingsChartInstance = null;
-let dashboardTrendRevenueChartInstance = null;
+let dashboardPreviousBookings = [];
 
-const DASHBOARD_RANGE_LABELS = {
-    "7d": "7 ngày",
-    "30d": "30 ngày",
-    "6m": "6 tháng",
-    "1y": "1 năm"
+const DASHBOARD_RANGES = {
+    "7d": { label: "7 ngày", days: 7 },
+    "30d": { label: "30 ngày", days: 30 },
+    "6m": { label: "6 tháng", months: 6 },
+    "1y": { label: "1 năm", months: 12 }
 };
 
-function getDashboardRangeStart() {
-    const now = new Date();
-    const start = new Date(now);
-
-    if (dashboardRange === "7d") {
-        start.setDate(start.getDate() - 6);
-    } else if (dashboardRange === "30d") {
-        start.setDate(start.getDate() - 29);
-    } else if (dashboardRange === "1y") {
-        start.setFullYear(start.getFullYear() - 1);
-    } else {
-        start.setMonth(start.getMonth() - 5);
-    }
-
+function dashboardDateStart(range = dashboardRange, end = new Date()) {
+    const start = new Date(end);
+    if (DASHBOARD_RANGES[range]?.days) start.setDate(start.getDate() - DASHBOARD_RANGES[range].days + 1);
+    else start.setMonth(start.getMonth() - DASHBOARD_RANGES[range].months);
     start.setHours(0, 0, 0, 0);
     return start;
 }
 
-function getDashboardFilteredBookings() {
-    if (!Array.isArray(bookings)) return [];
-
-    const start = getDashboardRangeStart();
+function dashboardDateEnd() {
     const end = new Date();
     end.setHours(23, 59, 59, 999);
+    return end;
+}
 
+function dashboardMatchesBooking(booking) {
+    if (dashboardTourId !== "ALL" && String(booking.tour_id) !== String(dashboardTourId)) return false;
+    if (dashboardDestination !== "ALL") {
+        const tour = tours.find(item => String(item.id) === String(booking.tour_id));
+        if ((tour?.destination || "") !== dashboardDestination) return false;
+    }
+    return true;
+}
+
+function getDashboardPeriodBookings() {
+    const end = dashboardDateEnd();
+    const start = dashboardDateStart();
     return bookings.filter(booking => {
         const date = new Date(booking.created_at);
-        return !Number.isNaN(date.getTime()) && date >= start && date <= end;
+        return !Number.isNaN(date.getTime()) && date >= start && date <= end && dashboardMatchesBooking(booking);
     });
 }
 
-function formatDashboardRange() {
-    return DASHBOARD_RANGE_LABELS[dashboardRange] || DASHBOARD_RANGE_LABELS["6m"];
-}
-
-function ensureDashboardFilter() {
-    const title = document.querySelector(".page-title");
-    if (!title || document.getElementById("dashboardRangeFilter")) return;
-
-    const filter = document.createElement("div");
-    filter.className = "dashboard-filter-wrap";
-    filter.innerHTML = `
-        <label for="dashboardRangeFilter">Khoảng thời gian</label>
-        <select id="dashboardRangeFilter" aria-label="Khoảng thời gian dashboard">
-            <option value="7d">7 ngày</option>
-            <option value="30d">30 ngày</option>
-            <option value="6m" selected>6 tháng</option>
-            <option value="1y">1 năm</option>
-        </select>
-    `;
-
-    const actions = title.querySelector("button")?.parentElement;
-    if (actions) {
-        actions.classList.add("dashboard-title-actions");
-        actions.prepend(filter);
-    } else {
-        title.appendChild(filter);
-    }
-
-    document.getElementById("dashboardRangeFilter").addEventListener("change", event => {
-        dashboardRange = event.target.value;
-        renderDashboardStats();
-        if (typeof renderAdvancedDashboardCharts === "function") {
-            renderAdvancedDashboardCharts();
-        }
+function getDashboardPreviousPeriodBookings() {
+    const end = dashboardDateStart();
+    end.setMilliseconds(-1);
+    const start = dashboardDateStart(dashboardRange, end);
+    return bookings.filter(booking => {
+        const date = new Date(booking.created_at);
+        return !Number.isNaN(date.getTime()) && date >= start && date <= end && dashboardMatchesBooking(booking);
     });
 }
 
-function getDashboardPrice(booking) {
+function dashboardTourPrice(booking) {
     const tour = tours.find(item => String(item.id) === String(booking.tour_id));
     return Number(tour?.price || 0);
 }
 
-function renderDashboardStatsV2() {
-    if (!Array.isArray(tours) || !Array.isArray(bookings)) return;
+function dashboardRevenue(list) {
+    return list.filter(item => ["PENDING", "CONFIRMED"].includes(item.status))
+        .reduce((sum, item) => sum + dashboardTourPrice(item) * Number(item.people || 0), 0);
+}
 
-    ensureDashboardFilter();
-    dashboardFilteredBookings = getDashboardFilteredBookings();
+function dashboardCompare(current, previous) {
+    if (previous === 0) return current === 0 ? { value: 0, text: "Không đổi" } : { value: 100, text: "Mới" };
+    const value = Math.round(((current - previous) / Math.abs(previous)) * 100);
+    return { value, text: `${value > 0 ? "+" : ""}${value}%` };
+}
 
-    const activeBookings = dashboardFilteredBookings.filter(booking =>
-        ["PENDING", "CONFIRMED"].includes(booking.status)
-    );
-    const pendingBookings = dashboardFilteredBookings.filter(booking => booking.status === "PENDING");
-    const confirmedBookings = dashboardFilteredBookings.filter(booking => booking.status === "CONFIRMED");
-    const cancelledBookings = dashboardFilteredBookings.filter(booking => booking.status === "CANCELLED");
+function dashboardComparisonMarkup(current, previous, suffix = "") {
+    const result = dashboardCompare(current, previous);
+    const cls = result.value > 0 ? "positive" : result.value < 0 ? "negative" : "neutral";
+    return `<span class="comparison-badge ${cls}">${result.text}${suffix ? ` ${suffix}` : ""}</span>`;
+}
 
-    const totalCapacity = tours.reduce(
-        (sum, tour) => sum + Number(tour.capacity ?? tour.seats ?? 0), 0
-    );
-    const remainingSeats = tours.reduce(
-        (sum, tour) => sum + Number(tour.seats || 0),
-        0
-    );
-    const reservedSeats = activeBookings.reduce(
-        (sum, booking) => sum + Number(booking.people || 0),
-        0
-    );
-    const expectedRevenue = activeBookings.reduce(
-        (sum, booking) => sum + getDashboardPrice(booking) * Number(booking.people || 0),
-        0
-    );
+function ensureDashboard21Controls() {
+    const title = document.querySelector(".page-title");
+    if (!title || document.getElementById("dashboardFilters21")) return;
 
-    const setText = (id, value) => {
+    const controls = document.createElement("div");
+    controls.id = "dashboardFilters21";
+    controls.className = "dashboard-filters-21";
+    controls.innerHTML = `
+        <label><span>Khoảng thời gian</span><select id="dashboardRangeFilter">
+            <option value="7d">7 ngày</option><option value="30d">30 ngày</option><option value="6m" selected>6 tháng</option><option value="1y">1 năm</option>
+        </select></label>
+        <label><span>Tour</span><select id="dashboardTourFilter"><option value="ALL">Tất cả tour</option></select></label>
+        <label><span>Điểm đến</span><select id="dashboardDestinationFilter"><option value="ALL">Tất cả điểm đến</option></select></label>
+    `;
+    title.appendChild(controls);
+
+    document.getElementById("dashboardRangeFilter").addEventListener("change", event => {
+        dashboardRange = event.target.value;
+        refreshDashboard21();
+    });
+    document.getElementById("dashboardTourFilter").addEventListener("change", event => {
+        dashboardTourId = event.target.value;
+        refreshDashboard21();
+    });
+    document.getElementById("dashboardDestinationFilter").addEventListener("change", event => {
+        dashboardDestination = event.target.value;
+        refreshDashboard21();
+    });
+}
+
+function populateDashboard21Filters() {
+    const tourSelect = document.getElementById("dashboardTourFilter");
+    const destinationSelect = document.getElementById("dashboardDestinationFilter");
+    if (!tourSelect || !destinationSelect) return;
+
+    const previousTour = dashboardTourId;
+    const previousDestination = dashboardDestination;
+    const destinations = [...new Set(tours.map(tour => tour.destination).filter(Boolean))].sort((a, b) => a.localeCompare(b, "vi"));
+
+    tourSelect.innerHTML = `<option value="ALL">Tất cả tour</option>` + tours.map(tour =>
+        `<option value="${escapeDashboardHtml(String(tour.id))}">${escapeDashboardHtml(tour.name || tour.destination || tour.id)}</option>`
+    ).join("");
+    destinationSelect.innerHTML = `<option value="ALL">Tất cả điểm đến</option>` + destinations.map(destination =>
+        `<option value="${escapeDashboardHtml(destination)}">${escapeDashboardHtml(destination)}</option>`
+    ).join("");
+
+    tourSelect.value = tours.some(t => String(t.id) === String(previousTour)) ? previousTour : "ALL";
+    destinationSelect.value = destinations.includes(previousDestination) ? previousDestination : "ALL";
+}
+
+function escapeDashboardHtml(value) {
+    return String(value).replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+}
+
+function updateDashboard21KPIs() {
+    dashboardFilteredBookings = getDashboardPeriodBookings();
+    dashboardPreviousBookings = getDashboardPreviousPeriodBookings();
+
+    const currentActive = dashboardFilteredBookings.filter(b => ["PENDING", "CONFIRMED"].includes(b.status));
+    const previousActive = dashboardPreviousBookings.filter(b => ["PENDING", "CONFIRMED"].includes(b.status));
+    const currentGuests = currentActive.reduce((sum, b) => sum + Number(b.people || 0), 0);
+    const previousGuests = previousActive.reduce((sum, b) => sum + Number(b.people || 0), 0);
+    const currentRevenue = dashboardRevenue(dashboardFilteredBookings);
+    const previousRevenue = dashboardRevenue(dashboardPreviousBookings);
+
+    const set = (id, value, previous, suffix = "") => {
         const element = document.getElementById(id);
-        if (element) element.textContent = value;
+        if (!element) return;
+        element.innerHTML = `${value}${dashboardComparisonMarkup(Number(value) || 0, previous, suffix)}`;
     };
 
-    setText("totalTours", tours.length);
-    setText("monthlyTours", getCurrentMonthTourCount());
-    setText("totalCapacity", totalCapacity);
-    setText("remainingSeats", remainingSeats);
-    setText("reservedSeats", reservedSeats);
-    setText("totalBookings", dashboardFilteredBookings.length);
-    setText("pendingBookings", pendingBookings.length);
-    setText("confirmedBookings", confirmedBookings.length);
-    setText("cancelledBookings", cancelledBookings.length);
-    setText("activeGuests", reservedSeats);
-    setText("expectedRevenue", formatVND(expectedRevenue));
+    set("totalBookings", dashboardFilteredBookings.length, dashboardPreviousBookings.length);
+    set("activeGuests", currentGuests, previousGuests);
+    set("expectedRevenue", formatVND(currentRevenue), previousRevenue);
 
-    const occupancyRate = totalCapacity > 0
-        ? Math.round((reservedSeats / totalCapacity) * 100)
-        : 0;
-    setText("occupancyRate", `${occupancyRate}%`);
+    const pending = dashboardFilteredBookings.filter(b => b.status === "PENDING").length;
+    const confirmed = dashboardFilteredBookings.filter(b => b.status === "CONFIRMED").length;
+    const cancelled = dashboardFilteredBookings.filter(b => b.status === "CANCELLED").length;
+    set("pendingBookings", pending, dashboardPreviousBookings.filter(b => b.status === "PENDING").length);
+    set("confirmedBookings", confirmed, dashboardPreviousBookings.filter(b => b.status === "CONFIRMED").length);
+    set("cancelledBookings", cancelled, dashboardPreviousBookings.filter(b => b.status === "CANCELLED").length);
 
-    renderBookingStatusChart(pendingBookings.length, confirmedBookings.length, cancelledBookings.length);
-    renderTourCapacityChart();
-    renderDashboardTrendCharts();
+    const selectedTours = dashboardTourId === "ALL" ? tours : tours.filter(t => String(t.id) === String(dashboardTourId));
+    const filteredTours = dashboardDestination === "ALL" ? selectedTours : selectedTours.filter(t => t.destination === dashboardDestination);
+    const capacity = filteredTours.reduce((sum, t) => sum + Number(t.capacity ?? t.seats ?? 0), 0);
+    const reserved = currentActive.reduce((sum, b) => sum + Number(b.people || 0), 0);
+    const remaining = Math.max(0, capacity - reserved);
+    const occupancy = capacity > 0 ? Math.round((reserved / capacity) * 100) : 0;
+    const totalCapacityEl = document.getElementById("totalCapacity");
+    const remainingEl = document.getElementById("remainingSeats");
+    const occupancyEl = document.getElementById("occupancyRate");
+    if (totalCapacityEl) totalCapacityEl.textContent = capacity;
+    if (remainingEl) remainingEl.textContent = remaining;
+    if (occupancyEl) occupancyEl.textContent = `${occupancy}%`;
+
+    const rangeLabel = DASHBOARD_RANGES[dashboardRange]?.label || "6 tháng";
+    const description = document.querySelector(".page-title p");
+    if (description) description.textContent = `Đang xem ${rangeLabel.toLowerCase()} • ${dashboardFilteredBookings.length} đơn phù hợp bộ lọc`;
 }
 
-function getDashboardBuckets() {
-    const result = [];
-    const now = new Date();
-
-    if (dashboardRange === "7d" || dashboardRange === "30d") {
-        const days = dashboardRange === "7d" ? 7 : 30;
-        for (let i = days - 1; i >= 0; i--) {
-            const date = new Date(now);
-            date.setHours(0, 0, 0, 0);
-            date.setDate(date.getDate() - i);
-            result.push({
-                key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
-                label: `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}`
-            });
-        }
-    } else {
-        const months = dashboardRange === "1y" ? 12 : 6;
-        for (let i = months - 1; i >= 0; i--) {
-            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            result.push({
-                key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`,
-                label: `T${date.getMonth() + 1}/${date.getFullYear()}`
-            });
-        }
-    }
-
-    return result;
+function refreshDashboard21() {
+    ensureDashboard21Controls();
+    populateDashboard21Filters();
+    updateDashboard21KPIs();
+    if (typeof window.renderDashboard21Charts === "function") window.renderDashboard21Charts();
+    if (typeof window.renderAdvancedDashboardCharts === "function") window.renderAdvancedDashboardCharts();
 }
 
-function getDashboardBucketKey(value) {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return null;
-
-    if (dashboardRange === "7d" || dashboardRange === "30d") {
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-    }
-
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function renderDashboardTrendCharts() {
-    if (typeof Chart === "undefined") return;
-
-    const bookingCanvas = document.getElementById("monthlyBookingsChart");
-    const revenueCanvas = document.getElementById("monthlyRevenueChart");
-    if (!bookingCanvas || !revenueCanvas) return;
-
-    const buckets = getDashboardBuckets();
-    const counts = buckets.map(bucket =>
-        dashboardFilteredBookings.filter(booking =>
-            getDashboardBucketKey(booking.created_at) === bucket.key
-        ).length
-    );
-
-    const revenue = buckets.map(bucket =>
-        dashboardFilteredBookings.reduce((sum, booking) => {
-            if (!["PENDING", "CONFIRMED"].includes(booking.status)) return sum;
-            if (getDashboardBucketKey(booking.created_at) !== bucket.key) return sum;
-            return sum + getDashboardPrice(booking) * Number(booking.people || 0);
-        }, 0)
-    );
-
-    if (dashboardTrendBookingsChartInstance) dashboardTrendBookingsChartInstance.destroy();
-    dashboardTrendBookingsChartInstance = new Chart(bookingCanvas, {
-        type: "line",
-        data: {
-            labels: buckets.map(bucket => bucket.label),
-            datasets: [{
-                label: "Booking",
-                data: counts,
-                borderColor: CHART_COLORS.bookings,
-                backgroundColor: "rgba(6, 182, 212, 0.15)",
-                fill: true,
-                tension: 0.35,
-                pointRadius: dashboardRange === "30d" ? 3 : 5,
-                pointHoverRadius: 7
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: "index", intersect: false },
-            plugins: {
-                legend: { display: false },
-                tooltip: { callbacks: { label: context => `${context.raw} đơn` } }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } },
-                x: { ticks: { maxRotation: 45, autoSkip: dashboardRange === "30d" } }
-            }
-        }
-    });
-
-    if (dashboardTrendRevenueChartInstance) dashboardTrendRevenueChartInstance.destroy();
-    dashboardTrendRevenueChartInstance = new Chart(revenueCanvas, {
-        type: "line",
-        data: {
-            labels: buckets.map(bucket => bucket.label),
-            datasets: [{
-                label: "Doanh thu",
-                data: revenue,
-                borderColor: CHART_COLORS.revenue,
-                backgroundColor: "rgba(139, 92, 246, 0.15)",
-                fill: true,
-                tension: 0.35,
-                pointRadius: dashboardRange === "30d" ? 3 : 5,
-                pointHoverRadius: 7
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: "index", intersect: false },
-            plugins: {
-                legend: { display: false },
-                tooltip: { callbacks: { label: context => formatVND(context.raw) } }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { callback: value => new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(value) }
-                },
-                x: { ticks: { maxRotation: 45, autoSkip: dashboardRange === "30d" } }
-            }
-        }
-    });
-
-    const bookingDescription = document.querySelector("#monthlyBookingsChart")?.closest(".chart-card")?.querySelector(".chart-header p");
-    const revenueDescription = document.querySelector("#monthlyRevenueChart")?.closest(".chart-card")?.querySelector(".chart-header p");
-    if (bookingDescription) bookingDescription.textContent = `Xu hướng booking trong ${formatDashboardRange()}`;
-    if (revenueDescription) revenueDescription.textContent = `Doanh thu PENDING + CONFIRMED trong ${formatDashboardRange()}`;
-}
-
-// Advanced charts should use the selected period for their ranking/reservation view.
-window.getTourReservedSeats = function (tourId) {
-    return dashboardFilteredBookings
-        .filter(booking =>
-            String(booking.tour_id) === String(tourId) &&
-            ["PENDING", "CONFIRMED"].includes(booking.status)
-        )
-        .reduce((sum, booking) => sum + Number(booking.people || 0), 0);
-};
-
-window.renderDashboardStats = renderDashboardStatsV2;
-
-(function injectDashboardFilterStyles() {
+(function injectDashboard21Styles() {
     const style = document.createElement("style");
     style.textContent = `
-        .dashboard-title-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .dashboard-filter-wrap { display: flex; align-items: center; gap: 8px; }
-        .dashboard-filter-wrap label { color: #66727d; font-size: 13px; font-weight: 600; white-space: nowrap; }
-        .dashboard-filter-wrap select { min-width: 125px; height: 40px; padding: 0 34px 0 12px; border: 1px solid #d7e1e8; border-radius: 9px; background: white; color: #17212b; font-size: 14px; font-weight: 600; cursor: pointer; }
-        .dashboard-filter-wrap select:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
-        @media (max-width: 700px) { .dashboard-title-actions { width: 100%; } .dashboard-filter-wrap { width: 100%; } .dashboard-filter-wrap select { flex: 1; } }
+        .page-title { align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+        .dashboard-filters-21 { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; align-items: flex-end; }
+        .dashboard-filters-21 label { display: flex; flex-direction: column; gap: 5px; min-width: 145px; }
+        .dashboard-filters-21 label span { font-size: 11px; color: #66727d; font-weight: 600; }
+        .dashboard-filters-21 select { height: 38px; padding: 0 32px 0 11px; border: 1px solid #d9e2e8; border-radius: 8px; background: white; color: #17212b; }
+        .comparison-badge { display: inline-flex; margin-left: 8px; padding: 3px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; vertical-align: middle; }
+        .comparison-badge.positive { color: #087443; background: #dcfce7; }
+        .comparison-badge.negative { color: #b42318; background: #fee4e2; }
+        .comparison-badge.neutral { color: #66727d; background: #eef2f5; }
+        .overview-card strong .comparison-badge { font-size: 10px; }
+        @media (max-width: 900px) { .dashboard-filters-21 { margin-left: 0; width: 100%; } .dashboard-filters-21 label { flex: 1; min-width: 130px; } }
     `;
     document.head.appendChild(style);
 })();
 
-ensureDashboardFilter();
+window.renderDashboard21 = refreshDashboard21;
+
+const previousRenderDashboardStats21 = window.renderDashboardStats;
+window.renderDashboardStats = function () {
+    if (typeof previousRenderDashboardStats21 === "function") previousRenderDashboardStats21();
+    refreshDashboard21();
+};
+
+const previousShowDashboard21 = window.showDashboard;
+if (typeof previousShowDashboard21 === "function") {
+    window.showDashboard = async function () {
+        await previousShowDashboard21();
+        refreshDashboard21();
+    };
+}
