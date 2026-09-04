@@ -36,10 +36,7 @@ function renderDashboardStats() {
         0
     );
 
-    const activeGuests = activeBookings.reduce(
-        (sum, booking) => sum + Number(booking.people || 0),
-        0
-    );
+    const activeGuests = reservedSeats;
 
     const expectedRevenue = activeBookings.reduce((sum, booking) => {
         const tour = tours.find(
@@ -84,6 +81,66 @@ function getCurrentMonthTourCount() {
     }).length;
 }
 
+// Dashboard styling is kept here so no extra CSS dependency is required.
+(function injectDashboardStyles() {
+    const style = document.createElement("style");
+    style.textContent = `
+        .stats-grid {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+        .stat-card { min-width: 0; }
+        .stat-subtext {
+            margin-top: 4px;
+            color: #66727d;
+            font-size: 12px;
+        }
+        .dashboard-overview {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .overview-card {
+            background: white;
+            border: 1px solid #e1eaf0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            min-width: 0;
+        }
+        .overview-label {
+            color: #66727d;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .overview-card strong {
+            display: block;
+            font-size: 23px;
+            line-height: 1.25;
+            color: #17212b;
+            overflow-wrap: anywhere;
+        }
+        .overview-card > span {
+            display: block;
+            margin-top: 5px;
+            color: #8a969f;
+            font-size: 12px;
+        }
+        .revenue-card strong {
+            color: #168b57;
+            font-size: 21px;
+        }
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            .dashboard-overview { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 700px) {
+            .stats-grid,
+            .dashboard-overview { grid-template-columns: 1fr; }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
 // Re-render dashboard numbers whenever booking data changes.
 const originalRenderBookingsForStats = window.renderBookings;
 if (typeof originalRenderBookingsForStats === "function") {
@@ -93,5 +150,13 @@ if (typeof originalRenderBookingsForStats === "function") {
     };
 }
 
-// admin.js calls this after loading tours/bookings.
+// Re-render after the initial dashboard load.
+const originalShowDashboardForStats = window.showDashboard;
+if (typeof originalShowDashboardForStats === "function") {
+    window.showDashboard = async function () {
+        await originalShowDashboardForStats();
+        renderDashboardStats();
+    };
+}
+
 window.renderDashboardStats = renderDashboardStats;
