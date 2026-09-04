@@ -42,10 +42,10 @@
             </div>
 
             <div class="dashboard-overview">
-                <div class="overview-card"><div class="overview-label">Tổng đơn đăng ký</div><strong id="totalBookings">0</strong><span>đơn</span></div>
-                <div class="overview-card"><div class="overview-label">Đã hủy</div><strong id="cancelledBookings">0</strong><span>đơn</span></div>
-                <div class="overview-card"><div class="overview-label">Khách đang giữ chỗ</div><strong id="activeGuests">0</strong><span>người</span></div>
-                <div class="overview-card"><div class="overview-label">Tỷ lệ lấp đầy</div><strong id="occupancyRate">0%</strong><span>PENDING + CONFIRMED</span></div>
+                <div class="overview-card"><div class="overview-label">Tổng đơn đăng ký</div><strong id="totalBookings">0</strong><span>trong khoảng thời gian đã chọn</span></div>
+                <div class="overview-card"><div class="overview-label">Đã hủy</div><strong id="cancelledBookings">0</strong><span>trong khoảng thời gian đã chọn</span></div>
+                <div class="overview-card"><div class="overview-label">Khách đang giữ chỗ</div><strong id="activeGuests">0</strong><span>PENDING + CONFIRMED</span></div>
+                <div class="overview-card"><div class="overview-label">Tỷ lệ lấp đầy</div><strong id="occupancyRate">0%</strong><span>theo khoảng thời gian đã chọn</span></div>
                 <div class="overview-card revenue-card"><div class="overview-label">Doanh thu dự kiến</div><strong id="expectedRevenue">0 đ</strong><span>PENDING + CONFIRMED</span></div>
             </div>
 
@@ -55,8 +55,8 @@
             </section>
 
             <section id="advancedChartsSection" class="dashboard-charts monthly-charts">
-                <div class="chart-card"><div class="chart-header"><div><h2>Đơn đăng ký theo tháng</h2><p>Xu hướng booking trong 6 tháng gần nhất</p></div></div><div class="chart-body"><canvas id="monthlyBookingsChart"></canvas></div></div>
-                <div class="chart-card"><div class="chart-header"><div><h2>Doanh thu dự kiến theo tháng</h2><p>Doanh thu từ PENDING + CONFIRMED</p></div></div><div class="chart-body"><canvas id="monthlyRevenueChart"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><div><h2>Đơn đăng ký theo thời gian</h2><p>Xu hướng booking trong 6 tháng gần nhất</p></div></div><div class="chart-body"><canvas id="monthlyBookingsChart"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><div><h2>Doanh thu dự kiến theo thời gian</h2><p>Doanh thu từ PENDING + CONFIRMED</p></div></div><div class="chart-body"><canvas id="monthlyRevenueChart"></canvas></div></div>
             </section>
 
             <section class="dashboard-charts advanced-charts">
@@ -82,6 +82,7 @@
             <script src="capacity-management.js"></script>
             <script src="dashboard-stats.js"></script>
             <script src="advanced-charts.js"></script>
+            <script src="dashboard-filter.js"></script>
         </main>
     </div>
 </body>
