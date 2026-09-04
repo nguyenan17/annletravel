@@ -1,6 +1,7 @@
 -- ANNLETRAVEL
 -- Atomic booking status management
 -- PENDING/CONFIRMED reserve seats. CANCELLED releases them.
+-- Seats are always recalculated from capacity - active reservations.
 -- Run this file in Supabase SQL Editor.
 
 CREATE OR REPLACE FUNCTION public.update_booking_status(
@@ -17,7 +18,10 @@ DECLARE
     v_old_status text;
     v_old_reserved boolean;
     v_new_reserved boolean;
-    v_tour_seats integer;
+    v_capacity integer;
+    v_reserved_before integer;
+    v_reserved_after integer;
+    v_remaining_seats integer;
     v_seat_delta integer := 0;
 BEGIN
     IF auth.uid() IS NULL
@@ -46,11 +50,17 @@ BEGIN
     v_old_status := COALESCE(v_booking.status, 'PENDING');
 
     IF v_old_status = p_new_status THEN
+        SELECT seats
+        INTO v_remaining_seats
+        FROM public.tours
+        WHERE id = v_booking.tour_id;
+
         RETURN json_build_object(
             'success', true,
             'booking_id', v_booking.id,
             'status', v_old_status,
-            'seat_change', 0
+            'seat_change', 0,
+            'remaining_seats', v_remaining_seats
         );
     END IF;
 
@@ -63,8 +73,8 @@ BEGIN
     END IF;
 
     -- Lock the tour so status changes cannot race with new bookings.
-    SELECT seats
-    INTO v_tour_seats
+    SELECT capacity
+    INTO v_capacity
     FROM public.tours
     WHERE id = v_booking.tour_id
     FOR UPDATE;
@@ -73,30 +83,35 @@ BEGIN
         RAISE EXCEPTION 'TOUR_NOT_FOUND';
     END IF;
 
+    -- Calculate the reservation total from the booking table instead of
+    -- incrementing/decrementing seats blindly. This keeps:
+    --     seats = capacity - PENDING/CONFIRMED people
+    -- and prevents seats from ever becoming greater than capacity.
+    SELECT COALESCE(SUM(people), 0)::integer
+    INTO v_reserved_before
+    FROM public.bookings
+    WHERE tour_id = v_booking.tour_id
+      AND status IN ('PENDING', 'CONFIRMED');
+
+    v_reserved_after := v_reserved_before;
+
     IF v_old_reserved AND NOT v_new_reserved THEN
-        -- Active -> CANCELLED: release the held seats.
+        v_reserved_after := v_reserved_after - v_booking.people;
         v_seat_delta := v_booking.people;
-
-        UPDATE public.tours
-        SET
-            seats = COALESCE(seats, 0) + v_booking.people,
-            updated_at = now()
-        WHERE id = v_booking.tour_id;
-
     ELSIF NOT v_old_reserved AND v_new_reserved THEN
-        -- CANCELLED -> active: reserve the seats again.
-        IF COALESCE(v_tour_seats, 0) < v_booking.people THEN
-            RAISE EXCEPTION 'NOT_ENOUGH_SEATS';
-        END IF;
-
+        v_reserved_after := v_reserved_after + v_booking.people;
         v_seat_delta := -v_booking.people;
-
-        UPDATE public.tours
-        SET
-            seats = seats - v_booking.people,
-            updated_at = now()
-        WHERE id = v_booking.tour_id;
     END IF;
+
+    IF v_reserved_after < 0 THEN
+        v_reserved_after := 0;
+    END IF;
+
+    IF COALESCE(v_capacity, 0) < v_reserved_after THEN
+        RAISE EXCEPTION 'NOT_ENOUGH_SEATS';
+    END IF;
+
+    v_remaining_seats := COALESCE(v_capacity, 0) - v_reserved_after;
 
     UPDATE public.bookings
     SET
@@ -104,19 +119,19 @@ BEGIN
         updated_at = now()
     WHERE id = p_booking_id;
 
+    UPDATE public.tours
+    SET
+        seats = v_remaining_seats,
+        updated_at = now()
+    WHERE id = v_booking.tour_id;
+
     RETURN json_build_object(
         'success', true,
         'booking_id', p_booking_id,
         'old_status', v_old_status,
         'status', p_new_status,
         'seat_change', v_seat_delta,
-        'remaining_seats', CASE
-            WHEN v_old_reserved AND NOT v_new_reserved
-                THEN v_tour_seats + v_booking.people
-            WHEN NOT v_old_reserved AND v_new_reserved
-                THEN v_tour_seats - v_booking.people
-            ELSE v_tour_seats
-        END
+        'remaining_seats', v_remaining_seats
     );
 END;
 $$;
@@ -125,8 +140,8 @@ GRANT EXECUTE ON FUNCTION public.update_booking_status(uuid, text)
 TO authenticated;
 
 
--- Delete a booking safely. If the booking still holds seats,
--- release those seats before deleting the booking.
+-- Delete a booking safely. Seats are recalculated from capacity and the
+-- remaining active bookings after the booking is removed.
 CREATE OR REPLACE FUNCTION public.delete_booking(
     p_booking_id uuid
 )
@@ -137,6 +152,9 @@ SET search_path = public
 AS $$
 DECLARE
     v_booking public.bookings%ROWTYPE;
+    v_capacity integer;
+    v_reserved_after integer;
+    v_remaining_seats integer;
     v_released_seats integer := 0;
 BEGIN
     IF auth.uid() IS NULL
@@ -158,31 +176,53 @@ BEGIN
         RAISE EXCEPTION 'BOOKING_NOT_FOUND';
     END IF;
 
+    IF v_booking.tour_id IS NULL OR trim(v_booking.tour_id) = '' THEN
+        RAISE EXCEPTION 'TOUR_NOT_FOUND';
+    END IF;
+
+    -- Lock the tour before changing its seat count.
+    SELECT capacity
+    INTO v_capacity
+    FROM public.tours
+    WHERE id = v_booking.tour_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'TOUR_NOT_FOUND';
+    END IF;
+
     IF v_booking.status IN ('PENDING', 'CONFIRMED') THEN
-        IF NOT EXISTS (
-            SELECT 1
-            FROM public.tours
-            WHERE id = v_booking.tour_id
-        ) THEN
-            RAISE EXCEPTION 'TOUR_NOT_FOUND';
-        END IF;
-
-        UPDATE public.tours
-        SET
-            seats = COALESCE(seats, 0) + v_booking.people,
-            updated_at = now()
-        WHERE id = v_booking.tour_id;
-
         v_released_seats := v_booking.people;
     END IF;
+
+    -- Exclude the booking being deleted from the reservation total.
+    SELECT COALESCE(SUM(people), 0)::integer
+    INTO v_reserved_after
+    FROM public.bookings
+    WHERE tour_id = v_booking.tour_id
+      AND id <> p_booking_id
+      AND status IN ('PENDING', 'CONFIRMED');
+
+    IF COALESCE(v_capacity, 0) < v_reserved_after THEN
+        RAISE EXCEPTION 'CAPACITY_BELOW_RESERVED';
+    END IF;
+
+    v_remaining_seats := COALESCE(v_capacity, 0) - v_reserved_after;
 
     DELETE FROM public.bookings
     WHERE id = p_booking_id;
 
+    UPDATE public.tours
+    SET
+        seats = v_remaining_seats,
+        updated_at = now()
+    WHERE id = v_booking.tour_id;
+
     RETURN json_build_object(
         'success', true,
         'booking_id', p_booking_id,
-        'released_seats', v_released_seats
+        'released_seats', v_released_seats,
+        'remaining_seats', v_remaining_seats
     );
 END;
 $$;
