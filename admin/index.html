@@ -42,7 +42,7 @@
             <div class="page-title">
                 <div>
                     <h1>Dashboard</h1>
-                    <p>Quản lý các tour du lịch</p>
+                    <p>Tổng quan hoạt động tour và đăng ký khách hàng</p>
                 </div>
                 <button id="addTourButton" class="primary-button">+ Thêm tour</button>
             </div>
@@ -57,8 +57,50 @@
                     <div id="monthlyTours" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Tổng số chỗ</div>
-                    <div id="totalSeats" class="stat-value">0</div>
+                    <div class="stat-label">Tổng sức chứa</div>
+                    <div id="totalCapacity" class="stat-value">0</div>
+                    <div class="stat-subtext">chỗ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Chỗ còn lại</div>
+                    <div id="remainingSeats" class="stat-value">0</div>
+                    <div class="stat-subtext">chỗ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Đơn chờ xác nhận</div>
+                    <div id="pendingBookings" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Đơn đã xác nhận</div>
+                    <div id="confirmedBookings" class="stat-value">0</div>
+                </div>
+            </div>
+
+            <div class="dashboard-overview">
+                <div class="overview-card">
+                    <div class="overview-label">Tổng đơn đăng ký</div>
+                    <strong id="totalBookings">0</strong>
+                    <span>đơn</span>
+                </div>
+                <div class="overview-card">
+                    <div class="overview-label">Đã hủy</div>
+                    <strong id="cancelledBookings">0</strong>
+                    <span>đơn</span>
+                </div>
+                <div class="overview-card">
+                    <div class="overview-label">Khách đang giữ chỗ</div>
+                    <strong id="activeGuests">0</strong>
+                    <span>người</span>
+                </div>
+                <div class="overview-card">
+                    <div class="overview-label">Tỷ lệ lấp đầy</div>
+                    <strong id="occupancyRate">0%</strong>
+                    <span>PENDING + CONFIRMED</span>
+                </div>
+                <div class="overview-card revenue-card">
+                    <div class="overview-label">Doanh thu dự kiến</div>
+                    <strong id="expectedRevenue">0 đ</strong>
+                    <span>PENDING + CONFIRMED</span>
                 </div>
             </div>
 
@@ -199,6 +241,7 @@
             <script src="admin.js"></script>
             <script src="booking-management.js"></script>
             <script src="capacity-management.js"></script>
+            <script src="dashboard-stats.js"></script>
         </main>
     </div>
 </body>
