@@ -4,6 +4,16 @@
 // This file overrides the legacy direct booking update/delete handlers.
 // Seat changes are performed inside Supabase RPC transactions.
 
+function refreshBookingDashboard() {
+    if (typeof renderDashboardStats === "function") {
+        renderDashboardStats();
+    }
+
+    if (typeof renderTours === "function") {
+        renderTours();
+    }
+}
+
 window.updateBookingStatus = async function (bookingId, newStatus) {
     const booking = bookings.find(item => item.id === bookingId);
 
@@ -37,6 +47,7 @@ window.updateBookingStatus = async function (bookingId, newStatus) {
         }
 
         renderBookings();
+        refreshBookingDashboard();
 
         if (oldStatus === "PENDING" && newStatus === "CANCELLED") {
             alert(`Đã hủy booking và hoàn ${booking.people} chỗ cho tour.`);
@@ -105,8 +116,7 @@ window.deleteBooking = async function (bookingId) {
         );
 
         await loadBookings();
-        renderTours();
-        renderStats();
+        refreshBookingDashboard();
     } catch (error) {
         console.error("Delete booking error:", error);
         alert("Không thể xóa đơn đăng ký.\n\n" + (error?.message || "Lỗi không xác định."));
