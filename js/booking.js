@@ -57,10 +57,19 @@ async function submitBooking(event, tourId) {
 
         const remainingSeats = data?.remaining_seats;
 
-        // Keep the local tour cache in sync after a successful reservation.
-        if (Array.isArray(window.tours)) {
-            const cachedTour = window.tours.find(item => String(item.id) === String(tourId));
-            if (cachedTour && Number.isInteger(remainingSeats)) {
+        // ========================================
+        // UPDATE LOCAL TOUR DATA IMMEDIATELY
+        // ========================================
+        // app.js declares `tours` in the global scope.
+        // Update that same array so the current page
+        // can display the new number of available seats
+        // without requiring a full browser reload.
+        if (Array.isArray(tours) && Number.isInteger(remainingSeats)) {
+            const cachedTour = tours.find(
+                item => String(item.id) === String(tourId)
+            );
+
+            if (cachedTour) {
                 cachedTour.seats = remainingSeats;
             }
         }
@@ -74,6 +83,17 @@ async function submitBooking(event, tourId) {
         if (typeof closeBookingModal === "function") {
             closeBookingModal();
         }
+
+        // ========================================
+        // REFRESH TOUR DETAIL UI
+        // ========================================
+        // Re-render the tour detail using the updated
+        // local seat count. This makes the change visible
+        // immediately after closing the booking popup.
+        if (typeof renderTourDetail === "function") {
+            await renderTourDetail();
+        }
+
     } catch (error) {
         console.error("Không thể tạo booking:", error);
 
