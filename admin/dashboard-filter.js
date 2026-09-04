@@ -75,7 +75,7 @@ function dashboardCompare(current, previous) {
 }
 
 function dashboardComparisonMarkup(current, previous) {
-    const result = dashboardCompare(current, previous);
+    const result = dashboardCompare(Number(current) || 0, Number(previous) || 0);
     const cls = result.value > 0 ? "positive" : result.value < 0 ? "negative" : "neutral";
     return `<span class="comparison-badge ${cls}">${result.text}</span>`;
 }
@@ -146,15 +146,15 @@ function updateDashboard21KPIs() {
     const currentRevenue = dashboardRevenue(dashboardFilteredBookings);
     const previousRevenue = dashboardRevenue(dashboardPreviousBookings);
 
-    const setNumeric = (id, current, previous) => {
+    const setNumeric = (id, current, previous, formatter = value => value) => {
         const element = document.getElementById(id);
         if (!element) return;
-        element.innerHTML = `${current}${dashboardComparisonMarkup(current, previous)}`;
+        element.innerHTML = `${formatter(current)}${dashboardComparisonMarkup(current, previous)}`;
     };
 
     setNumeric("totalBookings", dashboardFilteredBookings.length, dashboardPreviousBookings.length);
     setNumeric("activeGuests", currentGuests, previousGuests);
-    setNumeric("expectedRevenue", formatVND(currentRevenue), previousRevenue);
+    setNumeric("expectedRevenue", currentRevenue, previousRevenue, formatVND);
     setNumeric("pendingBookings", dashboardFilteredBookings.filter(b => b.status === "PENDING").length, dashboardPreviousBookings.filter(b => b.status === "PENDING").length);
     setNumeric("confirmedBookings", dashboardFilteredBookings.filter(b => b.status === "CONFIRMED").length, dashboardPreviousBookings.filter(b => b.status === "CONFIRMED").length);
     setNumeric("cancelledBookings", dashboardFilteredBookings.filter(b => b.status === "CANCELLED").length, dashboardPreviousBookings.filter(b => b.status === "CANCELLED").length);
@@ -221,17 +221,17 @@ function renderDashboard21Charts() {
     }
 
     const buckets = dashboardTrendBuckets();
-    const counts = buckets.map(bucket => filtered.filter(b => {
-        const date = new Date(b.created_at);
-        const key = buckets.length && buckets.length <= 31 ? date.toISOString().slice(0, 10) : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-        return key === bucket.key;
-    }).length);
-    const revenue = buckets.map(bucket => filtered.reduce((sum, b) => {
-        const date = new Date(b.created_at);
-        const key = buckets.length && buckets.length <= 31 ? date.toISOString().slice(0, 10) : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-        return key === bucket.key && ["PENDING", "CONFIRMED"].includes(b.status)
-            ? sum + dashboardTourPrice(b) * Number(b.people || 0) : sum;
-    }, 0));
+    const useDaily = buckets.length <= 31;
+    const getBucketKey = booking => {
+        const date = new Date(booking.created_at);
+        if (Number.isNaN(date.getTime())) return null;
+        return useDaily ? date.toISOString().slice(0, 10) : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    };
+
+    const counts = buckets.map(bucket => filtered.filter(b => getBucketKey(b) === bucket.key).length);
+    const revenue = buckets.map(bucket => filtered.reduce((sum, b) =>
+        getBucketKey(b) === bucket.key && ["PENDING", "CONFIRMED"].includes(b.status)
+            ? sum + dashboardTourPrice(b) * Number(b.people || 0) : sum, 0));
 
     if (typeof monthlyBookingsChartInstance !== "undefined" && monthlyBookingsChartInstance) {
         monthlyBookingsChartInstance.data.labels = buckets.map(b => b.label);
@@ -244,8 +244,8 @@ function renderDashboard21Charts() {
         monthlyRevenueChartInstance.update();
     }
 
-    const monthlyText = document.querySelector("#advancedChartsSection .chart-header p");
-    if (monthlyText) monthlyText.textContent = `${DASHBOARD_RANGES[dashboardRange].label} • ${dashboardFilteredBookings.length} đơn`;
+    const chartDescription = document.querySelector("#advancedChartsSection .chart-header p");
+    if (chartDescription) chartDescription.textContent = `${DASHBOARD_RANGES[dashboardRange].label} • ${dashboardFilteredBookings.length} đơn`;
 }
 
 function refreshDashboard21() {
