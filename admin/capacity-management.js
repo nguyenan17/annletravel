@@ -1,6 +1,6 @@
 // ANNLETRAVEL - Total capacity management
-// admin.js remains compatible: #tourSeats is temporarily used as the
-// visible capacity input, then converted to available seats on submit.
+// admin.js remains compatible: #tourSeats is used as the total-capacity input,
+// then converted to remaining seats before admin.js saves the tour.
 
 (function () {
     const form = document.getElementById("tourForm");
@@ -13,16 +13,14 @@
     const help = document.createElement("p");
     help.className = "image-help";
     help.id = "tourCapacityHelp";
-    help.textContent = "Số chỗ còn lại sẽ được tự động tính theo các đơn PENDING/CONFIRMED.";
+    help.textContent = "Số chỗ còn lại được tự động tính theo các đơn PENDING/CONFIRMED.";
     seatsInput.closest(".form-group")?.appendChild(help);
 
     const originalEditTour = window.editTour;
     if (typeof originalEditTour === "function") {
         window.editTour = function (tourId) {
             originalEditTour(tourId);
-            const tour = Array.isArray(window.tours)
-                ? window.tours.find(item => String(item.id) === String(tourId))
-                : null;
+            const tour = tours.find(item => String(item.id) === String(tourId));
             if (tour) {
                 seatsInput.value = Number.isInteger(Number(tour.capacity))
                     ? Number(tour.capacity)
@@ -32,8 +30,7 @@
     }
 
     function getActiveReservedPeople(tourId) {
-        if (!Array.isArray(window.bookings)) return 0;
-        return window.bookings
+        return bookings
             .filter(booking =>
                 String(booking.tour_id) === String(tourId) &&
                 ["PENDING", "CONFIRMED"].includes(booking.status)
@@ -52,7 +49,6 @@
         }
 
         if (!tourId) {
-            // New tour: total capacity equals available seats.
             seatsInput.value = capacity;
             return;
         }
@@ -64,11 +60,9 @@
             return;
         }
 
-        // admin.js reads #tourSeats as the remaining seats.
-        // Set it before its own submit handler runs.
+        // admin.js reads #tourSeats as remaining seats.
         seatsInput.value = capacity - reserved;
 
-        // Update the independent capacity column asynchronously.
         try {
             const { data, error } = await supabaseClient.rpc("update_tour_capacity", {
                 p_tour_id: tourId,
@@ -77,21 +71,18 @@
 
             if (error) throw error;
 
-            const tour = Array.isArray(window.tours)
-                ? window.tours.find(item => String(item.id) === String(tourId))
-                : null;
+            const tour = tours.find(item => String(item.id) === String(tourId));
             if (tour && data) {
                 tour.capacity = Number(data.capacity);
                 tour.seats = Number(data.remaining_seats);
             }
         } catch (error) {
             console.error("Update tour capacity error:", error);
-            // Do not block the legacy tour update here; the RPC is protected
-            // and will surface the problem in console for diagnosis.
+            // The RPC is protected by the database. Keep the existing save flow
+            // running so a temporary client-side error does not lose tour edits.
         }
     }, true);
 
-    // New tour modal should start with a sensible capacity.
     document.getElementById("addTourButton")?.addEventListener("click", function () {
         setTimeout(() => {
             seatsInput.value = "20";
