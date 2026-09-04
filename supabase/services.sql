@@ -29,6 +29,9 @@ CREATE TABLE IF NOT EXISTS public.services (
     updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS destination text DEFAULT '';
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS service_type text DEFAULT '';
+
 ALTER TABLE public.service_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
 
@@ -53,18 +56,29 @@ VALUES
 ('insurance', 'Bảo hiểm du lịch', 'insurance', '🛡️', 'Bảo hiểm hỗ trợ an tâm trong chuyến đi.', 70)
 ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, slug=EXCLUDED.slug, icon=EXCLUDED.icon, description=EXCLUDED.description, sort_order=EXCLUDED.sort_order, updated_at=now();
 
-INSERT INTO public.services (id, category_id, name, slug, short, description, featured, sort_order)
+INSERT INTO public.services (id, category_id, name, slug, short, description, destination, service_type, price_from, featured, sort_order)
 VALUES
-('sun-world', 'tickets', 'Vé Sun World', 'sun-world', 'Vé vui chơi Sun World tại các điểm đến nổi bật.', 'Hỗ trợ đặt vé Sun World, tư vấn loại vé và thời gian sử dụng phù hợp.', true, 10),
-('ba-na-hills', 'tickets', 'Vé Bà Nà Hills', 'ba-na-hills', 'Khám phá Bà Nà Hills và Cầu Vàng.', 'Hỗ trợ đặt vé Bà Nà Hills và tư vấn thời gian tham quan phù hợp.', true, 20),
-('fansipan', 'tickets', 'Vé Fansipan', 'fansipan', 'Vé cáp treo Fansipan tại Sapa.', 'Hỗ trợ vé Fansipan và tư vấn lịch trình Sapa.', true, 30),
-('vinwonders', 'tickets', 'Vé VinWonders', 'vinwonders', 'Vé công viên giải trí VinWonders.', 'Hỗ trợ đặt vé VinWonders theo điểm đến và nhu cầu.', true, 40),
-('show-tickets', 'tickets', 'Vé show & biểu diễn', 'show-tickets', 'Vé show, chương trình nghệ thuật và trải nghiệm.', 'Tư vấn và hỗ trợ đặt vé các show phù hợp với hành trình.', false, 50),
-('attraction-tickets', 'tickets', 'Vé điểm tham quan', 'attraction-tickets', 'Vé bảo tàng, di tích và điểm tham quan nổi bật.', 'Đặt vé tham quan trước để chủ động lịch trình và hạn chế thời gian chờ.', false, 60),
-('flight-domestic', 'flights', 'Vé máy bay nội địa', 'flight-domestic', 'Vé máy bay các chặng trong Việt Nam.', 'Tư vấn chuyến bay và hỗ trợ lựa chọn giờ bay phù hợp.', true, 10),
-('flight-international', 'flights', 'Vé máy bay quốc tế', 'flight-international', 'Vé máy bay đi Hàn Quốc, Nhật Bản, Thái Lan và nhiều điểm đến.', 'Tư vấn hành trình bay quốc tế theo lịch tour hoặc nhu cầu riêng.', true, 20),
-('hotel-booking', 'hotels', 'Đặt khách sạn', 'hotel-booking', 'Khách sạn từ phổ thông đến cao cấp.', 'Tư vấn và hỗ trợ đặt phòng theo ngân sách và lịch trình.', true, 10),
-('visa-korea', 'visa', 'Visa Hàn Quốc', 'visa-korea', 'Hỗ trợ hồ sơ visa Hàn Quốc.', 'Tư vấn điều kiện và chuẩn bị hồ sơ visa du lịch Hàn Quốc.', false, 10),
-('passport-service', 'passport', 'Làm hộ chiếu', 'passport-service', 'Tư vấn thủ tục và hỗ trợ làm hộ chiếu.', 'Hỗ trợ tư vấn hồ sơ, quy trình và các bước cần thiết để làm hoặc cấp lại hộ chiếu.', true, 10),
-('airport-transfer', 'transport', 'Xe đưa đón sân bay', 'airport-transfer', 'Đưa đón sân bay riêng hoặc theo nhóm.', 'Đặt xe theo số lượng khách và lịch bay.', false, 10)
-ON CONFLICT (id) DO UPDATE SET category_id=EXCLUDED.category_id, name=EXCLUDED.name, slug=EXCLUDED.slug, short=EXCLUDED.short, description=EXCLUDED.description, featured=EXCLUDED.featured, sort_order=EXCLUDED.sort_order, updated_at=now();
+('sun-world', 'tickets', 'Vé Sun World', 'sun-world', 'Vé vui chơi Sun World tại các điểm đến nổi bật.', 'Hỗ trợ đặt vé Sun World, tư vấn loại vé và thời gian sử dụng phù hợp.', 'Nhiều điểm đến', 'amusement', 0, true, 10),
+('ba-na-hills', 'tickets', 'Vé Bà Nà Hills', 'ba-na-hills', 'Khám phá Bà Nà Hills và Cầu Vàng.', 'Hỗ trợ đặt vé Bà Nà Hills và tư vấn thời gian tham quan phù hợp.', 'Đà Nẵng', 'amusement', 0, true, 20),
+('fansipan', 'tickets', 'Vé Fansipan', 'fansipan', 'Vé cáp treo Fansipan tại Sapa.', 'Hỗ trợ vé Fansipan và tư vấn lịch trình Sapa.', 'Sapa', 'attraction', 0, true, 30),
+('vinwonders', 'tickets', 'Vé VinWonders', 'vinwonders', 'Vé công viên giải trí VinWonders.', 'Hỗ trợ đặt vé VinWonders theo điểm đến và nhu cầu.', 'Nhiều điểm đến', 'amusement', 0, true, 40),
+('show-tickets', 'tickets', 'Vé show & biểu diễn', 'show-tickets', 'Vé show, chương trình nghệ thuật và trải nghiệm.', 'Tư vấn và hỗ trợ đặt vé các show phù hợp với hành trình.', 'Nhiều điểm đến', 'show', 0, false, 50),
+('attraction-tickets', 'tickets', 'Vé điểm tham quan', 'attraction-tickets', 'Vé bảo tàng, di tích và điểm tham quan nổi bật.', 'Đặt vé tham quan trước để chủ động lịch trình và hạn chế thời gian chờ.', 'Nhiều điểm đến', 'attraction', 0, false, 60),
+('flight-domestic', 'flights', 'Vé máy bay nội địa', 'flight-domestic', 'Vé máy bay các chặng trong Việt Nam.', 'Tư vấn chuyến bay và hỗ trợ lựa chọn giờ bay phù hợp.', '', '', 0, true, 10),
+('flight-international', 'flights', 'Vé máy bay quốc tế', 'flight-international', 'Vé máy bay đi Hàn Quốc, Nhật Bản, Thái Lan và nhiều điểm đến.', 'Tư vấn hành trình bay quốc tế theo lịch tour hoặc nhu cầu riêng.', '', '', 0, true, 20),
+('hotel-booking', 'hotels', 'Đặt khách sạn', 'hotel-booking', 'Khách sạn từ phổ thông đến cao cấp.', 'Tư vấn và hỗ trợ đặt phòng theo ngân sách và lịch trình.', '', '', 0, true, 10),
+('visa-korea', 'visa', 'Visa Hàn Quốc', 'visa-korea', 'Hỗ trợ hồ sơ visa Hàn Quốc.', 'Tư vấn điều kiện và chuẩn bị hồ sơ visa du lịch Hàn Quốc.', '', '', 0, false, 10),
+('passport-service', 'passport', 'Làm hộ chiếu', 'passport-service', 'Tư vấn thủ tục và hỗ trợ làm hộ chiếu.', 'Hỗ trợ tư vấn hồ sơ, quy trình và các bước cần thiết để làm hoặc cấp lại hộ chiếu.', '', '', 0, true, 10),
+('airport-transfer', 'transport', 'Xe đưa đón sân bay', 'airport-transfer', 'Đưa đón sân bay riêng hoặc theo nhóm.', 'Đặt xe theo số lượng khách và lịch bay.', '', '', 0, false, 10)
+ON CONFLICT (id) DO UPDATE SET
+    category_id=EXCLUDED.category_id,
+    name=EXCLUDED.name,
+    slug=EXCLUDED.slug,
+    short=EXCLUDED.short,
+    description=EXCLUDED.description,
+    destination=EXCLUDED.destination,
+    service_type=EXCLUDED.service_type,
+    price_from=EXCLUDED.price_from,
+    featured=EXCLUDED.featured,
+    sort_order=EXCLUDED.sort_order,
+    updated_at=now();
