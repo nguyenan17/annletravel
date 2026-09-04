@@ -28,13 +28,15 @@ function dashboardDateEnd() {
     return end;
 }
 
-function dashboardMatchesBooking(booking) {
-    if (dashboardTourId !== "ALL" && String(booking.tour_id) !== String(dashboardTourId)) return false;
-    if (dashboardDestination !== "ALL") {
-        const tour = tours.find(item => String(item.id) === String(booking.tour_id));
-        if ((tour?.destination || "") !== dashboardDestination) return false;
-    }
+function dashboardMatchesTour(tour) {
+    if (dashboardTourId !== "ALL" && String(tour.id) !== String(dashboardTourId)) return false;
+    if (dashboardDestination !== "ALL" && tour.destination !== dashboardDestination) return false;
     return true;
+}
+
+function dashboardMatchesBooking(booking) {
+    const tour = tours.find(item => String(item.id) === String(booking.tour_id));
+    return !!tour && dashboardMatchesTour(tour);
 }
 
 function getDashboardPeriodBookings() {
@@ -47,8 +49,8 @@ function getDashboardPeriodBookings() {
 }
 
 function getDashboardPreviousPeriodBookings() {
-    const end = dashboardDateStart();
-    end.setMilliseconds(-1);
+    const currentStart = dashboardDateStart();
+    const end = new Date(currentStart.getTime() - 1);
     const start = dashboardDateStart(dashboardRange, end);
     return bookings.filter(booking => {
         const date = new Date(booking.created_at);
@@ -72,10 +74,10 @@ function dashboardCompare(current, previous) {
     return { value, text: `${value > 0 ? "+" : ""}${value}%` };
 }
 
-function dashboardComparisonMarkup(current, previous, suffix = "") {
+function dashboardComparisonMarkup(current, previous) {
     const result = dashboardCompare(current, previous);
     const cls = result.value > 0 ? "positive" : result.value < 0 ? "negative" : "neutral";
-    return `<span class="comparison-badge ${cls}">${result.text}${suffix ? ` ${suffix}` : ""}</span>`;
+    return `<span class="comparison-badge ${cls}">${result.text}</span>`;
 }
 
 function ensureDashboard21Controls() {
@@ -115,7 +117,8 @@ function populateDashboard21Filters() {
 
     const previousTour = dashboardTourId;
     const previousDestination = dashboardDestination;
-    const destinations = [...new Set(tours.map(tour => tour.destination).filter(Boolean))].sort((a, b) => a.localeCompare(b, "vi"));
+    const destinations = [...new Set(tours.map(tour => tour.destination).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, "vi"));
 
     tourSelect.innerHTML = `<option value="ALL">Tất cả tour</option>` + tours.map(tour =>
         `<option value="${escapeDashboardHtml(String(tour.id))}">${escapeDashboardHtml(tour.name || tour.destination || tour.id)}</option>`
@@ -143,29 +146,25 @@ function updateDashboard21KPIs() {
     const currentRevenue = dashboardRevenue(dashboardFilteredBookings);
     const previousRevenue = dashboardRevenue(dashboardPreviousBookings);
 
-    const set = (id, value, previous, suffix = "") => {
+    const setNumeric = (id, current, previous) => {
         const element = document.getElementById(id);
         if (!element) return;
-        element.innerHTML = `${value}${dashboardComparisonMarkup(Number(value) || 0, previous, suffix)}`;
+        element.innerHTML = `${current}${dashboardComparisonMarkup(current, previous)}`;
     };
 
-    set("totalBookings", dashboardFilteredBookings.length, dashboardPreviousBookings.length);
-    set("activeGuests", currentGuests, previousGuests);
-    set("expectedRevenue", formatVND(currentRevenue), previousRevenue);
+    setNumeric("totalBookings", dashboardFilteredBookings.length, dashboardPreviousBookings.length);
+    setNumeric("activeGuests", currentGuests, previousGuests);
+    setNumeric("expectedRevenue", formatVND(currentRevenue), previousRevenue);
+    setNumeric("pendingBookings", dashboardFilteredBookings.filter(b => b.status === "PENDING").length, dashboardPreviousBookings.filter(b => b.status === "PENDING").length);
+    setNumeric("confirmedBookings", dashboardFilteredBookings.filter(b => b.status === "CONFIRMED").length, dashboardPreviousBookings.filter(b => b.status === "CONFIRMED").length);
+    setNumeric("cancelledBookings", dashboardFilteredBookings.filter(b => b.status === "CANCELLED").length, dashboardPreviousBookings.filter(b => b.status === "CANCELLED").length);
 
-    const pending = dashboardFilteredBookings.filter(b => b.status === "PENDING").length;
-    const confirmed = dashboardFilteredBookings.filter(b => b.status === "CONFIRMED").length;
-    const cancelled = dashboardFilteredBookings.filter(b => b.status === "CANCELLED").length;
-    set("pendingBookings", pending, dashboardPreviousBookings.filter(b => b.status === "PENDING").length);
-    set("confirmedBookings", confirmed, dashboardPreviousBookings.filter(b => b.status === "CONFIRMED").length);
-    set("cancelledBookings", cancelled, dashboardPreviousBookings.filter(b => b.status === "CANCELLED").length);
-
-    const selectedTours = dashboardTourId === "ALL" ? tours : tours.filter(t => String(t.id) === String(dashboardTourId));
-    const filteredTours = dashboardDestination === "ALL" ? selectedTours : selectedTours.filter(t => t.destination === dashboardDestination);
+    const filteredTours = tours.filter(dashboardMatchesTour);
     const capacity = filteredTours.reduce((sum, t) => sum + Number(t.capacity ?? t.seats ?? 0), 0);
-    const reserved = currentActive.reduce((sum, b) => sum + Number(b.people || 0), 0);
-    const remaining = Math.max(0, capacity - reserved);
-    const occupancy = capacity > 0 ? Math.round((reserved / capacity) * 100) : 0;
+    const remaining = filteredTours.reduce((sum, t) => sum + Number(t.seats || 0), 0);
+    const reservedSnapshot = Math.max(0, capacity - remaining);
+    const occupancy = capacity > 0 ? Math.round((reservedSnapshot / capacity) * 100) : 0;
+
     const totalCapacityEl = document.getElementById("totalCapacity");
     const remainingEl = document.getElementById("remainingSeats");
     const occupancyEl = document.getElementById("occupancyRate");
@@ -178,11 +177,82 @@ function updateDashboard21KPIs() {
     if (description) description.textContent = `Đang xem ${rangeLabel.toLowerCase()} • ${dashboardFilteredBookings.length} đơn phù hợp bộ lọc`;
 }
 
+function dashboardTrendBuckets() {
+    const end = dashboardDateEnd();
+    const start = dashboardDateStart();
+    const buckets = [];
+    const days = Math.ceil((end - start) / 86400000);
+
+    if (days <= 31) {
+        for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+            const d = new Date(date);
+            buckets.push({ key: d.toISOString().slice(0, 10), label: `${d.getDate()}/${d.getMonth() + 1}` });
+        }
+    } else {
+        const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+        const last = new Date(end.getFullYear(), end.getMonth(), 1);
+        while (cursor <= last) {
+            buckets.push({ key: `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`, label: `T${cursor.getMonth() + 1}/${cursor.getFullYear()}` });
+            cursor.setMonth(cursor.getMonth() + 1);
+        }
+    }
+    return buckets;
+}
+
+function renderDashboard21Charts() {
+    if (typeof Chart === "undefined") return;
+
+    const filtered = dashboardFilteredBookings;
+    const pending = filtered.filter(b => b.status === "PENDING").length;
+    const confirmed = filtered.filter(b => b.status === "CONFIRMED").length;
+    const cancelled = filtered.filter(b => b.status === "CANCELLED").length;
+
+    if (typeof bookingStatusChartInstance !== "undefined" && bookingStatusChartInstance) {
+        bookingStatusChartInstance.data.datasets[0].data = [pending, confirmed, cancelled];
+        bookingStatusChartInstance.update();
+    }
+
+    const filteredTours = tours.filter(dashboardMatchesTour);
+    if (typeof tourCapacityChartInstance !== "undefined" && tourCapacityChartInstance) {
+        tourCapacityChartInstance.data.labels = filteredTours.map(t => t.name || t.destination || t.id);
+        tourCapacityChartInstance.data.datasets[0].data = filteredTours.map(t => Number(t.capacity ?? t.seats ?? 0));
+        tourCapacityChartInstance.data.datasets[1].data = filteredTours.map(t => Number(t.seats || 0));
+        tourCapacityChartInstance.update();
+    }
+
+    const buckets = dashboardTrendBuckets();
+    const counts = buckets.map(bucket => filtered.filter(b => {
+        const date = new Date(b.created_at);
+        const key = buckets.length && buckets.length <= 31 ? date.toISOString().slice(0, 10) : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        return key === bucket.key;
+    }).length);
+    const revenue = buckets.map(bucket => filtered.reduce((sum, b) => {
+        const date = new Date(b.created_at);
+        const key = buckets.length && buckets.length <= 31 ? date.toISOString().slice(0, 10) : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        return key === bucket.key && ["PENDING", "CONFIRMED"].includes(b.status)
+            ? sum + dashboardTourPrice(b) * Number(b.people || 0) : sum;
+    }, 0));
+
+    if (typeof monthlyBookingsChartInstance !== "undefined" && monthlyBookingsChartInstance) {
+        monthlyBookingsChartInstance.data.labels = buckets.map(b => b.label);
+        monthlyBookingsChartInstance.data.datasets[0].data = counts;
+        monthlyBookingsChartInstance.update();
+    }
+    if (typeof monthlyRevenueChartInstance !== "undefined" && monthlyRevenueChartInstance) {
+        monthlyRevenueChartInstance.data.labels = buckets.map(b => b.label);
+        monthlyRevenueChartInstance.data.datasets[0].data = revenue;
+        monthlyRevenueChartInstance.update();
+    }
+
+    const monthlyText = document.querySelector("#advancedChartsSection .chart-header p");
+    if (monthlyText) monthlyText.textContent = `${DASHBOARD_RANGES[dashboardRange].label} • ${dashboardFilteredBookings.length} đơn`;
+}
+
 function refreshDashboard21() {
     ensureDashboard21Controls();
     populateDashboard21Filters();
     updateDashboard21KPIs();
-    if (typeof window.renderDashboard21Charts === "function") window.renderDashboard21Charts();
+    renderDashboard21Charts();
     if (typeof window.renderAdvancedDashboardCharts === "function") window.renderAdvancedDashboardCharts();
 }
 
