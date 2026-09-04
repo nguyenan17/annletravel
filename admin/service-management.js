@@ -66,7 +66,8 @@ async function saveService(event) {
     else { payload.id = slugifyService(slug) || `service-${Date.now()}`; query = supabaseClient.from('services').insert(payload); }
     const { error } = await query;
     if (error) { alert('Không thể lưu dịch vụ.\n\n' + error.message); return; }
-    closeServiceModal(); alert(editingServiceId ? 'Cập nhật dịch vụ thành công!' : 'Thêm dịch vụ thành công!'); await loadAdminServices();
+    const wasEditing = !!editingServiceId;
+    closeServiceModal(); alert(wasEditing ? 'Cập nhật dịch vụ thành công!' : 'Thêm dịch vụ thành công!'); await loadAdminServices();
 }
 
 function renderServiceCategoryOptions() {
@@ -82,4 +83,13 @@ function renderServiceCategoryOptions() {
     document.getElementById('cancelServiceButton')?.addEventListener('click', closeServiceModal);
     document.getElementById('serviceName')?.addEventListener('blur', e => { const input = document.getElementById('serviceSlug'); if (!input.value.trim()) input.value = slugifyService(e.target.value); });
     loadAdminServices().then(renderServiceCategoryOptions);
+})();
+
+// Load the unified ticket module on the main admin page.
+(function loadUnifiedTicketModule() {
+    if (!document.getElementById('dashboardPage')) return;
+    const script = document.createElement('script');
+    script.src = 'ticket-section.js';
+    script.defer = false;
+    document.body.appendChild(script);
 })();
