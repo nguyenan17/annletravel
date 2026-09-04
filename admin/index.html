@@ -104,6 +104,32 @@
                 </div>
             </div>
 
+            <section class="dashboard-charts">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <h2>Trạng thái đơn đăng ký</h2>
+                            <p>Phân bổ PENDING, CONFIRMED và CANCELLED</p>
+                        </div>
+                    </div>
+                    <div class="chart-body chart-body-doughnut">
+                        <canvas id="bookingStatusChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card chart-card-wide">
+                    <div class="chart-header">
+                        <div>
+                            <h2>Sức chứa theo tour</h2>
+                            <p>So sánh tổng sức chứa và số chỗ đã giữ</p>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="tourCapacityChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
             <!-- Legacy compatibility: admin.js still writes this value. Keep it hidden. -->
             <span id="totalSeats" hidden>0</span>
 
@@ -240,6 +266,7 @@
             </div>
 
             <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
             <script src="../js/supabase.js"></script>
             <script src="admin.js"></script>
             <script src="booking-management.js"></script>
