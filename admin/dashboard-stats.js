@@ -20,22 +20,14 @@ function formatVND(value) {
 }
 
 function renderDashboardStats() {
-    const activeBookings = bookings.filter(booking =>
-        ["PENDING", "CONFIRMED"].includes(booking.status)
-    );
+    const activeBookings = bookings.filter(booking => ["PENDING", "CONFIRMED"].includes(booking.status));
     const pendingBookings = bookings.filter(booking => booking.status === "PENDING");
     const confirmedBookings = bookings.filter(booking => booking.status === "CONFIRMED");
     const cancelledBookings = bookings.filter(booking => booking.status === "CANCELLED");
 
-    const totalCapacity = tours.reduce(
-        (sum, tour) => sum + Number(tour.capacity ?? tour.seats ?? 0), 0
-    );
-    const remainingSeats = tours.reduce(
-        (sum, tour) => sum + Number(tour.seats || 0), 0
-    );
-    const reservedSeats = activeBookings.reduce(
-        (sum, booking) => sum + Number(booking.people || 0), 0
-    );
+    const totalCapacity = tours.reduce((sum, tour) => sum + Number(tour.capacity ?? tour.seats ?? 0), 0);
+    const remainingSeats = tours.reduce((sum, tour) => sum + Number(tour.seats || 0), 0);
+    const reservedSeats = activeBookings.reduce((sum, booking) => sum + Number(booking.people || 0), 0);
     const expectedRevenue = activeBookings.reduce((sum, booking) => {
         const tour = tours.find(item => String(item.id) === String(booking.tour_id));
         return sum + Number(tour?.price || 0) * Number(booking.people || 0);
@@ -57,11 +49,7 @@ function renderDashboardStats() {
     setText("cancelledBookings", cancelledBookings.length);
     setText("activeGuests", reservedSeats);
     setText("expectedRevenue", formatVND(expectedRevenue));
-
-    const occupancyRate = totalCapacity > 0
-        ? Math.round((reservedSeats / totalCapacity) * 100)
-        : 0;
-    setText("occupancyRate", `${occupancyRate}%`);
+    setText("occupancyRate", `${totalCapacity > 0 ? Math.round((reservedSeats / totalCapacity) * 100) : 0}%`);
 
     renderBookingStatusChart(pendingBookings.length, confirmedBookings.length, cancelledBookings.length);
     renderTourCapacityChart();
@@ -79,7 +67,6 @@ function getCurrentMonthTourCount() {
 function renderBookingStatusChart(pending, confirmed, cancelled) {
     const canvas = document.getElementById("bookingStatusChart");
     if (!canvas || typeof Chart === "undefined") return;
-
     if (bookingStatusChartInstance) bookingStatusChartInstance.destroy();
 
     bookingStatusChartInstance = new Chart(canvas, {
@@ -89,25 +76,14 @@ function renderBookingStatusChart(pending, confirmed, cancelled) {
             datasets: [{
                 data: [pending, confirmed, cancelled],
                 backgroundColor: [CHART_COLORS.pending, CHART_COLORS.confirmed, CHART_COLORS.cancelled],
-                borderColor: "#ffffff",
-                borderWidth: 4,
-                hoverOffset: 10
+                borderColor: "#ffffff", borderWidth: 4, hoverOffset: 10
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: "62%",
+            responsive: true, maintainAspectRatio: false, cutout: "62%",
             plugins: {
-                legend: {
-                    position: "bottom",
-                    labels: { usePointStyle: true, padding: 18, font: { size: 13 } }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: context => `${context.label}: ${context.raw} đơn`
-                    }
-                }
+                legend: { position: "bottom", labels: { usePointStyle: true, padding: 18, font: { size: 13 } } },
+                tooltip: { callbacks: { label: context => `${context.label}: ${context.raw} đơn` } }
             }
         }
     });
@@ -118,34 +94,19 @@ function renderTourCapacityChart() {
     if (!canvas || typeof Chart === "undefined") return;
     if (tourCapacityChartInstance) tourCapacityChartInstance.destroy();
 
-    const chartTours = [...tours].sort(
-        (a, b) => Number(b.capacity ?? b.seats ?? 0) - Number(a.capacity ?? a.seats ?? 0)
-    );
+    const chartTours = [...tours].sort((a, b) => Number(b.capacity ?? b.seats ?? 0) - Number(a.capacity ?? a.seats ?? 0));
 
     tourCapacityChartInstance = new Chart(canvas, {
         type: "bar",
         data: {
             labels: chartTours.map(tour => tour.name || tour.destination || tour.id),
             datasets: [
-                {
-                    label: "Tổng sức chứa",
-                    data: chartTours.map(tour => Number(tour.capacity ?? tour.seats ?? 0)),
-                    backgroundColor: CHART_COLORS.capacity,
-                    borderRadius: 7,
-                    borderSkipped: false
-                },
-                {
-                    label: "Chỗ còn lại",
-                    data: chartTours.map(tour => Number(tour.seats || 0)),
-                    backgroundColor: CHART_COLORS.remaining,
-                    borderRadius: 7,
-                    borderSkipped: false
-                }
+                { label: "Tổng sức chứa", data: chartTours.map(tour => Number(tour.capacity ?? tour.seats ?? 0)), backgroundColor: CHART_COLORS.capacity, borderRadius: 7, borderSkipped: false },
+                { label: "Chỗ còn lại", data: chartTours.map(tour => Number(tour.seats || 0)), backgroundColor: CHART_COLORS.remaining, borderRadius: 7, borderSkipped: false }
             ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             scales: {
                 y: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: "Số chỗ" } },
                 x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } }
@@ -159,34 +120,9 @@ function renderTourCapacityChart() {
 }
 
 function ensureMonthlyChartCards() {
-    const chartsSection = document.querySelector(".dashboard-charts");
-    if (!chartsSection) return null;
-
-    let monthlySection = document.getElementById("monthlyChartsSection");
-    if (monthlySection) return monthlySection;
-
-    monthlySection = document.createElement("section");
-    monthlySection.id = "monthlyChartsSection";
-    monthlySection.className = "dashboard-charts monthly-charts";
-    monthlySection.innerHTML = `
-        <div class="chart-card">
-            <div class="chart-header">
-                <h2>Đơn đăng ký theo tháng</h2>
-                <p>Xu hướng số booking trong 6 tháng gần nhất</p>
-            </div>
-            <div class="chart-body"><canvas id="monthlyBookingsChart"></canvas></div>
-        </div>
-        <div class="chart-card">
-            <div class="chart-header">
-                <h2>Doanh thu dự kiến theo tháng</h2>
-                <p>Tính theo các đơn PENDING và CONFIRMED</p>
-            </div>
-            <div class="chart-body"><canvas id="monthlyRevenueChart"></canvas></div>
-        </div>
-    `;
-
-    chartsSection.parentNode.insertBefore(monthlySection, chartsSection.nextSibling);
-    return monthlySection;
+    // Monthly charts are already declared in admin/index.html.
+    // Reusing them avoids duplicate canvas IDs and Chart instances.
+    return document.getElementById("advancedChartsSection");
 }
 
 function getLastSixMonths() {
@@ -209,96 +145,61 @@ function getBookingTourPrice(booking) {
 
 function renderMonthlyCharts() {
     if (typeof Chart === "undefined") return;
+
     const section = ensureMonthlyChartCards();
     if (!section) return;
 
-    const months = getLastSixMonths();
-    const bookingCounts = months.map(month =>
-        bookings.filter(booking => {
-            const date = new Date(booking.created_at);
-            return !Number.isNaN(date.getTime()) &&
-                `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}` === month.key;
-        }).length
-    );
+    const bookingsCanvas = document.getElementById("monthlyBookingsChart");
+    const revenueCanvas = document.getElementById("monthlyRevenueChart");
+    if (!bookingsCanvas || !revenueCanvas) return;
 
-    const revenue = months.map(month =>
-        bookings.reduce((sum, booking) => {
-            if (!["PENDING", "CONFIRMED"].includes(booking.status)) return sum;
-            const date = new Date(booking.created_at);
-            if (Number.isNaN(date.getTime())) return sum;
-            const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-            return key === month.key
-                ? sum + getBookingTourPrice(booking) * Number(booking.people || 0)
-                : sum;
-        }, 0)
-    );
+    const months = getLastSixMonths();
+    const bookingCounts = months.map(month => bookings.filter(booking => {
+        const date = new Date(booking.created_at);
+        return !Number.isNaN(date.getTime()) && `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}` === month.key;
+    }).length);
+
+    const revenue = months.map(month => bookings.reduce((sum, booking) => {
+        if (!["PENDING", "CONFIRMED"].includes(booking.status)) return sum;
+        const date = new Date(booking.created_at);
+        if (Number.isNaN(date.getTime())) return sum;
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        return key === month.key ? sum + getBookingTourPrice(booking) * Number(booking.people || 0) : sum;
+    }, 0));
 
     const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
     };
 
     if (monthlyBookingsChartInstance) monthlyBookingsChartInstance.destroy();
-    monthlyBookingsChartInstance = new Chart(document.getElementById("monthlyBookingsChart"), {
+    monthlyBookingsChartInstance = new Chart(bookingsCanvas, {
         type: "line",
         data: {
             labels: months.map(item => item.label),
-            datasets: [{
-                label: "Booking",
-                data: bookingCounts,
-                borderColor: CHART_COLORS.bookings,
-                backgroundColor: "rgba(6, 182, 212, 0.15)",
-                fill: true,
-                tension: 0.35,
-                pointRadius: 5,
-                pointHoverRadius: 7
-            }]
+            datasets: [{ label: "Booking", data: bookingCounts, borderColor: CHART_COLORS.bookings, backgroundColor: "rgba(6, 182, 212, 0.15)", fill: true, tension: 0.35, pointRadius: 5, pointHoverRadius: 7 }]
         },
         options: {
             ...commonOptions,
-            plugins: {
-                ...commonOptions.plugins,
-                tooltip: { callbacks: { label: context => `${context.raw} đơn` } }
-            },
+            plugins: { ...commonOptions.plugins, tooltip: { callbacks: { label: context => `${context.raw} đơn` } } },
             scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
         }
     });
 
     if (monthlyRevenueChartInstance) monthlyRevenueChartInstance.destroy();
-    monthlyRevenueChartInstance = new Chart(document.getElementById("monthlyRevenueChart"), {
+    monthlyRevenueChartInstance = new Chart(revenueCanvas, {
         type: "line",
         data: {
             labels: months.map(item => item.label),
-            datasets: [{
-                label: "Doanh thu",
-                data: revenue,
-                borderColor: CHART_COLORS.revenue,
-                backgroundColor: "rgba(139, 92, 246, 0.15)",
-                fill: true,
-                tension: 0.35,
-                pointRadius: 5,
-                pointHoverRadius: 7
-            }]
+            datasets: [{ label: "Doanh thu", data: revenue, borderColor: CHART_COLORS.revenue, backgroundColor: "rgba(139, 92, 246, 0.15)", fill: true, tension: 0.35, pointRadius: 5, pointHoverRadius: 7 }]
         },
         options: {
             ...commonOptions,
-            plugins: {
-                ...commonOptions.plugins,
-                tooltip: { callbacks: { label: context => formatVND(context.raw) } }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { callback: value => new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(value) }
-                }
-            }
+            plugins: { ...commonOptions.plugins, tooltip: { callbacks: { label: context => formatVND(context.raw) } } },
+            scales: { y: { beginAtZero: true, ticks: { callback: value => new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(value) } } }
         }
     });
 }
