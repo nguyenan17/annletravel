@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vé vui chơi & tham quan - ANNLETRAVEL</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/tickets.css">
+</head>
+<body class="tickets-page">
+<header class="header">
+<div class="container header-container">
+<a href="index.html" class="logo"><img src="images/logo.png" alt="ANNLETRAVEL"></a>
+<nav class="menu">
+<a href="index.html">Trang chủ</a>
+<a href="tours.html">Tour</a>
+<div class="nav-dropdown"><a href="destinations.html">Điểm đến ▾</a><ul id="destinationMenu" class="dropdown-menu"></ul></div>
+<div class="nav-dropdown"><a href="services.html" class="active">Dịch vụ ▾</a><ul class="dropdown-menu service-menu">
+<li><a href="services.html?category=flights">✈️ Vé máy bay</a></li>
+<li><a href="services.html?category=hotels">🏨 Khách sạn</a></li>
+<li><a href="services.html?category=visa">🛂 Visa</a></li>
+<li><a href="services.html?category=passport">🪪 Hộ chiếu</a></li>
+<li><a href="tickets.html">🎫 Vé vui chơi & tham quan</a></li>
+<li><a href="services.html?category=transport">🚗 Xe đưa đón</a></li>
+<li><a href="services.html?category=trains">🚆 Vé tàu</a></li>
+<li><a href="services.html?category=insurance">🛡️ Bảo hiểm du lịch</a></li>
+</ul></div>
+<a href="index.html#about">Về chúng tôi</a><a href="index.html#contact">Liên hệ</a>
+</nav>
+<a href="index.html#contact" class="btn btn-header">Tư vấn ngay</a>
+</div>
+</header>
+
+<main>
+<section class="tickets-hero"><div class="container tickets-hero-inner">
+<div class="tickets-hero-copy"><p class="section-label">THINGS TO DO</p><h1>Vé vui chơi &<br>tham quan</h1><p>Chủ động đặt vé cho những trải nghiệm đáng nhớ trong hành trình — từ công viên giải trí, điểm tham quan đến show và hoạt động đặc sắc.</p><div class="tickets-hero-actions"><a href="#ticketList" class="btn btn-primary">Khám phá vé</a><a href="index.html#contact" class="btn tickets-outline">Cần tư vấn?</a></div></div>
+<div class="tickets-hero-note"><span>🎟️</span><strong>Đặt trước<br>Yên tâm trải nghiệm</strong><small>Thông tin rõ ràng · Hỗ trợ tận tâm</small></div>
+</div></section>
+
+<section class="ticket-intro"><div class="container"><div class="section-header"><div><p class="section-label">KHÁM PHÁ & TRẢI NGHIỆM</p><h2>Chọn trải nghiệm cho chuyến đi</h2></div><p class="ticket-intro-text">Tìm nhanh những loại vé phù hợp với điểm đến và lịch trình của bạn.</p></div>
+<div class="ticket-benefits"><div><span>01</span><h3>Chủ động lịch trình</h3><p>Đặt vé trước để dễ sắp xếp thời gian tham quan.</p></div><div><span>02</span><h3>Nhiều lựa chọn</h3><p>Công viên, điểm tham quan, show và trải nghiệm.</p></div><div><span>03</span><h3>Được tư vấn</h3><p>Hỗ trợ chọn loại vé phù hợp với nhu cầu.</p></div></div></div></section>
+
+<section class="ticket-list-section" id="ticketList"><div class="container">
+<div class="ticket-toolbar"><div><p class="section-label">TICKET COLLECTION</p><h2>Vé nổi bật</h2></div><span id="ticketCount" class="ticket-count"></span></div>
+<div class="ticket-filters" id="ticketFilters"></div>
+<div class="ticket-grid" id="ticketGrid"></div>
+</div></section>
+
+<section class="ticket-cta"><div class="container"><div><p class="section-label">ANNLETRAVEL</p><h2>Không biết nên chọn vé nào?</h2><p>Gửi điểm đến và lịch trình, ANNLETRAVEL sẽ tư vấn lựa chọn phù hợp.</p></div><a href="index.html#contact" class="btn btn-primary">Nhận tư vấn</a></div></section>
+</main>
+
+<footer><div class="container footer-container"><div><div class="footer-logo">ANN LÊ TRAVEL</div><p>CÔNG TY TNHH DỊCH VỤ VÀ DU LỊCH ANN LÊ.</p></div><div><h4>Liên hệ</h4><p>Hotline: 0862421655</p><p>Email: dulichannle@gmail.com</p></div><div><h4>Địa chỉ</h4><p>Số 136 phố Hàng Bạc, Phường Hoàn Kiếm, Thành phố Hà Nội, Việt Nam</p></div></div><div class="copyright">© 2026 ANNLETRAVEL. All rights reserved.</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/tickets.js"></script>
+<script src="js/destinations.js"></script>
+</body>
+</html>
