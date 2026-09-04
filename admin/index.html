@@ -48,85 +48,52 @@
             </div>
 
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Tổng số tour</div>
-                    <div id="totalTours" class="stat-value">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Tour tháng này</div>
-                    <div id="monthlyTours" class="stat-value">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Tổng sức chứa</div>
-                    <div id="totalCapacity" class="stat-value">0</div>
-                    <div class="stat-subtext">chỗ</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Chỗ còn lại</div>
-                    <div id="remainingSeats" class="stat-value">0</div>
-                    <div class="stat-subtext">chỗ</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Đơn chờ xác nhận</div>
-                    <div id="pendingBookings" class="stat-value">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Đơn đã xác nhận</div>
-                    <div id="confirmedBookings" class="stat-value">0</div>
-                </div>
+                <div class="stat-card"><div class="stat-label">Tổng số tour</div><div id="totalTours" class="stat-value">0</div></div>
+                <div class="stat-card"><div class="stat-label">Tour tháng này</div><div id="monthlyTours" class="stat-value">0</div></div>
+                <div class="stat-card"><div class="stat-label">Tổng sức chứa</div><div id="totalCapacity" class="stat-value">0</div><div class="stat-subtext">chỗ</div></div>
+                <div class="stat-card"><div class="stat-label">Chỗ còn lại</div><div id="remainingSeats" class="stat-value">0</div><div class="stat-subtext">chỗ</div></div>
+                <div class="stat-card"><div class="stat-label">Đơn chờ xác nhận</div><div id="pendingBookings" class="stat-value">0</div></div>
+                <div class="stat-card"><div class="stat-label">Đơn đã xác nhận</div><div id="confirmedBookings" class="stat-value">0</div></div>
             </div>
 
             <div class="dashboard-overview">
-                <div class="overview-card">
-                    <div class="overview-label">Tổng đơn đăng ký</div>
-                    <strong id="totalBookings">0</strong>
-                    <span>đơn</span>
-                </div>
-                <div class="overview-card">
-                    <div class="overview-label">Đã hủy</div>
-                    <strong id="cancelledBookings">0</strong>
-                    <span>đơn</span>
-                </div>
-                <div class="overview-card">
-                    <div class="overview-label">Khách đang giữ chỗ</div>
-                    <strong id="activeGuests">0</strong>
-                    <span>người</span>
-                </div>
-                <div class="overview-card">
-                    <div class="overview-label">Tỷ lệ lấp đầy</div>
-                    <strong id="occupancyRate">0%</strong>
-                    <span>PENDING + CONFIRMED</span>
-                </div>
-                <div class="overview-card revenue-card">
-                    <div class="overview-label">Doanh thu dự kiến</div>
-                    <strong id="expectedRevenue">0 đ</strong>
-                    <span>PENDING + CONFIRMED</span>
-                </div>
+                <div class="overview-card"><div class="overview-label">Tổng đơn đăng ký</div><strong id="totalBookings">0</strong><span>đơn</span></div>
+                <div class="overview-card"><div class="overview-label">Đã hủy</div><strong id="cancelledBookings">0</strong><span>đơn</span></div>
+                <div class="overview-card"><div class="overview-label">Khách đang giữ chỗ</div><strong id="activeGuests">0</strong><span>người</span></div>
+                <div class="overview-card"><div class="overview-label">Tỷ lệ lấp đầy</div><strong id="occupancyRate">0%</strong><span>PENDING + CONFIRMED</span></div>
+                <div class="overview-card revenue-card"><div class="overview-label">Doanh thu dự kiến</div><strong id="expectedRevenue">0 đ</strong><span>PENDING + CONFIRMED</span></div>
             </div>
 
             <section class="dashboard-charts">
                 <div class="chart-card">
-                    <div class="chart-header">
-                        <div>
-                            <h2>Trạng thái đơn đăng ký</h2>
-                            <p>Phân bổ PENDING, CONFIRMED và CANCELLED</p>
-                        </div>
-                    </div>
-                    <div class="chart-body chart-body-doughnut">
-                        <canvas id="bookingStatusChart"></canvas>
-                    </div>
+                    <div class="chart-header"><div><h2>Trạng thái đơn đăng ký</h2><p>Phân bổ PENDING, CONFIRMED và CANCELLED</p></div></div>
+                    <div class="chart-body chart-body-doughnut"><canvas id="bookingStatusChart"></canvas></div>
                 </div>
-
                 <div class="chart-card chart-card-wide">
-                    <div class="chart-header">
-                        <div>
-                            <h2>Sức chứa theo tour</h2>
-                            <p>So sánh tổng sức chứa và số chỗ đã giữ</p>
-                        </div>
-                    </div>
-                    <div class="chart-body">
-                        <canvas id="tourCapacityChart"></canvas>
-                    </div>
+                    <div class="chart-header"><div><h2>Sức chứa theo tour</h2><p>So sánh tổng sức chứa và số chỗ còn lại</p></div></div>
+                    <div class="chart-body"><canvas id="tourCapacityChart"></canvas></div>
+                </div>
+            </section>
+
+            <section id="advancedChartsSection" class="dashboard-charts monthly-charts">
+                <div class="chart-card">
+                    <div class="chart-header"><div><h2>Đơn đăng ký theo tháng</h2><p>Xu hướng booking trong 6 tháng gần nhất</p></div></div>
+                    <div class="chart-body"><canvas id="monthlyBookingsChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div><h2>Doanh thu dự kiến theo tháng</h2><p>Doanh thu từ PENDING + CONFIRMED</p></div></div>
+                    <div class="chart-body"><canvas id="monthlyRevenueChart"></canvas></div>
+                </div>
+            </section>
+
+            <section class="dashboard-charts advanced-charts">
+                <div class="chart-card chart-card-wide">
+                    <div class="chart-header"><div><h2>Top tour bán chạy</h2><p>Xếp hạng theo số khách đang giữ chỗ</p></div></div>
+                    <div class="chart-body"><canvas id="topToursChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div><h2>Tỷ lệ lấp đầy</h2><p>Phần trăm chỗ đã được giữ của từng tour</p></div></div>
+                    <div class="chart-body"><canvas id="occupancyByTourChart"></canvas></div>
                 </div>
             </section>
 
@@ -134,136 +101,19 @@
             <span id="totalSeats" hidden>0</span>
 
             <div class="tour-section">
-                <div class="section-header">
-                    <h2>Danh sách tour</h2>
-                    <button id="refreshButton" class="refresh-button">↻ Làm mới</button>
-                </div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tour</th>
-                                <th>Điểm đến</th>
-                                <th>Khởi hành</th>
-                                <th>Chỗ</th>
-                                <th>Giá</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tourTableBody"></tbody>
-                    </table>
-                </div>
+                <div class="section-header"><h2>Danh sách tour</h2><button id="refreshButton" class="refresh-button">↻ Làm mới</button></div>
+                <div class="table-wrapper"><table><thead><tr><th>Tour</th><th>Điểm đến</th><th>Khởi hành</th><th>Chỗ</th><th>Giá</th><th>Thao tác</th></tr></thead><tbody id="tourTableBody"></tbody></table></div>
             </div>
 
             <div class="tour-section booking-section">
-                <div class="section-header">
-                    <div>
-                        <h2>Đơn đăng ký tour</h2>
-                        <p class="section-description">Quản lý các yêu cầu đăng ký tour của khách hàng</p>
-                    </div>
-                    <button id="refreshBookingButton" class="refresh-button">↻ Làm mới</button>
-                </div>
-                <div class="booking-filter">
-                    <label for="bookingStatusFilter">Trạng thái</label>
-                    <select id="bookingStatusFilter">
-                        <option value="ALL">Tất cả</option>
-                        <option value="PENDING">Chờ xác nhận</option>
-                        <option value="CONFIRMED">Đã xác nhận</option>
-                        <option value="CANCELLED">Đã hủy</option>
-                    </select>
-                </div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Khách hàng</th>
-                                <th>Tour</th>
-                                <th>Số người</th>
-                                <th>Số điện thoại</th>
-                                <th>Ghi chú</th>
-                                <th>Ngày đăng ký</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bookingTableBody"></tbody>
-                    </table>
-                </div>
+                <div class="section-header"><div><h2>Đơn đăng ký tour</h2><p class="section-description">Quản lý các yêu cầu đăng ký tour của khách hàng</p></div><button id="refreshBookingButton" class="refresh-button">↻ Làm mới</button></div>
+                <div class="booking-filter"><label for="bookingStatusFilter">Trạng thái</label><select id="bookingStatusFilter"><option value="ALL">Tất cả</option><option value="PENDING">Chờ xác nhận</option><option value="CONFIRMED">Đã xác nhận</option><option value="CANCELLED">Đã hủy</option></select></div>
+                <div class="table-wrapper"><table><thead><tr><th>Khách hàng</th><th>Tour</th><th>Số người</th><th>Số điện thoại</th><th>Ghi chú</th><th>Ngày đăng ký</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="bookingTableBody"></tbody></table></div>
             </div>
 
-            <div id="tourModal" class="modal hidden">
-                <div class="modal-box">
-                    <div class="modal-header">
-                        <h2 id="modalTitle">Thêm tour</h2>
-                        <button id="closeModalButton" class="close-button">×</button>
-                    </div>
-                    <form id="tourForm">
-                        <input type="hidden" id="tourId">
-                        <div class="form-group">
-                            <label>Tên tour</label>
-                            <input type="text" id="tourName" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Điểm đến</label>
-                            <input type="text" id="tourDestination" required>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Ngày khởi hành</label>
-                                <input type="date" id="tourDeparture" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Tổng số chỗ</label>
-                                <input type="number" id="tourSeats" min="0" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Giá tour</label>
-                            <input type="number" id="tourPrice" min="0" step="1000" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Ảnh đại diện</label>
-                            <input type="file" id="tourImageFile" accept="image/*">
-                            <div id="imagePreview" class="image-preview"></div>
-                            <input type="hidden" id="tourImage">
-                        </div>
-                        <div class="form-group">
-                            <label>Ảnh thư viện tour</label>
-                            <input type="file" id="tourGalleryFiles" accept="image/*" multiple>
-                            <p class="image-help">Có thể chọn nhiều ảnh cùng lúc. Nên sử dụng ảnh JPG/PNG/WebP.</p>
-                            <div id="galleryPreview" class="gallery-preview"></div>
-                        </div>
-                        <div class="form-group">
-                            <label>Mô tả ngắn</label>
-                            <textarea id="tourShort" rows="4"></textarea>
-                        </div>
-                        <div class="modal-actions">
-                            <button type="button" id="cancelButton" class="cancel-button">Hủy</button>
-                            <button type="submit" class="primary-button">Lưu tour</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+            <div id="tourModal" class="modal hidden"><div class="modal-box"><div class="modal-header"><h2 id="modalTitle">Thêm tour</h2><button id="closeModalButton" class="close-button">×</button></div><form id="tourForm"><input type="hidden" id="tourId"><div class="form-group"><label>Tên tour</label><input type="text" id="tourName" required></div><div class="form-group"><label>Điểm đến</label><input type="text" id="tourDestination" required></div><div class="form-row"><div class="form-group"><label>Ngày khởi hành</label><input type="date" id="tourDeparture" required></div><div class="form-group"><label>Tổng số chỗ</label><input type="number" id="tourSeats" min="0" required></div></div><div class="form-group"><label>Giá tour</label><input type="number" id="tourPrice" min="0" step="1000" required></div><div class="form-group"><label>Ảnh đại diện</label><input type="file" id="tourImageFile" accept="image/*"><div id="imagePreview" class="image-preview"></div><input type="hidden" id="tourImage"></div><div class="form-group"><label>Ảnh thư viện tour</label><input type="file" id="tourGalleryFiles" accept="image/*" multiple><p class="image-help">Có thể chọn nhiều ảnh cùng lúc. Nên sử dụng ảnh JPG/PNG/WebP.</p><div id="galleryPreview" class="gallery-preview"></div></div><div class="form-group"><label>Mô tả ngắn</label><textarea id="tourShort" rows="4"></textarea></div><div class="modal-actions"><button type="button" id="cancelButton" class="cancel-button">Hủy</button><button type="submit" class="primary-button">Lưu tour</button></div></form></div></div>
 
-            <div id="itineraryModal" class="modal hidden">
-                <div class="modal-box itinerary-modal-box">
-                    <div class="modal-header">
-                        <div>
-                            <h2 id="itineraryModalTitle">Lịch trình</h2>
-                            <p id="itineraryTourName" class="section-description"></p>
-                        </div>
-                        <button id="closeItineraryModalButton" class="close-button">×</button>
-                    </div>
-                    <div class="itinerary-container">
-                        <div id="itineraryList"></div>
-                        <button type="button" id="addItineraryDayButton" class="primary-button">+ Thêm ngày</button>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" id="cancelItineraryButton" class="cancel-button">Đóng</button>
-                        <button type="button" id="saveItineraryButton" class="primary-button">Lưu lịch trình</button>
-                    </div>
-                </div>
-            </div>
+            <div id="itineraryModal" class="modal hidden"><div class="modal-box itinerary-modal-box"><div class="modal-header"><div><h2 id="itineraryModalTitle">Lịch trình</h2><p id="itineraryTourName" class="section-description"></p></div><button id="closeItineraryModalButton" class="close-button">×</button></div><div class="itinerary-container"><div id="itineraryList"></div><button type="button" id="addItineraryDayButton" class="primary-button">+ Thêm ngày</button></div><div class="modal-actions"><button type="button" id="cancelItineraryButton" class="cancel-button">Đóng</button><button type="button" id="saveItineraryButton" class="primary-button">Lưu lịch trình</button></div></div></div>
 
             <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
             <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
