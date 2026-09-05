@@ -56,7 +56,8 @@ function showAdminSection(sectionName, updateHash = true) {
         tours: "adminSectionTours",
         bookings: "adminSectionBookings",
         destinations: "adminSectionDestinations",
-        services: "adminSectionServices"
+        services: "adminSectionServices",
+        tickets: "adminSectionTickets"
     };
 
     const targetId = sectionMap[sectionName] || sectionMap.dashboard;
@@ -501,6 +502,4 @@ function escapeHtml(value) {
 // LOAD REMAINING ADMIN LOGIC
 // =========================
 
-// Giữ các hàm quản lý tour/ảnh/lịch trình được khai báo ở các script admin khác.
-// Nếu các script này đã được load trong index.html, chúng sẽ sử dụng cùng các biến
-// và element ở phía trên. Navigation được xử lý hoàn toàn ở đây.
+// Giữ các hàm quản lý tour/ảnh/lịch trình được kh... (truncated)
