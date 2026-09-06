@@ -2,61 +2,37 @@
 -- Run this script in Supabase SQL Editor.
 
 create table if not exists public.business_services (
-    id uuid primary key default gen_random_uuid(),
-    title text not null,
-    short_description text,
-    description text,
-    icon text,
-    image text,
-    sort_order integer not null default 0,
-    visible boolean not null default true,
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now()
+    id uuid primary key default gen_random_uuid(), title text not null, short_description text, description text,
+    icon text, image text, sort_order integer not null default 0, visible boolean not null default true,
+    created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 
 create table if not exists public.business_leads (
-    id uuid primary key default gen_random_uuid(),
-    company_name text not null,
-    contact_name text not null,
-    phone text not null,
-    email text,
-    employee_count integer,
-    service_interest text,
-    departure text,
-    destination text,
-    departure_date date,
-    return_date date,
-    budget text,
-    message text,
+    id uuid primary key default gen_random_uuid(), company_name text not null, contact_name text not null,
+    phone text not null, email text, employee_count integer, service_interest text, departure text,
+    destination text, departure_date date, return_date date, budget text, message text,
     status text not null default 'new' check (status in ('new','contacted','quoted','won','lost')),
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now()
+    created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 
 alter table public.business_services enable row level security;
 alter table public.business_leads enable row level security;
 
 drop policy if exists "Public can view visible business services" on public.business_services;
-create policy "Public can view visible business services"
-on public.business_services for select
-using (visible = true);
+create policy "Public can view visible business services" on public.business_services for select using (visible = true);
 
 drop policy if exists "Anyone can submit business lead" on public.business_leads;
-create policy "Anyone can submit business lead"
-on public.business_leads for insert
-with check (true);
+create policy "Anyone can submit business lead" on public.business_leads for insert with check (true);
 
 drop policy if exists "Admins manage business services" on public.business_services;
-create policy "Admins manage business services"
-on public.business_services for all
-using (exists (select 1 from public.admin_users au where au.id = auth.uid()))
-with check (exists (select 1 from public.admin_users au where au.id = auth.uid()));
+create policy "Admins manage business services" on public.business_services for all
+using (exists (select 1 from public.admin_users au where au.user_id = auth.uid()))
+with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
 
 drop policy if exists "Admins manage business leads" on public.business_leads;
-create policy "Admins manage business leads"
-on public.business_leads for all
-using (exists (select 1 from public.admin_users au where au.id = auth.uid()))
-with check (exists (select 1 from public.admin_users au where au.id = auth.uid()));
+create policy "Admins manage business leads" on public.business_leads for all
+using (exists (select 1 from public.admin_users au where au.user_id = auth.uid()))
+with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
 
 insert into public.business_services (title, short_description, description, icon, sort_order)
 select * from (values
