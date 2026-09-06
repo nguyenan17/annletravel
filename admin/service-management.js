@@ -4,7 +4,7 @@ let adminServiceCategories = [];
 let adminServices = [];
 let editingServiceId = null;
 
-const escServiceAdmin = value => String(value ?? '').replace(/[&<>'\"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '\"':'&quot;' }[c]));
+const escServiceAdmin = value => String(value ?? '').replace(/[&<>'\\"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '\"':'&quot;' }[c]));
 
 async function loadAdminServices() {
     const [cats, services] = await Promise.all([
@@ -16,96 +16,17 @@ async function loadAdminServices() {
     adminServices = services.data || [];
     renderAdminServices();
 }
-
 function renderAdminServices() {
-    const body = document.getElementById('serviceTableBody');
-    if (!body) return;
-    body.innerHTML = adminServices.length ? adminServices.map(s => {
-        const c = adminServiceCategories.find(x => x.id === s.category_id);
-        return `<tr><td><strong>${escServiceAdmin(s.name)}</strong><br><small>${escServiceAdmin(s.slug)}</small></td><td>${escServiceAdmin(c?.name || s.category_id)}</td><td>${s.featured ? '✓' : '-'}</td><td>${s.active ? 'Đang hiển thị' : 'Ẩn'}</td><td>${Number(s.sort_order || 0)}</td><td><div class="action-buttons"><button type="button" class="refresh-button" onclick="editService('${escServiceAdmin(s.id)}')">Sửa</button><button type="button" class="booking-delete-button" onclick="removeService('${escServiceAdmin(s.id)}')">Xóa</button></div></td></tr>`;
-    }).join('') : '<tr><td colspan="6">Chưa có dịch vụ.</td></tr>';
+    const body = document.getElementById('serviceTableBody'); if (!body) return;
+    body.innerHTML = adminServices.length ? adminServices.map(s => { const c = adminServiceCategories.find(x => x.id === s.category_id); return `<tr><td><strong>${escServiceAdmin(s.name)}</strong><br><small>${escServiceAdmin(s.slug)}</small></td><td>${escServiceAdmin(c?.name || s.category_id)}</td><td>${s.featured ? '✓' : '-'}</td><td>${s.active ? 'Đang hiển thị' : 'Ẩn'}</td><td>${Number(s.sort_order || 0)}</td><td><div class="action-buttons"><button type="button" class="refresh-button" onclick="editService('${escServiceAdmin(s.id)}')">Sửa</button><button type="button" class="booking-delete-button" onclick="removeService('${escServiceAdmin(s.id)}')">Xóa</button></div></td></tr>`; }).join('') : '<tr><td colspan="6">Chưa có dịch vụ.</td></tr>';
 }
-
-function openServiceModal(service = null) {
-    editingServiceId = service?.id || null;
-    const modal = document.getElementById('serviceModal'); if (!modal) return;
-    document.getElementById('serviceModalTitle').textContent = service ? 'Sửa dịch vụ' : 'Thêm dịch vụ';
-    document.getElementById('serviceId').value = service?.id || '';
-    document.getElementById('serviceCategory').value = service?.category_id || adminServiceCategories[0]?.id || '';
-    document.getElementById('serviceName').value = service?.name || '';
-    document.getElementById('serviceSlug').value = service?.slug || '';
-    document.getElementById('serviceShort').value = service?.short || '';
-    document.getElementById('serviceDescription').value = service?.description || '';
-    document.getElementById('serviceImage').value = service?.image || '';
-    document.getElementById('servicePriceFrom').value = service?.price_from || 0;
-    document.getElementById('serviceSortOrder').value = service?.sort_order ?? 100;
-    document.getElementById('serviceFeatured').checked = !!service?.featured;
-    document.getElementById('serviceActive').checked = service ? !!service.active : true;
-    modal.classList.remove('hidden');
-}
+function openServiceModal(service = null) { editingServiceId = service?.id || null; const modal = document.getElementById('serviceModal'); if (!modal) return; document.getElementById('serviceModalTitle').textContent = service ? 'Sửa dịch vụ' : 'Thêm dịch vụ'; document.getElementById('serviceId').value = service?.id || ''; document.getElementById('serviceCategory').value = service?.category_id || adminServiceCategories[0]?.id || ''; document.getElementById('serviceName').value = service?.name || ''; document.getElementById('serviceSlug').value = service?.slug || ''; document.getElementById('serviceShort').value = service?.short || ''; document.getElementById('serviceDescription').value = service?.description || ''; document.getElementById('serviceImage').value = service?.image || ''; document.getElementById('servicePriceFrom').value = service?.price_from || 0; document.getElementById('serviceSortOrder').value = service?.sort_order ?? 100; document.getElementById('serviceFeatured').checked = !!service?.featured; document.getElementById('serviceActive').checked = service ? !!service.active : true; modal.classList.remove('hidden'); }
 function closeServiceModal() { document.getElementById('serviceModal')?.classList.add('hidden'); editingServiceId = null; }
 function slugifyService(value) { return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
-
 window.editService = id => { const s = adminServices.find(x => String(x.id) === String(id)); if (s) openServiceModal(s); };
-window.removeService = async id => {
-    const s = adminServices.find(x => String(x.id) === String(id)); if (!s || !confirm(`Xóa dịch vụ "${s.name}"?`)) return;
-    const { error } = await supabaseClient.from('services').delete().eq('id', id);
-    if (error) { alert('Không thể xóa dịch vụ.\n\n' + error.message); return; }
-    alert('Xóa dịch vụ thành công!'); await loadAdminServices();
-};
-
-async function saveService(event) {
-    event.preventDefault();
-    const name = document.getElementById('serviceName').value.trim();
-    const slug = document.getElementById('serviceSlug').value.trim() || slugifyService(name);
-    const category_id = document.getElementById('serviceCategory').value;
-    if (!name || !slug || !category_id) { alert('Vui lòng nhập tên, slug và nhóm dịch vụ.'); return; }
-    const payload = { category_id, name, slug, short: document.getElementById('serviceShort').value.trim(), description: document.getElementById('serviceDescription').value.trim(), image: document.getElementById('serviceImage').value.trim(), price_from: Number(document.getElementById('servicePriceFrom').value || 0), sort_order: Number(document.getElementById('serviceSortOrder').value || 100), featured: document.getElementById('serviceFeatured').checked, active: document.getElementById('serviceActive').checked, updated_at: new Date().toISOString() };
-    let query;
-    if (editingServiceId) query = supabaseClient.from('services').update(payload).eq('id', editingServiceId);
-    else { payload.id = slugifyService(slug) || `service-${Date.now()}`; query = supabaseClient.from('services').insert(payload); }
-    const { error } = await query;
-    if (error) { alert('Không thể lưu dịch vụ.\n\n' + error.message); return; }
-    const wasEditing = !!editingServiceId;
-    closeServiceModal(); alert(wasEditing ? 'Cập nhật dịch vụ thành công!' : 'Thêm dịch vụ thành công!'); await loadAdminServices();
-}
-
-function renderServiceCategoryOptions() {
-    const select = document.getElementById('serviceCategory'); if (!select) return;
-    select.innerHTML = adminServiceCategories.map(c => `<option value="${escServiceAdmin(c.id)}">${escServiceAdmin(c.icon)} ${escServiceAdmin(c.name)}</option>`).join('');
-}
-
-(function initServiceAdmin() {
-    const form = document.getElementById('serviceForm'); if (!form) return;
-    form.addEventListener('submit', saveService);
-    document.getElementById('addServiceButton')?.addEventListener('click', () => openServiceModal());
-    document.getElementById('closeServiceModalButton')?.addEventListener('click', closeServiceModal);
-    document.getElementById('cancelServiceButton')?.addEventListener('click', closeServiceModal);
-    document.getElementById('serviceName')?.addEventListener('blur', e => { const input = document.getElementById('serviceSlug'); if (!input.value.trim()) input.value = slugifyService(e.target.value); });
-    loadAdminServices().then(renderServiceCategoryOptions);
-})();
-
-// Load the unified ticket module on the main admin page.
-(function loadUnifiedTicketModule() {
-    if (!document.getElementById('dashboardPage')) return;
-    const script = document.createElement('script');
-    script.src = 'ticket-section.js';
-    script.defer = false;
-    document.body.appendChild(script);
-})();
-
-// Add the About Us management entry to the existing admin sidebar.
-(function initAboutAdminNav() {
-    const sidebar = document.querySelector('.admin-sidebar');
-    if (!sidebar || sidebar.querySelector('[data-about-link="true"]')) return;
-
-    const link = document.createElement('a');
-    link.href = 'about.html';
-    link.className = 'admin-nav-link';
-    link.dataset.aboutLink = 'true';
-    link.textContent = '🏆 Về chúng tôi';
-
-    const ticketsLink = sidebar.querySelector('a[href="tickets.html"]');
-    if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link);
-    else sidebar.appendChild(link);
-})();
+window.removeService = async id => { const s = adminServices.find(x => String(x.id) === String(id)); if (!s || !confirm(`Xóa dịch vụ "${s.name}"?`)) return; const { error } = await supabaseClient.from('services').delete().eq('id', id); if (error) { alert('Không thể xóa dịch vụ.\n\n' + error.message); return; } alert('Xóa dịch vụ thành công!'); await loadAdminServices(); };
+async function saveService(event) { event.preventDefault(); const name = document.getElementById('serviceName').value.trim(); const slug = document.getElementById('serviceSlug').value.trim() || slugifyService(name); const category_id = document.getElementById('serviceCategory').value; if (!name || !slug || !category_id) { alert('Vui lòng nhập tên, slug và nhóm dịch vụ.'); return; } const payload = { category_id, name, slug, short: document.getElementById('serviceShort').value.trim(), description: document.getElementById('serviceDescription').value.trim(), image: document.getElementById('serviceImage').value.trim(), price_from: Number(document.getElementById('servicePriceFrom').value || 0), sort_order: Number(document.getElementById('serviceSortOrder').value || 100), featured: document.getElementById('serviceFeatured').checked, active: document.getElementById('serviceActive').checked, updated_at: new Date().toISOString() }; let query; if (editingServiceId) query = supabaseClient.from('services').update(payload).eq('id', editingServiceId); else { payload.id = slugifyService(slug) || `service-${Date.now()}`; query = supabaseClient.from('services').insert(payload); } const { error } = await query; if (error) { alert('Không thể lưu dịch vụ.\n\n' + error.message); return; } const wasEditing = !!editingServiceId; closeServiceModal(); alert(wasEditing ? 'Cập nhật dịch vụ thành công!' : 'Thêm dịch vụ thành công!'); await loadAdminServices(); }
+function renderServiceCategoryOptions() { const select = document.getElementById('serviceCategory'); if (!select) return; select.innerHTML = adminServiceCategories.map(c => `<option value="${escServiceAdmin(c.id)}">${escServiceAdmin(c.icon)} ${escServiceAdmin(c.name)}</option>`).join(''); }
+(function initServiceAdmin() { const form = document.getElementById('serviceForm'); if (!form) return; form.addEventListener('submit', saveService); document.getElementById('addServiceButton')?.addEventListener('click', () => openServiceModal()); document.getElementById('closeServiceModalButton')?.addEventListener('click', closeServiceModal); document.getElementById('cancelServiceButton')?.addEventListener('click', closeServiceModal); document.getElementById('serviceName')?.addEventListener('blur', e => { const input = document.getElementById('serviceSlug'); if (!input.value.trim()) input.value = slugifyService(e.target.value); }); loadAdminServices().then(renderServiceCategoryOptions); })();
+(function loadUnifiedTicketModule() { if (!document.getElementById('dashboardPage')) return; const script = document.createElement('script'); script.src = 'ticket-section.js'; script.defer = false; document.body.appendChild(script); })();
+(function initAboutBusinessAdminNav() { const sidebar = document.querySelector('.admin-sidebar'); if (!sidebar) return; const ticketsLink = sidebar.querySelector('a[href="tickets.html"]'); if (!sidebar.querySelector('[data-about-link="true"]')) { const link=document.createElement('a'); link.href='about.html'; link.className='admin-nav-link'; link.dataset.aboutLink='true'; link.textContent='🏆 Về chúng tôi'; if(ticketsLink) ticketsLink.insertAdjacentElement('beforebegin',link); else sidebar.appendChild(link); } if (!sidebar.querySelector('[data-business-link="true"]')) { const link=document.createElement('a'); link.href='business.html'; link.className='admin-nav-link'; link.dataset.businessLink='true'; link.textContent='🏢 Doanh nghiệp'; const about=sidebar.querySelector('[data-about-link="true"]'); if(about) about.insertAdjacentElement('afterend',link); else if(ticketsLink) ticketsLink.insertAdjacentElement('beforebegin',link); else sidebar.appendChild(link); } })();
