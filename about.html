@@ -1,22 +1,192 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Về chúng tôi - ANNLETRAVEL</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-.about-hero{min-height:55vh;display:flex;align-items:center;position:relative;overflow:hidden;background:#102a43}.about-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.45}.about-hero-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.65),rgba(0,0,0,.15))}.about-hero-content{position:relative;color:#fff;padding:110px 0}.about-hero-content h1{font-size:clamp(38px,6vw,72px);margin:10px 0}.about-section{padding:80px 0}.about-section-light{background:#f7f8fa}.about-two{display:grid;grid-template-columns:1fr 1fr;gap:45px;align-items:start}.about-kicker{font-size:13px;letter-spacing:2px;font-weight:700}.about-two h2,.about-section h2{text-align:left;margin:8px 0 20px}.about-copy{font-size:18px;line-height:1.8;color:#555}.about-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}.about-info-card{padding:25px;border-radius:16px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.06)}.about-info-card h3{margin:0 0 10px}.about-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center}.about-stat{padding:28px;background:#fff;border-radius:18px}.about-stat strong{display:block;font-size:38px}.about-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.about-award-card,.about-review-card{background:#fff;border-radius:18px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,.06)}.about-award-card img{width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:15px}.about-award-icon{font-size:48px}.about-award-card span{font-size:13px;font-weight:700}.about-review-card p{line-height:1.8;color:#555}.review-stars{letter-spacing:3px;margin-bottom:12px}.review-author{display:flex;gap:12px;align-items:center}.review-author img,.review-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover}.review-avatar{display:grid;place-items:center;background:#eee;font-weight:700}.review-author strong,.review-author span{display:block}.review-author span{font-size:13px;color:#777}.about-gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.about-gallery figure{margin:0;position:relative;overflow:hidden;border-radius:14px}.about-gallery img{width:100%;height:220px;object-fit:cover;display:block}.about-gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:12px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.7))}.about-empty{color:#777}.about-cta{text-align:center;background:#102a43;color:#fff}.about-cta h2{color:#fff;text-align:center}.about-cta p{color:#ddd}.about-cta .btn{margin-top:15px}@media(max-width:800px){.about-two,.about-grid{grid-template-columns:1fr}.about-info-grid{grid-template-columns:1fr}.about-stats{grid-template-columns:repeat(2,1fr)}.about-gallery{grid-template-columns:repeat(2,1fr)}}
+/* =========================================================
+   ANNLETRAVEL - ABOUT US
+   Premium page layer, using the same Ocean Blue visual system
+========================================================= */
+.about-page{background:#fff;overflow:hidden}
+.about-hero{height:650px;min-height:650px;position:relative;display:flex;align-items:center;color:#fff;overflow:hidden;background:linear-gradient(135deg,#0077B6,#003E5C)}
+.about-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.02)}
+.about-hero-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,25,39,.78) 0%,rgba(0,62,92,.52) 48%,rgba(0,62,92,.18) 100%)}
+.about-hero::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:130px;background:linear-gradient(to bottom,transparent,#fff);pointer-events:none}
+.about-hero-content{position:relative;z-index:2;padding-top:85px;max-width:1180px}
+.about-kicker{margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:2.5px;color:var(--primary);text-transform:uppercase}
+.about-hero .about-kicker{color:#8edcff}
+.about-hero h1{margin:0 0 18px;max-width:760px;font-size:clamp(42px,6vw,68px);line-height:1.06;letter-spacing:-1.5px;text-shadow:0 8px 28px rgba(0,0,0,.2)}
+.about-hero-subtitle{max-width:610px;margin:0;color:rgba(255,255,255,.9);font-size:20px;line-height:1.65}
+.about-hero-badge{display:inline-flex;align-items:center;gap:8px;margin-top:28px;padding:10px 15px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);font-size:13px;font-weight:700}
+.about-section{padding:88px 0}
+.about-section-light{background:var(--bg-light)}
+.about-story{display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:center}
+.about-story-copy h2,.about-section h2{margin:0 0 18px;color:var(--text);font-size:clamp(30px,4vw,40px);line-height:1.2;letter-spacing:-.5px}
+.about-story-copy h2{max-width:650px}
+.about-copy{margin:0;color:var(--text-light);font-size:16px;line-height:1.9;max-width:670px}
+.about-story-lead{margin-bottom:26px;font-size:18px;color:#41515c}
+.about-values{display:grid;grid-template-columns:1fr;gap:13px}
+.about-info-card{position:relative;padding:23px 24px 23px 28px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 25px rgba(11,55,75,.06);overflow:hidden;transition:.25s ease}
+.about-info-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--primary)}
+.about-info-card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(11,55,75,.1)}
+.about-info-card h3{margin:0 0 7px;font-size:17px;color:#183746}
+.about-info-card p{margin:0;color:var(--text-light);font-size:14px;line-height:1.7}
+.about-section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-bottom:32px}
+.about-section-heading h2{margin-bottom:0}
+.about-section-heading-copy{max-width:500px;color:var(--text-light);font-size:14px;line-height:1.7;text-align:right}
+.about-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.about-stat{position:relative;padding:30px 20px;text-align:center;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 7px 25px rgba(11,55,75,.055);overflow:hidden}
+.about-stat::before{content:'';position:absolute;top:0;left:15%;right:15%;height:3px;background:var(--primary);border-radius:0 0 99px 99px}
+.about-stat strong{display:block;margin-bottom:4px;color:var(--primary);font-size:40px;line-height:1.1;font-weight:800}
+.about-stat span{color:var(--text-light);font-size:13px;font-weight:600}
+.about-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.about-award-card,.about-review-card{background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 7px 25px rgba(11,55,75,.055);overflow:hidden;transition:.25s ease}
+.about-award-card:hover,.about-review-card:hover{transform:translateY(-5px);box-shadow:0 16px 35px rgba(11,55,75,.11)}
+.about-award-media{position:relative;height:210px;background:linear-gradient(135deg,#e9f7fc,#cfeaf5);overflow:hidden}
+.about-award-media img{width:100%;height:100%;display:block;object-fit:cover;transition:.4s ease}
+.about-award-card:hover .about-award-media img{transform:scale(1.045)}
+.about-award-icon{height:100%;display:grid;place-items:center;font-size:54px}
+.about-award-body{padding:21px 22px 24px}
+.about-award-year{display:inline-flex;padding:5px 10px;border-radius:999px;background:#eaf7fd;color:var(--primary-dark);font-size:11px;font-weight:800;letter-spacing:.5px}
+.about-award-body h3{margin:12px 0 7px;font-size:19px;line-height:1.35;color:#173544}
+.about-award-org{margin:0 0 9px;color:var(--primary);font-size:13px;font-weight:700}
+.about-award-desc{margin:0;color:var(--text-light);font-size:13px;line-height:1.7}
+.about-review-card{padding:25px;display:flex;flex-direction:column;min-height:250px}
+.review-stars{margin-bottom:15px;color:#F5A623;font-size:17px;letter-spacing:2px}
+.about-review-card blockquote{margin:0 0 24px;color:#42515b;font-size:15px;line-height:1.85;flex:1}
+.review-author{display:flex;gap:12px;align-items:center;padding-top:17px;border-top:1px solid #edf1f3}
+.review-author img,.review-avatar{width:46px;height:46px;flex:0 0 46px;border-radius:50%;object-fit:cover}
+.review-avatar{display:grid;place-items:center;background:#eaf7fd;color:var(--primary-dark);font-weight:800}
+.review-author strong,.review-author span{display:block}.review-author strong{font-size:14px;color:#193744}.review-author span{margin-top:2px;font-size:12px;color:#7b8790}
+.about-gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:205px;gap:14px}
+.about-gallery figure{margin:0;position:relative;overflow:hidden;border-radius:14px;background:#e8eef1;border:1px solid var(--border)}
+.about-gallery figure:first-child{grid-column:span 2;grid-row:span 2}
+.about-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:.45s ease}
+.about-gallery figure:hover img{transform:scale(1.06)}
+.about-gallery figure::after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(to bottom,transparent,rgba(0,30,45,.78));pointer-events:none}
+.about-gallery figcaption{position:absolute;left:17px;right:17px;bottom:14px;z-index:2;color:#fff;font-size:13px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+.about-empty{grid-column:1/-1;margin:0;padding:35px;text-align:center;color:#7b8790;background:#fff;border:1px dashed #cdd9df;border-radius:14px}
+.about-cta{position:relative;padding:82px 0;background:linear-gradient(135deg,#005B8F,#0077B6);color:#fff;text-align:center;overflow:hidden}
+.about-cta::before{content:'';position:absolute;width:380px;height:380px;right:-120px;top:-220px;border-radius:50%;background:rgba(255,255,255,.08)}
+.about-cta::after{content:'';position:absolute;width:260px;height:260px;left:-100px;bottom:-180px;border-radius:50%;background:rgba(255,255,255,.06)}
+.about-cta .container{position:relative;z-index:2}
+.about-cta .about-kicker{color:#8edcff}.about-cta h2{margin-bottom:12px;color:#fff;text-align:center}.about-cta p:not(.about-kicker){margin:0;color:rgba(255,255,255,.82)}
+.about-cta .btn{margin-top:24px;background:#fff;color:var(--primary-dark);padding:13px 23px;border-radius:999px}.about-cta .btn:hover{background:#eaf7fd;color:var(--primary-dark)}
+@media(max-width:992px){.about-story{grid-template-columns:1fr;gap:38px}.about-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.about-stats{grid-template-columns:repeat(2,1fr)}.about-section-heading{align-items:flex-start;flex-direction:column}.about-section-heading-copy{text-align:left}.about-gallery{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.about-hero{height:590px;min-height:590px}.about-hero-content{padding-top:95px}.about-hero h1{font-size:42px;letter-spacing:-.8px}.about-hero-subtitle{font-size:17px}.about-section{padding:62px 0}.about-story{gap:28px}.about-story-copy h2,.about-section h2{font-size:30px}.about-grid{grid-template-columns:1fr}.about-stats{grid-template-columns:repeat(2,1fr);gap:12px}.about-stat{padding:24px 12px}.about-stat strong{font-size:31px}.about-gallery{grid-template-columns:1fr 1fr;grid-auto-rows:155px;gap:10px}.about-gallery figure:first-child{grid-column:span 2;grid-row:span 1}.about-gallery img{min-height:0}.about-cta{padding:65px 0}}
 </style>
 </head>
-<body>
-<header class="header"><div class="container header-container"><a href="index.html" class="logo"><img src="images/logo.png" alt="ANNLETRAVEL"></a><nav class="menu"><a href="index.html">Trang chủ</a><a href="tours.html">Tour</a><a href="destinations.html">Điểm đến</a><a href="services.html">Dịch vụ</a><a href="about.html">Về chúng tôi</a><a href="index.html#contact">Liên hệ</a></nav><a href="index.html#contact" class="btn btn-header">Tư vấn ngay</a></div></header>
-<section class="about-hero"><div id="aboutHeroImage" class="about-hero-bg"></div><div class="about-hero-overlay"></div><div class="container about-hero-content"><p class="about-kicker">ABOUT US</p><h1 id="aboutHeroTitle">Về ANNLETRAVEL</h1><p id="aboutHeroSubtitle">Niềm tin trên mọi hành trình</p></div></section>
-<section class="about-section"><div class="container about-two"><div><p class="about-kicker">OUR STORY</p><h2>Đồng hành cùng bạn trên mọi hành trình</h2><p id="aboutIntroduction" class="about-copy"></p></div><div class="about-info-grid"><div class="about-info-card"><h3>Tầm nhìn</h3><p id="aboutVision"></p></div><div class="about-info-card"><h3>Sứ mệnh</h3><p id="aboutMission"></p></div><div class="about-info-card"><h3>Giá trị cốt lõi</h3><p id="aboutValues"></p></div></div></div></section>
-<section class="about-section about-section-light"><div class="container"><div class="section-header"><div><p class="about-kicker">ANNLETRAVEL IN NUMBERS</p><h2>Những con số đáng nhớ</h2></div></div><div class="about-stats"><div class="about-stat"><strong id="statYears">0</strong><span>Năm hoạt động</span></div><div class="about-stat"><strong id="statCustomers">0</strong><span>Khách hàng</span></div><div class="about-stat"><strong id="statTours">0</strong><span>Tour đã tổ chức</span></div><div class="about-stat"><strong id="statDestinations">0</strong><span>Điểm đến</span></div></div></div></section>
-<section class="about-section"><div class="container"><div class="section-header"><div><p class="about-kicker">ACHIEVEMENTS</p><h2>Thành tựu &amp; dấu ấn</h2></div></div><div id="awardsGrid" class="about-grid"><p class="about-empty">Đang tải...</p></div></div></section>
-<section class="about-section about-section-light"><div class="container"><div class="section-header"><div><p class="about-kicker">CUSTOMER LOVE</p><h2>Khách hàng nói gì?</h2></div></div><div id="reviewsGrid" class="about-grid"><p class="about-empty">Đang tải...</p></div></div></section>
-<section class="about-section"><div class="container"><div class="section-header"><div><p class="about-kicker">OUR JOURNEY</p><h2>Hình ảnh ANNLETRAVEL</h2></div></div><div id="aboutGallery" class="about-gallery"></div></div></section>
-<section class="about-section about-cta"><div class="container"><p class="about-kicker">LET'S TRAVEL</p><h2>Sẵn sàng cho hành trình tiếp theo?</h2><p>Hãy để ANNLETRAVEL đồng hành cùng bạn.</p><a href="tours.html" class="btn">Khám phá tour</a></div></section>
-<footer><div class="container footer-container"><div><div class="footer-logo">ANN LÊ TRAVEL</div><p>CÔNG TY TNHH DỊCH VỤ VÀ DU LỊCH ANN LÊ.</p></div><div><h4>Liên hệ</h4><p>Hotline: 0862421655</p><p>Email: dulichannle@gmail.com</p></div><div><h4>Địa chỉ</h4><p>Số 136 phố Hàng Bạc, Phường Hoàn Kiếm, Thành phố Hà Nội, Việt Nam</p></div></div><div class="copyright">© 2026 ANNLETRAVEL. All rights reserved.</div></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase.js"></script><script src="js/about.js"></script>
-</body></html>
+<body class="about-page">
+<header class="header">
+    <div class="container header-container">
+        <a href="index.html" class="logo"><img src="images/logo.png" alt="ANNLETRAVEL"></a>
+        <nav class="menu">
+            <a href="index.html">Trang chủ</a>
+            <a href="tours.html">Tour</a>
+            <a href="destinations.html">Điểm đến</a>
+            <a href="services.html">Dịch vụ</a>
+            <a href="about.html">Về chúng tôi</a>
+            <a href="index.html#contact">Liên hệ</a>
+        </nav>
+        <a href="index.html#contact" class="btn btn-header">Tư vấn ngay</a>
+    </div>
+</header>
+
+<section class="about-hero">
+    <div id="aboutHeroImage" class="about-hero-bg"></div>
+    <div class="about-hero-overlay"></div>
+    <div class="container about-hero-content">
+        <p class="about-kicker">ABOUT US</p>
+        <h1 id="aboutHeroTitle">Về ANNLETRAVEL</h1>
+        <p id="aboutHeroSubtitle" class="about-hero-subtitle">Niềm tin trên mọi hành trình</p>
+        <div class="about-hero-badge">✦ Tận tâm trong từng hành trình</div>
+    </div>
+</section>
+
+<section class="about-section">
+    <div class="container about-story">
+        <div class="about-story-copy">
+            <p class="about-kicker">OUR STORY</p>
+            <h2>Đồng hành cùng bạn trên mọi hành trình</h2>
+            <p id="aboutIntroduction" class="about-copy about-story-lead"></p>
+            <p class="about-copy">Chúng tôi tin rằng một chuyến đi đáng nhớ không chỉ nằm ở điểm đến, mà còn ở cách hành trình được chuẩn bị và những trải nghiệm bạn mang về.</p>
+        </div>
+        <div class="about-values">
+            <div class="about-info-card"><h3>Tầm nhìn</h3><p id="aboutVision"></p></div>
+            <div class="about-info-card"><h3>Sứ mệnh</h3><p id="aboutMission"></p></div>
+            <div class="about-info-card"><h3>Giá trị cốt lõi</h3><p id="aboutValues"></p></div>
+        </div>
+    </div>
+</section>
+
+<section class="about-section about-section-light">
+    <div class="container">
+        <div class="about-section-heading">
+            <div><p class="about-kicker">ANNLETRAVEL IN NUMBERS</p><h2>Những con số đáng nhớ</h2></div>
+            <p class="about-section-heading-copy">Những dấu mốc được tạo nên từ sự tin tưởng của khách hàng và sự tận tâm của đội ngũ ANNLETRAVEL.</p>
+        </div>
+        <div class="about-stats">
+            <div class="about-stat"><strong id="statYears">0</strong><span>Năm hoạt động</span></div>
+            <div class="about-stat"><strong id="statCustomers">0</strong><span>Khách hàng</span></div>
+            <div class="about-stat"><strong id="statTours">0</strong><span>Tour đã tổ chức</span></div>
+            <div class="about-stat"><strong id="statDestinations">0</strong><span>Điểm đến</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="about-section">
+    <div class="container">
+        <div class="about-section-heading">
+            <div><p class="about-kicker">ACHIEVEMENTS</p><h2>Thành tựu &amp; dấu ấn</h2></div>
+            <p class="about-section-heading-copy">Những cột mốc nổi bật trong hành trình xây dựng thương hiệu và phục vụ khách hàng.</p>
+        </div>
+        <div id="awardsGrid" class="about-grid"><p class="about-empty">Đang tải...</p></div>
+    </div>
+</section>
+
+<section class="about-section about-section-light">
+    <div class="container">
+        <div class="about-section-heading">
+            <div><p class="about-kicker">CUSTOMER LOVE</p><h2>Khách hàng nói gì?</h2></div>
+            <p class="about-section-heading-copy">Mỗi lời nhận xét là một động lực để ANNLETRAVEL tiếp tục nâng cao chất lượng dịch vụ.</p>
+        </div>
+        <div id="reviewsGrid" class="about-grid"><p class="about-empty">Đang tải...</p></div>
+    </div>
+</section>
+
+<section class="about-section">
+    <div class="container">
+        <div class="about-section-heading">
+            <div><p class="about-kicker">OUR JOURNEY</p><h2>Hình ảnh ANNLETRAVEL</h2></div>
+            <p class="about-section-heading-copy">Một vài khoảnh khắc trong những hành trình chúng tôi đã đồng hành cùng khách hàng.</p>
+        </div>
+        <div id="aboutGallery" class="about-gallery"></div>
+    </div>
+</section>
+
+<section class="about-cta">
+    <div class="container">
+        <p class="about-kicker">LET'S TRAVEL</p>
+        <h2>Sẵn sàng cho hành trình tiếp theo?</h2>
+        <p>Hãy để ANNLETRAVEL đồng hành cùng bạn.</p>
+        <a href="tours.html" class="btn">Khám phá tour</a>
+    </div>
+</section>
+
+<footer>
+    <div class="container footer-container">
+        <div><div class="footer-logo">ANN LÊ TRAVEL</div><p>CÔNG TY TNHH DỊCH VỤ VÀ DU LỊCH ANN LÊ.</p></div>
+        <div><h4>Liên hệ</h4><p>Hotline: 0862421655</p><p>Email: dulichannle@gmail.com</p></div>
+        <div><h4>Địa chỉ</h4><p>Số 136 phố Hàng Bạc, Phường Hoàn Kiếm, Thành phố Hà Nội, Việt Nam</p></div>
+    </div>
+    <div class="copyright">© 2026 ANNLETRAVEL. All rights reserved.</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/about.js"></script>
+</body>
+</html>
