@@ -24,16 +24,26 @@ async function loadAboutPage() {
     const awards = awardsResult.data || [];
     document.getElementById('awardsGrid').innerHTML = awards.length ? awards.map(item => `
         <article class="about-award-card">
-            ${item.image ? `<img src="${safeUrl(item.image)}" alt="${escapeHtml(item.title)}">` : '<div class="about-award-icon">🏆</div>'}
-            <div><span>${escapeHtml(item.year)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.organization)}</p><p>${escapeHtml(item.description)}</p></div>
+            <div class="about-award-media">
+                ${item.image ? `<img src="${safeUrl(item.image)}" alt="${escapeHtml(item.title)}">` : '<div class="about-award-icon">🏆</div>'}
+            </div>
+            <div class="about-award-body">
+                <span class="about-award-year">${escapeHtml(item.year)}</span>
+                <h3>${escapeHtml(item.title)}</h3>
+                <p class="about-award-org">${escapeHtml(item.organization)}</p>
+                <p class="about-award-desc">${escapeHtml(item.description)}</p>
+            </div>
         </article>`).join('') : '<p class="about-empty">Thành tựu đang được cập nhật.</p>';
 
     const reviews = reviewsResult.data || [];
     document.getElementById('reviewsGrid').innerHTML = reviews.length ? reviews.map(item => `
         <article class="about-review-card">
             <div class="review-stars">${'★'.repeat(Number(item.rating || 5))}${'☆'.repeat(5 - Number(item.rating || 5))}</div>
-            <p>“${escapeHtml(item.content)}”</p>
-            <div class="review-author">${item.avatar ? `<img src="${safeUrl(item.avatar)}" alt="${escapeHtml(item.customer_name)}">` : '<div class="review-avatar">' + escapeHtml((item.customer_name || '?').charAt(0)) + '</div>'}<div><strong>${escapeHtml(item.customer_name)}</strong><span>${escapeHtml(item.customer_title)}</span></div></div>
+            <blockquote>“${escapeHtml(item.content)}”</blockquote>
+            <div class="review-author">
+                ${item.avatar ? `<img src="${safeUrl(item.avatar)}" alt="${escapeHtml(item.customer_name)}">` : '<div class="review-avatar">' + escapeHtml((item.customer_name || '?').charAt(0)) + '</div>'}
+                <div><strong>${escapeHtml(item.customer_name)}</strong><span>${escapeHtml(item.customer_title)}</span></div>
+            </div>
         </article>`).join('') : '<p class="about-empty">Chưa có đánh giá.</p>';
 
     const gallery = galleryResult.data || [];
@@ -44,7 +54,14 @@ function setText(id, value) { const el = document.getElementById(id); if (el) el
 function escapeHtml(value) { return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function safeUrl(value) { return String(value || '').replace(/'/g, '%27'); }
 
-document.addEventListener('DOMContentLoaded', () => loadAboutPage().catch(error => {
-    console.error('About page error:', error);
-    document.querySelectorAll('.about-empty').forEach(el => el.textContent = 'Không thể tải nội dung hiện tại.');
-}));
+document.addEventListener('DOMContentLoaded', () => {
+    // The About page uses overflow:hidden for visual clipping effects,
+    // but the document itself must remain vertically scrollable.
+    document.body.style.overflowY = 'auto';
+    document.body.style.overflowX = 'hidden';
+
+    loadAboutPage().catch(error => {
+        console.error('About page error:', error);
+        document.querySelectorAll('.about-empty').forEach(el => el.textContent = 'Không thể tải nội dung hiện tại.');
+    });
+});
