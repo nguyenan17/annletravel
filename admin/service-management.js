@@ -4,7 +4,7 @@ let adminServiceCategories = [];
 let adminServices = [];
 let editingServiceId = null;
 
-const escServiceAdmin = value => String(value ?? '').replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
+const escServiceAdmin = value => String(value ?? '').replace(/[&<>'\"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '\"':'&quot;' }[c]));
 
 async function loadAdminServices() {
     const [cats, services] = await Promise.all([
@@ -92,4 +92,20 @@ function renderServiceCategoryOptions() {
     script.src = 'ticket-section.js';
     script.defer = false;
     document.body.appendChild(script);
+})();
+
+// Add the About Us management entry to the existing admin sidebar.
+(function initAboutAdminNav() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    if (!sidebar || sidebar.querySelector('[data-about-link="true"]')) return;
+
+    const link = document.createElement('a');
+    link.href = 'about.html';
+    link.className = 'admin-nav-link';
+    link.dataset.aboutLink = 'true';
+    link.textContent = '🏆 Về chúng tôi';
+
+    const ticketsLink = sidebar.querySelector('a[href="tickets.html"]');
+    if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link);
+    else sidebar.appendChild(link);
 })();
