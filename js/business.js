@@ -1,3 +1,11 @@
+// Load shared public language support on the Business page.
+(function () {
+    if (document.querySelector('script[src="js/i18n.js"]')) return;
+    const script = document.createElement('script');
+    script.src = 'js/i18n.js';
+    document.head.appendChild(script);
+})();
+
 async function loadBusinessServices() {
     const grid = document.getElementById('businessServicesGrid');
     if (!grid || typeof supabaseClient === 'undefined') return;
