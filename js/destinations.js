@@ -1,3 +1,11 @@
+// Load the shared public-language system on pages that use this module.
+(function () {
+    if (document.querySelector('script[src="js/i18n.js"]')) return;
+    const script = document.createElement('script');
+    script.src = 'js/i18n.js';
+    document.head.appendChild(script);
+})();
+
 // ANNLETRAVEL - DESTINATIONS
 
 let destinations = [];
