@@ -37,8 +37,8 @@ async function loadAdminPageInline(page, sectionId, scriptName) {
 
     document.querySelectorAll('.admin-content-section').forEach(s => s.classList.toggle('hidden', s !== section));
 
-    // Only dynamic About/Business links are controlled here. Core navigation
-    // is controlled by admin.js via data-section.
+    // About/Business are part of the same sidebar navigation system as the core menu.
+    // Clear only the two dynamic links first; the core links are handled by admin.js.
     document.querySelectorAll('[data-about-link="true"], [data-business-link="true"]')
         .forEach(link => link.classList.remove('active'));
 
@@ -133,4 +133,15 @@ window.showInlineAdminPage = function(page) {
         const about = sidebar.querySelector('[data-about-link="true"]');
         if (about) about.insertAdjacentElement('afterend', link); else if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link); else sidebar.appendChild(link);
     }
+
+    // Keep dynamic links synchronized with the normal Admin sidebar.
+    // When any other menu is clicked, remove stale About/Business highlight.
+    // When About/Business itself is clicked, its own handler controls the active state.
+    sidebar.addEventListener('click', event => {
+        const clickedDynamicLink = event.target.closest('[data-about-link="true"], [data-business-link="true"]');
+        if (clickedDynamicLink) return;
+
+        sidebar.querySelectorAll('[data-about-link="true"], [data-business-link="true"]')
+            .forEach(link => link.classList.remove('active'));
+    });
 })();
