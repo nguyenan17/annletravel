@@ -36,7 +36,11 @@ async function loadAdminPageInline(page, sectionId, scriptName) {
     if (!section) return;
 
     document.querySelectorAll('.admin-content-section').forEach(s => s.classList.toggle('hidden', s !== section));
-    document.querySelectorAll('.admin-nav-link').forEach(link => link.classList.remove('active'));
+
+    // Only dynamic About/Business links are controlled here. Core navigation
+    // is controlled by admin.js via data-section.
+    document.querySelectorAll('[data-about-link="true"], [data-business-link="true"]')
+        .forEach(link => link.classList.remove('active'));
 
     const navLink = page === 'about'
         ? document.querySelector('[data-about-link="true"]')
@@ -129,14 +133,4 @@ window.showInlineAdminPage = function(page) {
         const about = sidebar.querySelector('[data-about-link="true"]');
         if (about) about.insertAdjacentElement('afterend', link); else if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link); else sidebar.appendChild(link);
     }
-
-    // The main admin.js navigation only toggles active state for links with
-    // data-section. Remove the dynamic About/Business active state first so
-    // clicking Dashboard/Tour/Booking/etc. can never leave two active items.
-    sidebar.addEventListener('click', event => {
-        const coreLink = event.target.closest('.admin-nav-link[data-section]');
-        if (!coreLink) return;
-        sidebar.querySelectorAll('[data-about-link="true"], [data-business-link="true"]')
-            .forEach(link => link.classList.remove('active'));
-    }, true);
 })();
