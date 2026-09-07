@@ -1,3 +1,11 @@
+// Load shared public language support on the About page.
+(function () {
+    if (document.querySelector('script[src="js/i18n.js"]')) return;
+    const script = document.createElement('script');
+    script.src = 'js/i18n.js';
+    document.head.appendChild(script);
+})();
+
 async function loadAboutPage() {
     const companyResult = await supabaseClient.from('about_company').select('*').eq('id', 1).maybeSingle();
     const awardsResult = await supabaseClient.from('about_awards').select('*').eq('visible', true).order('sort_order', { ascending: true });
@@ -55,8 +63,6 @@ function escapeHtml(value) { return String(value ?? '').replace(/[&<>'"]/g, c =>
 function safeUrl(value) { return String(value || '').replace(/'/g, '%27'); }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // The About page uses overflow:hidden for visual clipping effects,
-    // but the document itself must remain vertically scrollable.
     document.body.style.overflowY = 'auto';
     document.body.style.overflowX = 'hidden';
 
