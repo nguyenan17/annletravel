@@ -24,7 +24,7 @@ function openServiceModal(service = null) { editingServiceId = service?.id || nu
 function closeServiceModal() { document.getElementById('serviceModal')?.classList.add('hidden'); editingServiceId = null; }
 function slugifyService(value) { return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 window.editService = id => { const s = adminServices.find(x => String(x.id) === String(id)); if (s) openServiceModal(s); };
-window.removeService = async id => { const s = adminServices.find(x => String(x.id) === String(id)); if (!s || !confirm(`Xóa dịch vụ "${s.name}"?`)) return; const { error } = await supabaseClient.from('services').delete().eq('id', id); if (error) { alert('Không thể xóa dịch vụ.\n\n' + error.message); return; } alert('Xóa dịch vụ thành công!'); await loadAdminServices(); };
+window.removeService = async id => { const s = adminServices.find(x => String(x.id) === String(id)); if (!s || !confirm(`Xóa dịch vụ \"${s.name}\"?`)) return; const { error } = await supabaseClient.from('services').delete().eq('id', id); if (error) { alert('Không thể xóa dịch vụ.\n\n' + error.message); return; } alert('Xóa dịch vụ thành công!'); await loadAdminServices(); };
 async function saveService(event) { event.preventDefault(); const name = document.getElementById('serviceName').value.trim(); const slug = document.getElementById('serviceSlug').value.trim() || slugifyService(name); const category_id = document.getElementById('serviceCategory').value; if (!name || !slug || !category_id) { alert('Vui lòng nhập tên, slug và nhóm dịch vụ.'); return; } const payload = { category_id, name, slug, short: document.getElementById('serviceShort').value.trim(), description: document.getElementById('serviceDescription').value.trim(), image: document.getElementById('serviceImage').value.trim(), price_from: Number(document.getElementById('servicePriceFrom').value || 0), sort_order: Number(document.getElementById('serviceSortOrder').value || 100), featured: document.getElementById('serviceFeatured').checked, active: document.getElementById('serviceActive').checked, updated_at: new Date().toISOString() }; let query; if (editingServiceId) query = supabaseClient.from('services').update(payload).eq('id', editingServiceId); else { payload.id = slugifyService(slug) || `service-${Date.now()}`; query = supabaseClient.from('services').insert(payload); } const { error } = await query; if (error) { alert('Không thể lưu dịch vụ.\n\n' + error.message); return; } const wasEditing = !!editingServiceId; closeServiceModal(); alert(wasEditing ? 'Cập nhật dịch vụ thành công!' : 'Thêm dịch vụ thành công!'); await loadAdminServices(); }
 function renderServiceCategoryOptions() { const select = document.getElementById('serviceCategory'); if (!select) return; select.innerHTML = adminServiceCategories.map(c => `<option value="${escServiceAdmin(c.id)}">${escServiceAdmin(c.icon)} ${escServiceAdmin(c.name)}</option>`).join(''); }
 (function initServiceAdmin() { const form = document.getElementById('serviceForm'); if (!form) return; form.addEventListener('submit', saveService); document.getElementById('addServiceButton')?.addEventListener('click', () => openServiceModal()); document.getElementById('closeServiceModalButton')?.addEventListener('click', closeServiceModal); document.getElementById('cancelServiceButton')?.addEventListener('click', closeServiceModal); document.getElementById('serviceName')?.addEventListener('blur', e => { const input = document.getElementById('serviceSlug'); if (!input.value.trim()) input.value = slugifyService(e.target.value); }); loadAdminServices().then(renderServiceCategoryOptions); })();
@@ -129,4 +129,14 @@ window.showInlineAdminPage = function(page) {
         const about = sidebar.querySelector('[data-about-link="true"]');
         if (about) about.insertAdjacentElement('afterend', link); else if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link); else sidebar.appendChild(link);
     }
+
+    // The main admin.js navigation only toggles active state for links with
+    // data-section. Remove the dynamic About/Business active state first so
+    // clicking Dashboard/Tour/Booking/etc. can never leave two active items.
+    sidebar.addEventListener('click', event => {
+        const coreLink = event.target.closest('.admin-nav-link[data-section]');
+        if (!coreLink) return;
+        sidebar.querySelectorAll('[data-about-link="true"], [data-business-link="true"]')
+            .forEach(link => link.classList.remove('active'));
+    }, true);
 })();
