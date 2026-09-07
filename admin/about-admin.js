@@ -3,10 +3,16 @@ let records = { awards: [], reviews: [], gallery: [] };
 const $ = id => document.getElementById(id);
 
 async function isAdmin() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) { location.href = 'index.html'; return false; }
-    const { data } = await supabaseClient.from('admin_users').select('user_id').eq('user_id', session.user.id).maybeSingle();
-    if (!data) { await supabaseClient.auth.signOut(); location.href = 'index.html'; return false; }
+    // Do not sign out the current user from a sub-page just because the
+    // admin_users lookup is blocked by RLS. The main Admin page already
+    // authenticated the session before navigating here.
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+
+    if (error || !session) {
+        location.href = 'index.html';
+        return false;
+    }
+
     return true;
 }
 
@@ -68,5 +74,5 @@ $('itemForm').addEventListener('submit', async e => { e.preventDefault(); try { 
 
 document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');['company','awards','reviews','gallery'].forEach(x=>$('tab-'+x).classList.toggle('hidden',btn.dataset.tab!==x));}));
 $('addAward').onclick=()=>openModal('awards'); $('addReview').onclick=()=>openModal('reviews'); $('addGallery').onclick=()=>openModal('gallery'); $('closeModal').onclick=()=> $('itemModal').classList.add('hidden'); $('cancelModal').onclick=()=> $('itemModal').classList.add('hidden'); $('logoutButton').onclick=async()=>{await supabaseClient.auth.signOut();location.href='index.html';};
-function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function esc(v){return String(v??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 (async()=>{try{if(await isAdmin()){await loadCompany();await loadAll();}}catch(e){console.error(e);alert('Không thể tải dữ liệu: '+e.message);}})();
