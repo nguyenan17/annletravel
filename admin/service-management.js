@@ -30,22 +30,12 @@ function renderServiceCategoryOptions() { const select = document.getElementById
 (function initServiceAdmin() { const form = document.getElementById('serviceForm'); if (!form) return; form.addEventListener('submit', saveService); document.getElementById('addServiceButton')?.addEventListener('click', () => openServiceModal()); document.getElementById('closeServiceModalButton')?.addEventListener('click', closeServiceModal); document.getElementById('cancelServiceButton')?.addEventListener('click', closeServiceModal); document.getElementById('serviceName')?.addEventListener('blur', e => { const input = document.getElementById('serviceSlug'); if (!input.value.trim()) input.value = slugifyService(e.target.value); }); loadAdminServices().then(renderServiceCategoryOptions); })();
 (function loadUnifiedTicketModule() { if (!document.getElementById('dashboardPage')) return; const script = document.createElement('script'); script.src = 'ticket-section.js'; script.defer = false; document.body.appendChild(script); })();
 
-// Load About/Business inside the existing Admin dashboard. This keeps the same tab and session.
+// Load About/Business inside the existing Admin dashboard.
 async function loadAdminPageInline(page, sectionId, scriptName) {
     const section = document.getElementById(sectionId);
     if (!section) return;
 
     document.querySelectorAll('.admin-content-section').forEach(s => s.classList.toggle('hidden', s !== section));
-
-    // About/Business are part of the same sidebar navigation system as the core menu.
-    // Clear only the two dynamic links first; the core links are handled by admin.js.
-    document.querySelectorAll('[data-about-link="true"], [data-business-link="true"]')
-        .forEach(link => link.classList.remove('active'));
-
-    const navLink = page === 'about'
-        ? document.querySelector('[data-about-link="true"]')
-        : document.querySelector('[data-business-link="true"]');
-    navLink?.classList.add('active');
 
     if (section.dataset.loaded === 'true') return;
 
@@ -89,14 +79,8 @@ async function loadAdminPageInline(page, sectionId, scriptName) {
     }
 }
 
-window.showInlineAdminPage = function(page) {
-    const sectionId = page === 'about' ? 'adminSectionAbout' : 'adminSectionBusiness';
-    const scriptName = page === 'about' ? 'about-admin.js' : 'business-admin.js';
-    loadAdminPageInline(page === 'about' ? 'about.html' : 'business.html', sectionId, scriptName);
-    history.replaceState(null, '', `#${page}`);
-};
-
-(function initAboutBusinessAdminNav() {
+// Use the same navigation model as admin.js for every menu, including About/Business.
+(function unifyAdminNavigation() {
     const sidebar = document.querySelector('.admin-sidebar');
     const dashboardContainer = document.querySelector('.dashboard-container');
     if (!sidebar || !dashboardContainer) return;
@@ -113,35 +97,63 @@ window.showInlineAdminPage = function(page) {
 
     const ticketsLink = sidebar.querySelector('a[href="tickets.html"]');
 
-    if (!sidebar.querySelector('[data-about-link="true"]')) {
-        const link = document.createElement('a');
-        link.href = '#about';
-        link.className = 'admin-nav-link';
-        link.dataset.aboutLink = 'true';
-        link.textContent = '🏆 Về chúng tôi';
-        link.onclick = event => { event.preventDefault(); window.showInlineAdminPage('about'); };
-        if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link); else sidebar.appendChild(link);
-    }
+    const createDynamicLink = (type, text) => {
+        const attr = type === 'about' ? 'data-about-link' : 'data-business-link';
+        let link = sidebar.querySelector(`[${attr}="true"]`);
+        if (!link) {
+            link = document.createElement('a');
+            link.href = `#${type}`;
+            link.className = 'admin-nav-link';
+            link.textContent = text;
+            if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link); else sidebar.appendChild(link);
+        }
+        link.dataset.section = type;
+        return link;
+    };
 
-    if (!sidebar.querySelector('[data-business-link="true"]')) {
-        const link = document.createElement('a');
-        link.href = '#business';
-        link.className = 'admin-nav-link';
-        link.dataset.businessLink = 'true';
-        link.textContent = '🏢 Doanh nghiệp';
-        link.onclick = event => { event.preventDefault(); window.showInlineAdminPage('business'); };
-        const about = sidebar.querySelector('[data-about-link="true"]');
-        if (about) about.insertAdjacentElement('afterend', link); else if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link); else sidebar.appendChild(link);
-    }
+    const aboutLink = createDynamicLink('about', '🏆 Về chúng tôi');
+    const businessLink = createDynamicLink('business', '🏢 Doanh nghiệp');
+    if (aboutLink.nextElementSibling !== businessLink) aboutLink.insertAdjacentElement('afterend', businessLink);
 
-    // Keep dynamic links synchronized with the normal Admin sidebar.
-    // When any other menu is clicked, remove stale About/Business highlight.
-    // When About/Business itself is clicked, its own handler controls the active state.
-    sidebar.addEventListener('click', event => {
-        const clickedDynamicLink = event.target.closest('[data-about-link="true"], [data-business-link="true"]');
-        if (clickedDynamicLink) return;
+    // admin.js owns the active state for normal menus. Extend that same function
+    // so About/Business are handled by the exact same active class mechanism.
+    window.showAdminSection = function(sectionName, updateHash = true) {
+        const sectionMap = {
+            dashboard: 'adminSectionDashboard',
+            tours: 'adminSectionTours',
+            bookings: 'adminSectionBookings',
+            destinations: 'adminSectionDestinations',
+            services: 'adminSectionServices',
+            tickets: 'adminSectionTickets',
+            about: 'adminSectionAbout',
+            business: 'adminSectionBusiness'
+        };
 
-        sidebar.querySelectorAll('[data-about-link="true"], [data-business-link="true"]')
-            .forEach(link => link.classList.remove('active'));
-    });
+        const targetId = sectionMap[sectionName] || sectionMap.dashboard;
+        document.querySelectorAll('.admin-content-section').forEach(section => {
+            section.classList.toggle('hidden', section.id !== targetId);
+        });
+        document.querySelectorAll('.admin-nav-link').forEach(link => {
+            link.classList.toggle('active', link.dataset.section === sectionName);
+        });
+
+        if (updateHash) {
+            const newHash = `#${sectionName}`;
+            if (window.location.hash !== newHash) history.replaceState(null, '', newHash);
+        }
+
+        if (sectionName === 'about') loadAdminPageInline('about.html', 'adminSectionAbout', 'about-admin.js');
+        if (sectionName === 'business') loadAdminPageInline('business.html', 'adminSectionBusiness', 'business-admin.js');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    aboutLink.onclick = event => {
+        event.preventDefault();
+        window.showAdminSection('about');
+    };
+    businessLink.onclick = event => {
+        event.preventDefault();
+        window.showAdminSection('business');
+    };
 })();
