@@ -1,3 +1,11 @@
+// Load shared public language support for service pages.
+(function () {
+    if (document.querySelector('script[src="js/i18n.js"]')) return;
+    const script = document.createElement('script');
+    script.src = 'js/i18n.js';
+    document.head.appendChild(script);
+})();
+
 // ANNLETRAVEL - PUBLIC SERVICES
 
 function escapeServiceHtml(value) {
