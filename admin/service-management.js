@@ -29,4 +29,104 @@ async function saveService(event) { event.preventDefault(); const name = documen
 function renderServiceCategoryOptions() { const select = document.getElementById('serviceCategory'); if (!select) return; select.innerHTML = adminServiceCategories.map(c => `<option value="${escServiceAdmin(c.id)}">${escServiceAdmin(c.icon)} ${escServiceAdmin(c.name)}</option>`).join(''); }
 (function initServiceAdmin() { const form = document.getElementById('serviceForm'); if (!form) return; form.addEventListener('submit', saveService); document.getElementById('addServiceButton')?.addEventListener('click', () => openServiceModal()); document.getElementById('closeServiceModalButton')?.addEventListener('click', closeServiceModal); document.getElementById('cancelServiceButton')?.addEventListener('click', closeServiceModal); document.getElementById('serviceName')?.addEventListener('blur', e => { const input = document.getElementById('serviceSlug'); if (!input.value.trim()) input.value = slugifyService(e.target.value); }); loadAdminServices().then(renderServiceCategoryOptions); })();
 (function loadUnifiedTicketModule() { if (!document.getElementById('dashboardPage')) return; const script = document.createElement('script'); script.src = 'ticket-section.js'; script.defer = false; document.body.appendChild(script); })();
-(function initAboutBusinessAdminNav() { const sidebar = document.querySelector('.admin-sidebar'); if (!sidebar) return; const ticketsLink = sidebar.querySelector('a[href="tickets.html"]'); if (!sidebar.querySelector('[data-about-link="true"]')) { const link=document.createElement('a'); link.href='about.html'; link.className='admin-nav-link'; link.dataset.aboutLink='true'; link.textContent='🏆 Về chúng tôi'; if(ticketsLink) ticketsLink.insertAdjacentElement('beforebegin',link); else sidebar.appendChild(link); } if (!sidebar.querySelector('[data-business-link="true"]')) { const link=document.createElement('a'); link.href='business.html'; link.className='admin-nav-link'; link.dataset.businessLink='true'; link.textContent='🏢 Doanh nghiệp'; const about=sidebar.querySelector('[data-about-link="true"]'); if(about) about.insertAdjacentElement('afterend',link); else if(ticketsLink) ticketsLink.insertAdjacentElement('beforebegin',link); else sidebar.appendChild(link); } })();
+
+// Load About/Business inside the existing Admin dashboard. This keeps the same tab and session.
+async function loadAdminPageInline(page, sectionId, scriptName) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    document.querySelectorAll('.admin-content-section').forEach(s => s.classList.toggle('hidden', s !== section));
+    document.querySelectorAll('.admin-nav-link').forEach(link => link.classList.remove('active'));
+
+    const navLink = page === 'about'
+        ? document.querySelector('[data-about-link="true"]')
+        : document.querySelector('[data-business-link="true"]');
+    navLink?.classList.add('active');
+
+    if (section.dataset.loaded === 'true') return;
+
+    section.innerHTML = '<div class="tour-section" style="padding:40px;text-align:center">Đang tải...</div>';
+
+    try {
+        const response = await fetch(page, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Không thể tải ${page}`);
+
+        const html = await response.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const sourceMain = doc.querySelector('main.dashboard-container');
+        if (!sourceMain) throw new Error(`Không tìm thấy nội dung ${page}`);
+
+        doc.querySelectorAll('style').forEach((style, index) => {
+            const styleId = `inline-${page.replace(/[^a-z0-9]/gi, '-')}-${index}`;
+            if (!document.getElementById(styleId)) {
+                const newStyle = document.createElement('style');
+                newStyle.id = styleId;
+                newStyle.textContent = style.textContent;
+                document.head.appendChild(newStyle);
+            }
+        });
+
+        section.innerHTML = sourceMain.innerHTML;
+        section.dataset.loaded = 'true';
+
+        if (!document.querySelector(`script[data-inline-admin-script="${scriptName}"]`)) {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = scriptName;
+                script.dataset.inlineAdminScript = scriptName;
+                script.onload = resolve;
+                script.onerror = () => reject(new Error(`Không thể tải ${scriptName}`));
+                document.body.appendChild(script);
+            });
+        }
+    } catch (error) {
+        console.error('Inline admin page error:', error);
+        section.innerHTML = `<div class="tour-section" style="padding:40px"><h2>Không thể tải trang</h2><p>${escServiceAdmin(error.message)}</p></div>`;
+    }
+}
+
+window.showInlineAdminPage = function(page) {
+    const sectionId = page === 'about' ? 'adminSectionAbout' : 'adminSectionBusiness';
+    const scriptName = page === 'about' ? 'about-admin.js' : 'business-admin.js';
+    loadAdminPageInline(page === 'about' ? 'about.html' : 'business.html', sectionId, scriptName);
+    history.replaceState(null, '', `#${page}`);
+};
+
+(function initAboutBusinessAdminNav() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    const dashboardContainer = document.querySelector('.dashboard-container');
+    if (!sidebar || !dashboardContainer) return;
+
+    ['About', 'Business'].forEach(name => {
+        const id = `adminSection${name}`;
+        if (!document.getElementById(id)) {
+            const section = document.createElement('section');
+            section.id = id;
+            section.className = 'admin-content-section hidden';
+            dashboardContainer.appendChild(section);
+        }
+    });
+
+    const ticketsLink = sidebar.querySelector('a[href="tickets.html"]');
+
+    if (!sidebar.querySelector('[data-about-link="true"]')) {
+        const link = document.createElement('a');
+        link.href = '#about';
+        link.className = 'admin-nav-link';
+        link.dataset.aboutLink = 'true';
+        link.textContent = '🏆 Về chúng tôi';
+        link.onclick = event => { event.preventDefault(); window.showInlineAdminPage('about'); };
+        if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link); else sidebar.appendChild(link);
+    }
+
+    if (!sidebar.querySelector('[data-business-link="true"]')) {
+        const link = document.createElement('a');
+        link.href = '#business';
+        link.className = 'admin-nav-link';
+        link.dataset.businessLink = 'true';
+        link.textContent = '🏢 Doanh nghiệp';
+        link.onclick = event => { event.preventDefault(); window.showInlineAdminPage('business'); };
+        const about = sidebar.querySelector('[data-about-link="true"]');
+        if (about) about.insertAdjacentElement('afterend', link); else if (ticketsLink) ticketsLink.insertAdjacentElement('beforebegin', link); else sidebar.appendChild(link);
+    }
+})();
