@@ -8,7 +8,12 @@ const noteTypeText = {note:'Ghi chú', call:'Cuộc gọi', email:'Email', meeti
 async function checkAdmin(){
  const {data:{session}}=await supabaseClient.auth.getSession();
  if(!session){location.href='index.html';return false;}
- const {data}=await supabaseClient.from('admin_users').select('user_id').eq('user_id',session.user.id).maybeSingle();
+ const {data,error}=await supabaseClient.from('admin_users').select('user_id').eq('user_id',session.user.id).maybeSingle();
+ if(error){
+  console.error('Admin permission check error:',error);
+  alert('Không thể kiểm tra quyền Admin. Vui lòng kiểm tra RLS của bảng admin_users trong Supabase.');
+  return false;
+ }
  if(!data){await supabaseClient.auth.signOut();location.href='index.html';return false;} return true;
 }
 async function loadData(){
@@ -52,7 +57,7 @@ $('saveLead').onclick=async()=>{if(!selectedLeadId)return;const {error}=await su
 window.editService=id=>{const x=services.find(v=>v.id===id);if(!x)return;$('serviceId').value=x.id;$('serviceTitle').value=x.title||'';$('serviceIcon').value=x.icon||'';$('serviceShort').value=x.short_description||'';$('serviceDescription').value=x.description||'';$('serviceOrder').value=x.sort_order||0;$('serviceVisible').checked=x.visible;$('serviceModalTitle').textContent='Chỉnh sửa dịch vụ';$('serviceModal').classList.remove('hidden');};
 window.deleteService=async id=>{if(!confirm('Xóa dịch vụ này?'))return;const {error}=await supabaseClient.from('business_services').delete().eq('id',id);if(error)return alert(error.message);await loadData();};
 $('serviceForm').onsubmit=async e=>{e.preventDefault();const payload={title:$('serviceTitle').value.trim(),icon:$('serviceIcon').value.trim(),short_description:$('serviceShort').value.trim(),description:$('serviceDescription').value.trim(),sort_order:+$('serviceOrder').value||0,visible:$('serviceVisible').checked,updated_at:new Date().toISOString()};const id=$('serviceId').value;const q=id?supabaseClient.from('business_services').update(payload).eq('id',id):supabaseClient.from('business_services').insert(payload);const {error}=await q;if(error)return alert(error.message);$('serviceModal').classList.add('hidden');await loadData();};
-$('addService').onclick=()=>{$('serviceForm').reset();$('serviceId').value='';$('serviceOrder').value=0;$('serviceVisible').checked=true;$('serviceModalTitle').textContent='Thêm dịch vụ';$('serviceModal').classList.remove('hidden');};
+$('addService').onclick=()=>{$('serviceForm').reset();$('serviceId').value='';$('serviceOrder').value=0;$('serviceVisible').checked=true;$('serviceModalTitle').textContent='Thêm dịch vụ';$('serviceModal').classList.remove('hidden');$('serviceModal').classList.remove('hidden');};
 $('closeLead').onclick=()=>$('leadModal').classList.add('hidden');$('closeService').onclick=()=>$('serviceModal').classList.add('hidden');$('leadSearch').oninput=renderLeads;$('statusFilter').onchange=renderLeads;$('logoutButton').onclick=async()=>{await supabaseClient.auth.signOut();location.href='index.html';};
 function fmtDate(v){if(!v)return '—';const d=new Date(v+'T00:00:00');return d.toLocaleDateString('vi-VN');}
 function fmtDateTime(v){if(!v)return '—';const d=new Date(v);return d.toLocaleString('vi-VN',{dateStyle:'short',timeStyle:'short'});}
