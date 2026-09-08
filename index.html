@@ -1,41 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnnLeTravel - Niềm tin trên mọi hành trình</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/destinations.css">
-    <link rel="stylesheet" href="css/i18n.css">
-    <style>
-        .header .logo img { width: 102px; height: 102px; }
-        @media (max-width: 650px) { .header .logo img { width: 70px; height: 70px; } }
-    </style>
-</head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>AnnLeTravel - Bắt đầu hành trình</title><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/audience.css"></head>
 <body>
-<header class="header">
-    <div class="container header-container">
-        <a href="index.html" class="logo"><img src="images/logo.png" alt="ANNLETRAVEL"></a>
-        <nav class="menu">
-            <a href="index.html" data-i18n="nav.home">Trang chủ</a>
-            <a href="tours.html" data-i18n="nav.tours">Tour</a>
-            <div class="nav-dropdown"><a href="destinations.html" data-i18n="nav.destinations">Điểm đến ▾</a><ul id="destinationMenu" class="dropdown-menu"></ul></div>
-            <div class="nav-dropdown"><a href="services.html" data-i18n="nav.services">Dịch vụ ▾</a><ul class="dropdown-menu service-menu"><li><a href="services.html?category=flights">✈️ Vé máy bay</a></li><li><a href="services.html?category=hotels">🏨 Khách sạn</a></li><li><a href="services.html?category=visa">🛂 Visa</a></li><li><a href="services.html?category=passport">🪪 Hộ chiếu</a></li><li><a href="tickets.html">🎫 Vé vui chơi &amp; tham quan</a></li><li><a href="services.html?category=transport">🚗 Xe đưa đón</a></li><li><a href="services.html?category=trains">🚆 Vé tàu</a></li><li><a href="services.html?category=insurance">🛡️ Bảo hiểm du lịch</a></li></ul></div>
-            <a href="business.html" data-i18n="nav.business">Doanh nghiệp</a>
-            <a href="about.html" data-i18n="nav.about">Về chúng tôi</a>
-            <a href="#contact" data-i18n="nav.contact">Liên hệ</a>
-        </nav>
-        <a href="#contact" class="btn btn-header" data-i18n="nav.consult">Tư vấn ngay</a>
-    </div>
-</header>
-<section class="hero"><div class="hero-background"><video autoplay muted loop playsinline><source src="images/hero/travel.mp4" type="video/mp4"></video></div><div class="hero-overlay"></div><div class="container hero-content"><p class="hero-small" data-i18n="home.heroSmall">TRAVEL • EXPLORE • EXPERIENCE</p><h1 data-i18n="home.heroTitle">Khám phá hành trình của riêng bạn</h1><p class="hero-description" data-i18n="home.heroDesc">Những chuyến đi đáng nhớ, những trải nghiệm tuyệt vời và hành trình dành riêng cho bạn.</p><div class="hero-buttons"><a href="tours.html" class="btn" data-i18n="home.exploreTours">Khám phá tour</a><a href="#contact" class="btn btn-outline" data-i18n="home.consultation">Nhận tư vấn</a></div></div></section>
-<section class="search-section"><div class="container"><div class="search-box"><div class="search-item"><label data-i18n="home.searchDestination">Điểm đến</label><input type="text" id="searchDestination" data-i18n-placeholder="home.searchDestination" placeholder="Điểm đến"></div><div class="search-item"><label data-i18n="home.searchDate">Ngày khởi hành</label><input type="date" id="searchDate"></div><div class="search-item"><label data-i18n="home.searchPrice">Khoảng giá</label><select id="searchPrice"><option value="" data-i18n="home.priceAll">Tất cả mức giá</option><option value="under10" data-i18n="home.under10">Dưới 10 triệu</option><option value="10to20" data-i18n="home.from10to20">10 - 20 triệu</option><option value="over20" data-i18n="home.over20">Trên 20 triệu</option></select></div><button type="button" class="btn search-button" onclick="searchTours()" data-i18n="home.searchButton">Tìm tour</button></div></div></section>
-<section class="section"><div class="container"><div class="section-header"><div><p class="section-label" data-i18n="home.featuredLabel">FEATURED TOURS</p><h2 data-i18n="home.featuredTitle">Tour nổi bật</h2></div><a href="tours.html" class="view-all" data-i18n="common.viewAll">Xem tất cả →</a></div><div id="featuredTours" class="tour-grid"></div></div></section>
-<section class="section section-light" id="destinations"><div class="container"><div class="section-header"><div><p class="section-label" data-i18n="home.destinationsLabel">DESTINATIONS</p><h2 data-i18n="home.destinationsTitle">Điểm đến yêu thích</h2></div><a href="destinations.html" class="view-all" data-i18n="common.viewAll">Xem tất cả →</a></div><div id="destinationGrid" class="destination-grid destination-grid-v2"></div></div></section>
-<section class="section"><div class="container"><div class="section-header"><div><p class="section-label" data-i18n="home.departuresLabel">DEPARTURES</p><h2 data-i18n="home.departuresTitle">Tour khởi hành trong tháng</h2></div></div><div id="monthlyTours" class="departure-list"></div></div></section>
-<section class="section section-light" id="services"><div class="container"><div class="section-header"><div><p class="section-label" data-i18n="home.whyLabel">WHY US</p><h2 data-i18n="home.whyTitle">Vì sao chọn chúng tôi?</h2></div></div><div class="feature-grid"><div class="feature-card"><span>01</span><h3>Giá tốt</h3><p>Giá tour cạnh tranh, thông tin chi phí minh bạch.</p></div><div class="feature-card"><span>02</span><h3>Lịch trình rõ ràng</h3><p>Chương trình được trình bày rõ ràng và dễ theo dõi.</p></div><div class="feature-card"><span>03</span><h3>Hỗ trợ tận tâm</h3><p>Sale đồng hành cùng khách trước và trong chuyến đi.</p></div><div class="feature-card"><span>04</span><h3>Nhiều điểm đến</h3><p>Nhiều lựa chọn tour trong nước và quốc tế.</p></div></div></div></section>
-<section class="section" id="about"><div class="container"><div class="section-header"><div><p class="section-label" data-i18n="home.aboutLabel">ABOUT US</p><h2 data-i18n="home.aboutTitle">ANNLETRAVEL</h2></div></div><p data-i18n="home.aboutText">Đồng hành cùng bạn trong những hành trình đáng nhớ, với thông tin tour rõ ràng và hỗ trợ tận tâm.</p><a href="about.html" class="view-all" data-i18n="home.aboutLink">Xem chi tiết về chúng tôi →</a></div></section>
-<section class="contact-section" id="contact"><div class="container contact-container"><div class="contact-text"><p class="section-label" data-i18n="home.helpLabel">NEED HELP?</p><h2 data-i18n="home.helpTitle">Chưa biết chọn tour nào?</h2><p data-i18n="home.helpText">Để lại thông tin, nhân viên tư vấn sẽ liên hệ và giúp bạn lựa chọn hành trình phù hợp.</p></div><form class="contact-form" onsubmit="submitLead(event)"><input type="text" data-i18n-placeholder="home.name" placeholder="Họ và tên" required><input type="tel" data-i18n-placeholder="home.phone" placeholder="Số điện thoại" required><select><option data-i18n="home.interest">Tôi quan tâm đến...</option><option>Hà Giang</option><option>Sapa</option><option>Hàn Quốc</option><option>Nhật Bản</option><option>Thái Lan</option></select><button type="submit" class="btn" data-i18n="home.submitConsult">Nhận tư vấn</button></form></div></section>
-<footer><div class="container footer-container"><div><div class="footer-logo">ANN LÊ TRAVEL</div><p>CÔNG TY TNHH DỊCH VỤ VÀ DU LỊCH ANN LÊ.</p></div><div><h4>Liên hệ</h4><p>Hotline: 0862421655</p><p>Email: dulichannle@gmail.com</p></div><div><h4>Địa chỉ</h4><p>Số 136 phố Hàng Bạc, Phường Hoàn Kiếm, Thành phố Hà Nội, Việt Nam</p></div></div><div class="copyright">© 2026 ANNLETRAVEL. All rights reserved.</div></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase.js"></script><script src="js/app.js"></script><script src="js/destinations.js"></script><script src="js/hardening.js"></script><script src="js/i18n.js"></script><script src="js/i18n-multi.js"></script>
+<main class="audience-entry"><div class="audience-entry-inner">
+<div class="audience-brand">ANNLETRAVEL</div>
+<h1 class="audience-greeting">Xin chào 👋<br>Bạn muốn đi cùng ai hôm nay?</h1>
+<p class="audience-subtitle">Chọn một hành trình phù hợp với nhu cầu của bạn.</p>
+<div class="audience-choices">
+<a class="audience-choice personal" href="ca-nhan.html"><span class="choice-icon">🌴</span><h2>Cá nhân</h2><p>Đi để tận hưởng · Gia đình · Bạn bè · Nghỉ dưỡng · Khám phá</p><span class="choice-link">Khám phá hành trình →</span></a>
+<a class="audience-choice business" href="business.html"><span class="choice-icon">🏢</span><h2>Doanh nghiệp</h2><p>Đi để kết nối · Company Trip · Team Building · MICE · Sự kiện</p><span class="choice-link">Khám phá giải pháp →</span></a>
+</div>
+<p class="audience-note">ANNLETRAVEL · Những hành trình được tạo nên cho bạn</p>
+</div></main>
 </body></html>
