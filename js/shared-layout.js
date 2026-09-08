@@ -4,6 +4,7 @@
     if (window.location.pathname.includes("/admin/")) return;
     if (!document.querySelector('link[href*="css/i18n.css"]')) { const s=document.createElement("link"); s.rel="stylesheet"; s.href="css/i18n.css"; document.head.appendChild(s); }
     if (!document.querySelector('link[href*="css/audience.css"]')) { const s=document.createElement("link"); s.rel="stylesheet"; s.href="css/audience.css"; document.head.appendChild(s); }
+    if (!document.querySelector('link[href*="css/audience-pages.css"]')) { const s=document.createElement("link"); s.rel="stylesheet"; s.href="css/audience-pages.css"; document.head.appendChild(s); }
     const file=(window.location.pathname.split("/").pop()||"index.html").toLowerCase();
     const isBusiness=file==="business.html"||document.body.classList.contains("business-page");
     const active=key=>({home:isBusiness?file==="business.html":file==="ca-nhan.html",tours:!isBusiness&&(file==="tours.html"||file==="tour-detail.html"),destinations:file==="destinations.html"||file==="destination.html",services:!isBusiness&&["services.html","service-detail.html","tickets.html","ticket-detail.html"].includes(file),business:file==="business.html",about:file==="about.html"}[key]?"active":"");
