@@ -8,17 +8,8 @@
     <link rel="stylesheet" href="css/destinations.css">
     <link rel="stylesheet" href="css/i18n.css">
     <style>
-        /* Logo trang chủ - tăng kích thước nhưng không làm đổi chiều cao header */
-        .header .logo img {
-            width: 102px;
-            height: 102px;
-        }
-        @media (max-width: 650px) {
-            .header .logo img {
-                width: 70px;
-                height: 70px;
-            }
-        }
+        .header .logo img { width: 102px; height: 102px; }
+        @media (max-width: 650px) { .header .logo img { width: 70px; height: 70px; } }
     </style>
 </head>
 <body>
@@ -46,5 +37,5 @@
 <section class="section" id="about"><div class="container"><div class="section-header"><div><p class="section-label" data-i18n="home.aboutLabel">ABOUT US</p><h2 data-i18n="home.aboutTitle">ANNLETRAVEL</h2></div></div><p data-i18n="home.aboutText">Đồng hành cùng bạn trong những hành trình đáng nhớ, với thông tin tour rõ ràng và hỗ trợ tận tâm.</p><a href="about.html" class="view-all" data-i18n="home.aboutLink">Xem chi tiết về chúng tôi →</a></div></section>
 <section class="contact-section" id="contact"><div class="container contact-container"><div class="contact-text"><p class="section-label" data-i18n="home.helpLabel">NEED HELP?</p><h2 data-i18n="home.helpTitle">Chưa biết chọn tour nào?</h2><p data-i18n="home.helpText">Để lại thông tin, nhân viên tư vấn sẽ liên hệ và giúp bạn lựa chọn hành trình phù hợp.</p></div><form class="contact-form" onsubmit="submitLead(event)"><input type="text" data-i18n-placeholder="home.name" placeholder="Họ và tên" required><input type="tel" data-i18n-placeholder="home.phone" placeholder="Số điện thoại" required><select><option data-i18n="home.interest">Tôi quan tâm đến...</option><option>Hà Giang</option><option>Sapa</option><option>Hàn Quốc</option><option>Nhật Bản</option><option>Thái Lan</option></select><button type="submit" class="btn" data-i18n="home.submitConsult">Nhận tư vấn</button></form></div></section>
 <footer><div class="container footer-container"><div><div class="footer-logo">ANN LÊ TRAVEL</div><p>CÔNG TY TNHH DỊCH VỤ VÀ DU LỊCH ANN LÊ.</p></div><div><h4>Liên hệ</h4><p>Hotline: 0862421655</p><p>Email: dulichannle@gmail.com</p></div><div><h4>Địa chỉ</h4><p>Số 136 phố Hàng Bạc, Phường Hoàn Kiếm, Thành phố Hà Nội, Việt Nam</p></div></div><div class="copyright">© 2026 ANNLETRAVEL. All rights reserved.</div></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase.js"></script><script src="js/app.js"></script><script src="js/destinations.js"></script><script src="js/hardening.js"></script><script src="js/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase.js"></script><script src="js/app.js"></script><script src="js/destinations.js"></script><script src="js/hardening.js"></script><script src="js/i18n.js"></script><script src="js/i18n-multi.js"></script>
 </body></html>
