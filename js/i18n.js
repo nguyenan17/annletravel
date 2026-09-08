@@ -143,8 +143,11 @@
             const button = event.target.closest('[data-lang-switch]');
             if (button) applyLanguage(button.dataset.langSwitch);
         });
+
+        // Keep the language switcher on the far right of the header,
+        // immediately after the main consultation CTA button.
         const headerButton = headerContainer.querySelector('.btn-header, .btn-primary');
-        if (headerButton) headerButton.insertAdjacentElement('beforebegin', switcher);
+        if (headerButton) headerButton.insertAdjacentElement('afterend', switcher);
         else headerContainer.appendChild(switcher);
     }
 
