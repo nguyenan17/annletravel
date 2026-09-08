@@ -6,31 +6,45 @@
     <title>Điểm đến - ANNLETRAVEL</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/destinations.css">
+    <link rel="stylesheet" href="css/i18n.css">
+    <style>
+        /* DESTINATION LISTING - MATCH TOUR PAGE */
+        .page-hero{position:relative;overflow:hidden;padding:155px 0 95px;background:linear-gradient(135deg,#063b57 0%,#0077b6 58%,#00a8e8 100%);color:#fff}.page-hero:before{content:"";position:absolute;width:420px;height:420px;right:-120px;top:-180px;border-radius:50%;background:rgba(255,255,255,.09)}.page-hero:after{content:"";position:absolute;width:260px;height:260px;left:-100px;bottom:-160px;border-radius:50%;background:rgba(255,255,255,.06)}.page-hero .container{position:relative;z-index:1}.page-hero .section-label{color:#bdefff}.page-hero h1{font-size:52px;line-height:1.08;margin:8px 0 14px;max-width:700px}.page-hero p{font-size:17px;max-width:620px;color:rgba(255,255,255,.82)}
+        .destination-filter{position:relative;z-index:5;margin-top:-34px}.destination-filter-box{display:flex;align-items:center;gap:10px;padding:14px;background:rgba(255,255,255,.98);border:1px solid rgba(225,234,240,.9);border-radius:18px;box-shadow:0 18px 50px rgba(11,40,58,.16)}.destination-filter-box a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;color:#52636e;font-size:13px;font-weight:800;border:1px solid transparent;transition:.2s ease}.destination-filter-box a:hover,.destination-filter-box a.active{background:#eaf7fd;color:var(--primary);border-color:#ccebf7}.destination-filter-box a:first-child{background:var(--primary);color:#fff}
+        .destination-list-section{padding:65px 0 90px}.destination-list-heading{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:25px}.destination-list-heading h2{font-size:32px;margin-top:4px}.destination-count{display:inline-flex;align-items:center;padding:8px 13px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text-light);font-size:12px;font-weight:700}
+        .destination-grid-v2{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.destination-card-v2{height:320px;min-height:320px;border-radius:18px;box-shadow:0 8px 28px rgba(14,49,67,.08);transition:.3s ease}.destination-card-v2:hover{transform:translateY(-7px);box-shadow:0 18px 40px rgba(14,49,67,.14)}.destination-card-v2 .destination-placeholder{min-height:320px;height:100%;background:#cfd8dc;background-size:cover;background-position:center}.destination-card-v2 .destination-placeholder::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,32,48,.86),rgba(0,32,48,.05) 70%)}.destination-card-content{left:22px;right:22px;bottom:20px}.destination-card-content small{font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:800}.destination-card-content .destination-name{position:static;font-size:27px;line-height:1.15;text-shadow:none;margin:4px 0 10px}.destination-card-content span{font-size:13px}.destination-card-v2:focus-visible{outline:3px solid rgba(0,168,232,.35);outline-offset:3px}
+        .empty-result{grid-column:1/-1;border:1px dashed #cbdce4;background:#f7fbfd;padding:55px 25px;color:var(--text-light);border-radius:16px;text-align:center}.empty-result h3{color:var(--text);margin-bottom:6px}
+        @media(max-width:900px){.destination-grid-v2{grid-template-columns:repeat(2,minmax(0,1fr))}.page-hero h1{font-size:44px}}
+        @media(max-width:650px){.page-hero{padding:125px 0 75px}.page-hero h1{font-size:37px}.page-hero p{font-size:15px}.destination-filter{margin-top:-25px}.destination-filter-box{overflow-x:auto;justify-content:flex-start;padding:10px}.destination-filter-box a{white-space:nowrap}.destination-list-section{padding:48px 0 65px}.destination-list-heading{align-items:flex-start;gap:12px;flex-direction:column}.destination-list-heading h2{font-size:27px}.destination-grid-v2{grid-template-columns:1fr;gap:18px}.destination-card-v2,.destination-card-v2 .destination-placeholder{height:270px;min-height:270px}}
+    </style>
 </head>
 <body>
-<header class="header">
-    <div class="container header-container">
-        <a href="index.html" class="logo">ANNLETRAVEL</a>
-        <nav class="menu">
-            <a href="index.html">Trang chủ</a>
-            <a href="tours.html">Tour</a>
-            <div class="nav-dropdown"><a href="destinations.html" class="active">Điểm đến ▾</a><ul id="destinationMenu" class="dropdown-menu"></ul></div>
-            <a href="index.html#services">Dịch vụ</a>
-            <a href="index.html#about">Về chúng tôi</a>
-            <a href="index.html#contact">Liên hệ</a>
-        </nav>
-        <a href="index.html#contact" class="btn btn-header">Tư vấn ngay</a>
-    </div>
-</header>
+<header class="header"><div class="container header-container">
+    <a href="index.html" class="logo"><img src="images/logo.png" alt="ANNLETRAVEL"></a>
+    <nav class="menu">
+        <a href="index.html" data-i18n="nav.home">Trang chủ</a>
+        <a href="tours.html" data-i18n="nav.tours">Tour</a>
+        <div class="nav-dropdown"><a href="destinations.html" class="active" data-i18n="nav.destinations">Điểm đến ▾</a><ul id="destinationMenu" class="dropdown-menu"></ul></div>
+        <div class="nav-dropdown"><a href="services.html" data-i18n="nav.services">Dịch vụ ▾</a><ul class="dropdown-menu service-menu"><li><a href="services.html?category=flights">✈️ Vé máy bay</a></li><li><a href="services.html?category=hotels">🏨 Khách sạn</a></li><li><a href="services.html?category=visa">🛂 Visa</a></li><li><a href="services.html?category=passport">🪪 Hộ chiếu</a></li><li><a href="tickets.html">🎫 Vé vui chơi &amp; tham quan</a></li><li><a href="services.html?category=transport">🚗 Xe đưa đón</a></li><li><a href="services.html?category=trains">🚆 Vé tàu</a></li><li><a href="services.html?category=insurance">🛡️ Bảo hiểm du lịch</a></li></ul></div>
+        <a href="business.html" data-i18n="nav.business">Doanh nghiệp</a><a href="about.html" data-i18n="nav.about">Về chúng tôi</a><a href="index.html#contact" data-i18n="nav.contact">Liên hệ</a>
+    </nav>
+    <a href="index.html#contact" class="btn btn-header" data-i18n="nav.consult">Tư vấn ngay</a>
+</div></header>
 <main>
-    <section class="page-hero"><div class="container"><span class="section-label">DESTINATIONS</span><h1 id="destinationPageTitle">Tất cả điểm đến</h1><p id="destinationPageDescription">Lựa chọn những điểm đến phù hợp cho hành trình tiếp theo.</p><div class="destination-tabs"><a href="destinations.html">Tất cả</a><a href="destinations.html?region=domestic">🇻🇳 Trong nước</a><a href="destinations.html?region=international">🌏 Nước ngoài</a></div></div></section>
-    <section class="section"><div class="container"><div id="destinationList" class="destination-grid destination-grid-v2"></div></div></section>
+    <section class="page-hero"><div class="container"><span class="section-label" data-i18n="destinations.label">DESTINATIONS</span><h1 id="destinationPageTitle" data-i18n="destinations.title">Tất cả điểm đến</h1><p id="destinationPageDescription" data-i18n="destinations.desc">Lựa chọn những điểm đến phù hợp cho hành trình tiếp theo.</p></div></section>
+    <section class="destination-filter"><div class="container"><div class="destination-filter-box"><a href="destinations.html" class="active">Tất cả</a><a href="destinations.html?region=domestic">🇻🇳 Trong nước</a><a href="destinations.html?region=international">🌏 Nước ngoài</a></div></div></section>
+    <section class="section destination-list-section"><div class="container"><div class="destination-list-heading"><div><span class="section-label">KHÁM PHÁ</span><h2>Chọn điểm đến của bạn</h2></div><span id="destinationCount" class="destination-count"></span></div><div id="destinationList" class="destination-grid destination-grid-v2"></div></div></section>
 </main>
-<footer class="footer"><div class="container"><div class="footer-grid"><div><div class="logo">ANNLETRAVEL</div><p>Cùng bạn khám phá những hành trình đáng nhớ.</p></div><div><h4>Khám phá</h4><a href="tours.html">Tất cả tour</a><a href="destinations.html">Điểm đến</a></div><div><h4>Liên hệ</h4><p>Hotline: 0862421655</p><p>Email: dulichannle@gmail.com</p></div></div></div></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
-<script src="js/app.js"></script>
-<script src="js/destinations.js"></script>
-<script src="js/hardening.js"></script>
+<footer><div class="container footer-container"><div><div class="footer-logo">ANN LÊ TRAVEL</div><p>CÔNG TY TNHH DỊCH VỤ VÀ DU LỊCH ANN LÊ.</p></div><div><h4>Khám phá</h4><p><a href="tours.html">Tất cả tour</a></p><p><a href="destinations.html">Điểm đến</a></p></div><div><h4>Liên hệ</h4><p>Hotline: 0862421655</p><p>Email: dulichannle@gmail.com</p></div></div><div class="copyright">© 2026 ANNLETRAVEL. All rights reserved.</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase.js"></script><script src="js/app.js"></script><script src="js/destinations.js"></script><script src="js/hardening.js"></script><script src="js/i18n.js"></script><script src="js/i18n-multi.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const count = document.getElementById('destinationCount');
+    if (count && typeof loadDestinations === 'function') {
+        const data = await loadDestinations();
+        count.textContent = `${data.length} điểm đến`;
+    }
+});
+</script>
 </body>
 </html>
