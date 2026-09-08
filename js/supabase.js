@@ -18,12 +18,11 @@ const supabaseClient =
     script.src = "js/shared-layout.js";
     script.defer = false;
 
-    // Load the language system only after the shared header has been rendered.
-    // This keeps the selector consistent on every public page and avoids
-    // i18n.js running before .language-switcher exists.
+    // The shared header must exist before the language selector is initialized.
     script.onload = function () {
         const loadScript = (src, callback) => {
-            if (document.querySelector(`script[src="${src}"]`)) {
+            const existing = document.querySelector(`script[src="${src}"]`);
+            if (existing) {
                 if (callback) callback();
                 return;
             }
@@ -36,8 +35,17 @@ const supabaseClient =
         };
 
         loadScript("js/i18n.js", function () {
-            loadScript("js/i18n-multi.js");
+            loadScript("js/i18n-multi.js", function () {
+                // Re-install after shared-layout replaced the header.
+                window.AnnLeMultiI18n?.install?.();
+            });
         });
+
+        // If both language scripts were already present on the page,
+        // still initialize the newly-rendered shared selector.
+        if (window.AnnLeMultiI18n?.install) {
+            window.AnnLeMultiI18n.install();
+        }
     };
 
     document.body.appendChild(script);
