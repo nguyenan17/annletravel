@@ -3,6 +3,14 @@
     "use strict";
     if (window.location.pathname.includes("/admin/")) return;
 
+    // Ensure the shared language selector CSS is available on every public page.
+    if (!document.querySelector('link[href*="css/i18n.css"]')) {
+        const i18nCss = document.createElement("link");
+        i18nCss.rel = "stylesheet";
+        i18nCss.href = "css/i18n.css";
+        document.head.appendChild(i18nCss);
+    }
+
     const file = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
     const active = key => {
         const map = {
@@ -45,6 +53,7 @@
                     <a href="about.html" class="${active("about")}" data-i18n="nav.about">Về chúng tôi</a>
                     <a href="index.html#contact" data-i18n="nav.contact">Liên hệ</a>
                 </nav>
+                <div class="language-switcher" aria-label="Language selector"></div>
                 <a href="index.html#contact" class="btn btn-header" data-i18n="nav.consult">Tư vấn ngay</a>
             </div>`;
     }
@@ -81,6 +90,7 @@
         .header .menu > a.active,.header .menu .nav-dropdown > a.active{color:var(--primary)}
         .footer-logo-link{display:inline-flex;align-items:center;margin-bottom:10px}
         .footer-logo-image{width:74px;height:74px;object-fit:contain;display:block}
+        @media(max-width:900px){.header-container{flex-wrap:wrap}.language-switcher{order:3}.btn-header{order:4}}
         @media(max-width:650px){.header .logo img{width:68px;height:68px}.footer-logo-image{width:62px;height:62px}}
     `;
     document.head.appendChild(style);
