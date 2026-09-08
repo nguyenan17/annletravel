@@ -1,0 +1,28 @@
+/* ANNLETRAVEL — PUBLIC CONTENT PAGES */
+
+/* About */
+.about-page .about-hero{box-shadow:inset 0 -1px rgba(255,255,255,.08)}
+.about-page .about-section{position:relative}
+.about-page .about-section-heading h2,.about-page .about-story-copy h2{font-weight:800}
+.about-page .about-info-card{border-radius:18px;box-shadow:0 10px 30px rgba(8,45,65,.07)}
+.about-page .about-stat{border-radius:18px;transition:.25s ease}
+.about-page .about-stat:hover{transform:translateY(-4px);box-shadow:0 16px 35px rgba(8,45,65,.1)}
+.about-page .about-award-card,.about-page .about-review-card{border-radius:18px}
+.about-page .about-cta{margin-top:0}
+
+/* Destination listing */
+body:has(.page-hero) main{background:#f7fafc}
+.page-hero{box-shadow:inset 0 -1px rgba(255,255,255,.08)}
+.destination-filter-box{backdrop-filter:blur(12px)}
+.destination-list-section{background:#f7fafc}
+.destination-list-heading h2{font-weight:800;letter-spacing:-.5px}
+.destination-card-v2{cursor:pointer}
+
+/* Destination detail */
+.destination-detail-hero{box-shadow:inset 0 -1px rgba(255,255,255,.08)}
+.destination-detail-content h1{font-weight:800}
+
+@media(max-width:650px){
+  .about-page .about-section-heading{gap:10px}
+  .destination-list-section{padding-top:48px}
+}
