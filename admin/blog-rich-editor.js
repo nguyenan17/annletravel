@@ -2,8 +2,8 @@
 // Uses Quill to provide a Word-like editor while saving clean HTML to blog_posts.content.
 
 (function initBlogRichEditor() {
-    const QUILL_CSS = "https://cdn.jsdelivr.net/npm/[email protected]/dist/quill.snow.css";
-    const QUILL_JS = "https://cdn.jsdelivr.net/npm/[email protected]/dist/quill.min.js";
+    const QUILL_CSS = "https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css";
+    const QUILL_JS = "https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js";
     let quill = null;
     let wrapped = false;
 
@@ -70,13 +70,12 @@
         toolbar.innerHTML = `
             <span class="ql-formats">
                 <select class="ql-header"><option value="2"></option><option value="3"></option><option selected></option></select>
-                <select class="ql-font"></select>
             </span>
             <span class="ql-formats">
                 <button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button><button class="ql-strike"></button>
             </span>
             <span class="ql-formats">
-                <button class="ql-blockquote"></button><button class="ql-code-block"></button>
+                <button class="ql-blockquote"></button>
             </span>
             <span class="ql-formats">
                 <button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button>
