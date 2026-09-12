@@ -13,6 +13,20 @@
     let wrapped = false;
     let imageInput = null;
 
+    function getSupabaseClient() {
+        // js/supabase.js creates a global lexical binding named supabaseClient,
+        // not window.supabaseClient. This works across classic <script> tags.
+        try {
+            if (typeof supabaseClient !== "undefined" && supabaseClient) {
+                return supabaseClient;
+            }
+        } catch (error) {
+            console.warn("Không truy cập được supabaseClient:", error);
+        }
+
+        return window.supabaseClient || null;
+    }
+
     function loadCss() {
         if (document.getElementById("annletravel-quill-css")) return;
         const link = document.createElement("link");
@@ -103,15 +117,16 @@
     }
 
     async function optimizeImage(file) {
-        if (file.size <= COMPRESS_THRESHOLD) return file;
-        if (!file.type.startsWith("image/")) return file;
+        if (file.size <= COMPRESS_THRESHOLD || !file.type.startsWith("image/")) return file;
 
         const dimensions = await getImageDimensions(file);
-        if (dimensions.width <= MAX_IMAGE_WIDTH && file.size <= COMPRESS_THRESHOLD) return file;
-
         const scale = Math.min(1, MAX_IMAGE_WIDTH / dimensions.width);
         const width = Math.max(1, Math.round(dimensions.width * scale));
         const height = Math.max(1, Math.round(dimensions.height * scale));
+
+        if (width === dimensions.width && height === dimensions.height && file.size <= COMPRESS_THRESHOLD) {
+            return file;
+        }
 
         const bitmap = await createImageBitmap(file);
         const canvas = document.createElement("canvas");
@@ -137,8 +152,10 @@
         if (file.size > MAX_IMAGE_SIZE) {
             throw new Error("Ảnh gốc không được lớn hơn 8 MB.");
         }
-        if (!window.supabaseClient) {
-            throw new Error("Chưa khởi tạo kết nối Supabase.");
+
+        const client = getSupabaseClient();
+        if (!client) {
+            throw new Error("Chưa khởi tạo kết nối Supabase. Hãy tải lại trang Admin rồi thử lại.");
         }
 
         setStatus("Đang tối ưu ảnh...", "");
@@ -147,7 +164,7 @@
         const path = `blog/${new Date().toISOString().slice(0, 10)}/${fileName}`;
 
         setStatus("Đang tải ảnh lên...", "");
-        const { error } = await window.supabaseClient.storage
+        const { error } = await client.storage
             .from(BLOG_IMAGE_BUCKET)
             .upload(path, optimized, {
                 cacheControl: "3600",
@@ -160,7 +177,7 @@
             throw new Error(error.message || "Không thể tải ảnh lên.");
         }
 
-        const { data } = window.supabaseClient.storage
+        const { data } = client.storage
             .from(BLOG_IMAGE_BUCKET)
             .getPublicUrl(path);
 
