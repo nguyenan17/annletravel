@@ -1,9 +1,10 @@
 // ANNLETRAVEL - Rich text editor for Blog Admin
-// Quill editor with direct image upload to Supabase Storage.
+// Quill editor with direct image upload, resize and alignment controls.
 
 (function initBlogRichEditor() {
     const QUILL_CSS = "https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css";
     const QUILL_JS = "https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js";
+    const QUILL_IMAGE_RESIZE_JS = "https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js";
     const BLOG_IMAGE_BUCKET = "blog-images";
     const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
     const MAX_IMAGE_WIDTH = 1800;
@@ -14,16 +15,11 @@
     let imageInput = null;
 
     function getSupabaseClient() {
-        // js/supabase.js creates a global lexical binding named supabaseClient,
-        // not window.supabaseClient. This works across classic <script> tags.
         try {
-            if (typeof supabaseClient !== "undefined" && supabaseClient) {
-                return supabaseClient;
-            }
+            if (typeof supabaseClient !== "undefined" && supabaseClient) return supabaseClient;
         } catch (error) {
             console.warn("Không truy cập được supabaseClient:", error);
         }
-
         return window.supabaseClient || null;
     }
 
@@ -36,23 +32,55 @@
         document.head.appendChild(link);
     }
 
-    function loadQuill(callback) {
-        loadCss();
-        if (window.Quill) {
-            callback();
-            return;
-        }
-        const existing = document.getElementById("annletravel-quill-js");
+    function loadScript(id, src, callback, onError) {
+        const existing = document.getElementById(id);
         if (existing) {
-            existing.addEventListener("load", callback, { once: true });
+            if (existing.dataset.loaded === "true") {
+                callback();
+            } else {
+                existing.addEventListener("load", callback, { once: true });
+                if (onError) existing.addEventListener("error", onError, { once: true });
+            }
             return;
         }
         const script = document.createElement("script");
-        script.id = "annletravel-quill-js";
-        script.src = QUILL_JS;
-        script.onload = callback;
-        script.onerror = () => console.error("Không tải được Quill rich text editor.");
+        script.id = id;
+        script.src = src;
+        script.onload = () => {
+            script.dataset.loaded = "true";
+            callback();
+        };
+        if (onError) script.onerror = onError;
         document.head.appendChild(script);
+    }
+
+    function loadQuill(callback) {
+        loadCss();
+        const afterQuill = () => {
+            if (window.Quill && window.Quill.imports?.["modules/imageResize"]) {
+                callback();
+                return;
+            }
+            loadScript(
+                "annletravel-quill-image-resize-js",
+                QUILL_IMAGE_RESIZE_JS,
+                callback,
+                () => {
+                    console.error("Không tải được module chỉnh kích thước ảnh Quill.");
+                    callback();
+                }
+            );
+        };
+        if (window.Quill) {
+            afterQuill();
+            return;
+        }
+        loadScript(
+            "annletravel-quill-js",
+            QUILL_JS,
+            afterQuill,
+            () => console.error("Không tải được Quill rich text editor.")
+        );
     }
 
     function addStyles() {
@@ -67,7 +95,9 @@
             .blog-rich-editor-shell .ql-editor.ql-blank::before { color: #9aa6ad; font-style: normal; }
             .blog-rich-editor-shell .ql-editor h2 { margin: 18px 0 8px; font-size: 25px; }
             .blog-rich-editor-shell .ql-editor h3 { margin: 16px 0 7px; font-size: 20px; }
-            .blog-rich-editor-shell .ql-editor img { max-width: 100%; height: auto; border-radius: 10px; }
+            .blog-rich-editor-shell .ql-editor img { max-width: 100%; height: auto; border-radius: 10px; cursor: pointer; }
+            .blog-rich-editor-shell .ql-editor img:hover { outline: 2px solid rgba(22, 113, 255, .18); }
+            .blog-rich-editor-shell .ql-container.ql-snow:focus-within { border-color: #b9c8d1; }
             .blog-rich-editor-shell .ql-editor blockquote { border-left: 4px solid #d8e1e5; padding-left: 14px; color: #5e6b73; }
             .blog-rich-editor-note { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:7px; font-size:12px; color:#81909a; line-height:1.5; }
             .blog-rich-editor-note strong { color:#52616a; }
@@ -75,6 +105,7 @@
             .blog-rich-editor-status.error { color:#c0392b; }
             .blog-rich-editor-status.success { color:#237a57; }
             .blog-html-source { display:none!important; }
+            .blog-image-resize-hint { margin-top:5px; font-size:12px; color:#81909a; }
         `;
         document.head.appendChild(style);
     }
@@ -118,16 +149,10 @@
 
     async function optimizeImage(file) {
         if (file.size <= COMPRESS_THRESHOLD || !file.type.startsWith("image/")) return file;
-
         const dimensions = await getImageDimensions(file);
         const scale = Math.min(1, MAX_IMAGE_WIDTH / dimensions.width);
         const width = Math.max(1, Math.round(dimensions.width * scale));
         const height = Math.max(1, Math.round(dimensions.height * scale));
-
-        if (width === dimensions.width && height === dimensions.height && file.size <= COMPRESS_THRESHOLD) {
-            return file;
-        }
-
         const bitmap = await createImageBitmap(file);
         const canvas = document.createElement("canvas");
         canvas.width = width;
@@ -135,10 +160,8 @@
         const context = canvas.getContext("2d");
         context.drawImage(bitmap, 0, 0, width, height);
         bitmap.close();
-
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.84));
         if (!blob) return file;
-
         return new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
             type: "image/jpeg",
             lastModified: Date.now()
@@ -146,45 +169,26 @@
     }
 
     async function uploadImage(file) {
-        if (!file || !file.type.startsWith("image/")) {
-            throw new Error("Vui lòng chọn file ảnh JPG, PNG, WEBP... .");
-        }
-        if (file.size > MAX_IMAGE_SIZE) {
-            throw new Error("Ảnh gốc không được lớn hơn 8 MB.");
-        }
-
+        if (!file || !file.type.startsWith("image/")) throw new Error("Vui lòng chọn file ảnh JPG, PNG, WEBP... .");
+        if (file.size > MAX_IMAGE_SIZE) throw new Error("Ảnh gốc không được lớn hơn 8 MB.");
         const client = getSupabaseClient();
-        if (!client) {
-            throw new Error("Chưa khởi tạo kết nối Supabase. Hãy tải lại trang Admin rồi thử lại.");
-        }
-
+        if (!client) throw new Error("Chưa khởi tạo kết nối Supabase. Hãy tải lại trang Admin rồi thử lại.");
         setStatus("Đang tối ưu ảnh...", "");
         const optimized = await optimizeImage(file);
         const fileName = getSafeFileName(optimized);
         const path = `blog/${new Date().toISOString().slice(0, 10)}/${fileName}`;
-
         setStatus("Đang tải ảnh lên...", "");
-        const { error } = await client.storage
-            .from(BLOG_IMAGE_BUCKET)
-            .upload(path, optimized, {
-                cacheControl: "3600",
-                contentType: optimized.type,
-                upsert: false
-            });
-
+        const { error } = await client.storage.from(BLOG_IMAGE_BUCKET).upload(path, optimized, {
+            cacheControl: "3600",
+            contentType: optimized.type,
+            upsert: false
+        });
         if (error) {
             console.error("Blog image upload error:", error);
             throw new Error(error.message || "Không thể tải ảnh lên.");
         }
-
-        const { data } = client.storage
-            .from(BLOG_IMAGE_BUCKET)
-            .getPublicUrl(path);
-
-        if (!data?.publicUrl) {
-            throw new Error("Tải ảnh thành công nhưng không lấy được URL ảnh.");
-        }
-
+        const { data } = client.storage.from(BLOG_IMAGE_BUCKET).getPublicUrl(path);
+        if (!data?.publicUrl) throw new Error("Tải ảnh thành công nhưng không lấy được URL ảnh.");
         return data.publicUrl;
     }
 
@@ -193,7 +197,6 @@
         const range = quill.getSelection(true) || { index: Math.max(0, quill.getLength() - 1) };
         quill.insertEmbed(range.index, "image", url, "user");
         quill.setSelection(range.index + 1, 0, "silent");
-
         const images = quill.root.querySelectorAll("img");
         const image = images[images.length - 1];
         if (image && altText) image.setAttribute("alt", altText);
@@ -266,9 +269,7 @@
             <span class="ql-formats">
                 <button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button><button class="ql-strike"></button>
             </span>
-            <span class="ql-formats">
-                <button class="ql-blockquote"></button>
-            </span>
+            <span class="ql-formats"><button class="ql-blockquote"></button></span>
             <span class="ql-formats">
                 <button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button>
                 <select class="ql-align"></select>
@@ -283,24 +284,28 @@
         const editor = document.createElement("div");
         editor.id = "blogRichEditor";
         editor.innerHTML = "<p><br></p>";
-
         shell.appendChild(toolbar);
         shell.appendChild(editor);
         textarea.parentNode.insertBefore(shell, textarea);
         textarea.classList.add("blog-html-source");
         textarea.setAttribute("aria-hidden", "true");
 
+        const modules = {
+            toolbar: {
+                container: "#blogRichEditorToolbar",
+                handlers: { image: openImagePicker }
+            }
+        };
+        if (window.ImageResize) {
+            modules.imageResize = {
+                modules: ["Resize", "DisplaySize", "Toolbar"]
+            };
+        }
+
         quill = new Quill(editor, {
             theme: "snow",
             placeholder: "Bắt đầu viết bài như Word...",
-            modules: {
-                toolbar: {
-                    container: "#blogRichEditorToolbar",
-                    handlers: {
-                        image: openImagePicker
-                    }
-                }
-            }
+            modules
         });
 
         quill.on("text-change", function () {
@@ -314,8 +319,13 @@
 
         const note = document.createElement("div");
         note.className = "blog-rich-editor-note";
-        note.innerHTML = "<span><strong>Soạn thảo như Word:</strong> tiêu đề, in đậm, danh sách, link, ảnh, căn lề...</span><span>Chọn nút ảnh, kéo-thả hoặc Ctrl+V ảnh để tải trực tiếp.</span>";
+        note.innerHTML = "<span><strong>Soạn thảo như Word:</strong> tiêu đề, in đậm, danh sách, link, ảnh, căn lề...</span><span>Chọn ảnh để kéo góc đổi kích thước; có thể căn trái, giữa hoặc phải.</span>";
         shell.parentNode.insertBefore(note, textarea.nextSibling);
+
+        const imageHint = document.createElement("div");
+        imageHint.className = "blog-image-resize-hint";
+        imageHint.textContent = "Mẹo: click vào ảnh trong bài viết → kéo các góc để phóng to/thu nhỏ; thanh công cụ của ảnh cho phép đổi vị trí.";
+        shell.parentNode.insertBefore(imageHint, textarea.nextSibling);
 
         const status = document.createElement("div");
         status.id = "blogRichEditorStatus";
