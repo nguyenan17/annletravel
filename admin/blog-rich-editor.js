@@ -1,5 +1,5 @@
 // ANNLETRAVEL - Rich text editor for Blog Admin
-// Quill editor with direct image upload, resize and alignment controls.
+// Quill editor with direct image upload, resize, alignment and storage cleanup.
 
 (function initBlogRichEditor() {
     const QUILL_CSS = "https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css";
@@ -13,6 +13,7 @@
     let quill = null;
     let wrapped = false;
     let imageInput = null;
+    let uploadedImageUrls = new Set();
 
     function getSupabaseClient() {
         try {
@@ -35,9 +36,8 @@
     function loadScript(id, src, callback, onError) {
         const existing = document.getElementById(id);
         if (existing) {
-            if (existing.dataset.loaded === "true") {
-                callback();
-            } else {
+            if (existing.dataset.loaded === "true") callback();
+            else {
                 existing.addEventListener("load", callback, { once: true });
                 if (onError) existing.addEventListener("error", onError, { once: true });
             }
@@ -57,7 +57,7 @@
     function loadQuill(callback) {
         loadCss();
         const afterQuill = () => {
-            if (window.Quill && window.Quill.imports?.["modules/imageResize"]) {
+            if (window.ImageResize) {
                 callback();
                 return;
             }
@@ -97,7 +97,6 @@
             .blog-rich-editor-shell .ql-editor h3 { margin: 16px 0 7px; font-size: 20px; }
             .blog-rich-editor-shell .ql-editor img { max-width: 100%; height: auto; border-radius: 10px; cursor: pointer; }
             .blog-rich-editor-shell .ql-editor img:hover { outline: 2px solid rgba(22, 113, 255, .18); }
-            .blog-rich-editor-shell .ql-container.ql-snow:focus-within { border-color: #b9c8d1; }
             .blog-rich-editor-shell .ql-editor blockquote { border-left: 4px solid #d8e1e5; padding-left: 14px; color: #5e6b73; }
             .blog-rich-editor-note { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:7px; font-size:12px; color:#81909a; line-height:1.5; }
             .blog-rich-editor-note strong { color:#52616a; }
@@ -194,6 +193,7 @@
 
     function insertImage(url, altText = "") {
         if (!quill || !url) return;
+        uploadedImageUrls.add(url);
         const range = quill.getSelection(true) || { index: Math.max(0, quill.getLength() - 1) };
         quill.insertEmbed(range.index, "image", url, "user");
         quill.setSelection(range.index + 1, 0, "silent");
@@ -297,7 +297,7 @@
             }
         };
         if (window.ImageResize) {
-            modules.imageResize = {
+            modules.ImageResize = {
                 modules: ["Resize", "DisplaySize", "Toolbar"]
             };
         }
@@ -319,12 +319,12 @@
 
         const note = document.createElement("div");
         note.className = "blog-rich-editor-note";
-        note.innerHTML = "<span><strong>Soạn thảo như Word:</strong> tiêu đề, in đậm, danh sách, link, ảnh, căn lề...</span><span>Chọn ảnh để kéo góc đổi kích thước; có thể căn trái, giữa hoặc phải.</span>";
+        note.innerHTML = "<span><strong>Soạn thảo như Word:</strong> tiêu đề, in đậm, danh sách, link, ảnh, căn lề...</span><span>Chọn ảnh để kéo góc đổi kích thước; thanh công cụ của ảnh cho phép đổi vị trí.</span>";
         shell.parentNode.insertBefore(note, textarea.nextSibling);
 
         const imageHint = document.createElement("div");
         imageHint.className = "blog-image-resize-hint";
-        imageHint.textContent = "Mẹo: click vào ảnh trong bài viết → kéo các góc để phóng to/thu nhỏ; thanh công cụ của ảnh cho phép đổi vị trí.";
+        imageHint.textContent = "Mẹo: click vào ảnh → kéo các góc để phóng to/thu nhỏ; thanh công cụ xuất hiện dưới ảnh để căn trái, giữa hoặc phải.";
         shell.parentNode.insertBefore(imageHint, textarea.nextSibling);
 
         const status = document.createElement("div");
@@ -337,6 +337,7 @@
 
     function setHtml(html) {
         if (!quill) return;
+        uploadedImageUrls = new Set();
         const value = String(html || "").trim();
         quill.setText("");
         if (value) quill.clipboard.dangerouslyPasteHTML(value, "api");
@@ -348,6 +349,116 @@
     function syncHtml() {
         const textarea = document.getElementById("blogContent");
         if (quill && textarea) textarea.value = quill.root.innerHTML;
+    }
+
+    function extractImageUrls(html) {
+        const urls = new Set();
+        if (!html) return urls;
+        const doc = new DOMParser().parseFromString(String(html), "text/html");
+        doc.querySelectorAll("img[src]").forEach(img => {
+            const src = img.getAttribute("src");
+            if (src) urls.add(src.trim());
+        });
+        return urls;
+    }
+
+    function getStoragePathFromUrl(url) {
+        if (!url || typeof url !== "string") return null;
+        try {
+            const parsed = new URL(url);
+            const markers = [
+                `/storage/v1/object/public/${BLOG_IMAGE_BUCKET}/`,
+                `/storage/v1/object/sign/${BLOG_IMAGE_BUCKET}/`,
+                `/storage/v1/object/authenticated/${BLOG_IMAGE_BUCKET}/`
+            ];
+            const marker = markers.find(item => parsed.pathname.includes(item));
+            if (!marker) return null;
+            const index = parsed.pathname.indexOf(marker);
+            return decodeURIComponent(parsed.pathname.slice(index + marker.length));
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async function deleteUnusedStorageImages(urls, excludePostId = null) {
+        const candidates = [...new Set([...urls].filter(Boolean))];
+        if (!candidates.length) return;
+        const client = getSupabaseClient();
+        if (!client) return;
+
+        const { data: posts, error } = await client.from("blog_posts").select("id,content");
+        if (error) {
+            console.warn("Không kiểm tra được ảnh Blog đang được dùng:", error.message);
+            return;
+        }
+
+        const removablePaths = [];
+        for (const url of candidates) {
+            const path = getStoragePathFromUrl(url);
+            if (!path) continue;
+            const usedElsewhere = (posts || []).some(post => {
+                if (excludePostId != null && String(post.id) === String(excludePostId)) return false;
+                return extractImageUrls(post.content || "").has(url);
+            });
+            if (!usedElsewhere) removablePaths.push(path);
+        }
+
+        if (!removablePaths.length) return;
+        const { error: removeError } = await client.storage.from(BLOG_IMAGE_BUCKET).remove(removablePaths);
+        if (removeError) {
+            console.warn("Không xóa được ảnh Blog không còn dùng:", removeError.message);
+        } else {
+            console.info(`Đã xóa ${removablePaths.length} ảnh Blog không còn được sử dụng.`);
+        }
+    }
+
+    async function cleanupAfterSave(postId, oldContent, uploadedUrls) {
+        const client = getSupabaseClient();
+        if (!client) return;
+        if (!postId) {
+            const currentUrls = extractImageUrls(document.getElementById("blogContent")?.value || "");
+            const unusedUploaded = [...uploadedUrls].filter(url => !currentUrls.has(url));
+            await deleteUnusedStorageImages(unusedUploaded, null);
+            return;
+        }
+
+        const { data: savedPost, error } = await client.from("blog_posts").select("id,content").eq("id", postId).maybeSingle();
+        if (error || !savedPost) return;
+
+        const oldUrls = extractImageUrls(oldContent);
+        const savedUrls = extractImageUrls(savedPost.content || "");
+        const removedUrls = [...oldUrls].filter(url => !savedUrls.has(url));
+        const unsavedUploads = [...uploadedUrls].filter(url => !savedUrls.has(url));
+        await deleteUnusedStorageImages([...removedUrls, ...unsavedUploads], postId);
+    }
+
+    function scheduleImageCleanup() {
+        const form = document.getElementById("blogPostForm");
+        if (!form) return;
+        syncHtml();
+        const postId = document.getElementById("blogPostId")?.value || null;
+        let oldContent = "";
+        if (postId && typeof embeddedBlogPosts !== "undefined") {
+            oldContent = embeddedBlogPosts.find(post => String(post.id) === String(postId))?.content || "";
+        }
+        const uploadedUrls = new Set(uploadedImageUrls);
+        [1800, 4000].forEach(delay => {
+            setTimeout(() => cleanupAfterSave(postId, oldContent, uploadedUrls), delay);
+        });
+    }
+
+    function scheduleDeletedPostCleanup(postId, oldContent) {
+        if (!postId || !oldContent) return;
+        const urls = extractImageUrls(oldContent);
+        if (!urls.size) return;
+        [1500, 3500].forEach(delay => {
+            setTimeout(async () => {
+                const client = getSupabaseClient();
+                if (!client) return;
+                const { data } = await client.from("blog_posts").select("id").eq("id", postId).maybeSingle();
+                if (!data) await deleteUnusedStorageImages([...urls], postId);
+            }, delay);
+        });
     }
 
     function wrapEditorOpen() {
@@ -378,13 +489,25 @@
         });
 
         document.addEventListener("submit", event => {
-            if (event.target?.id === "blogPostForm") syncHtml();
+            if (event.target?.id === "blogPostForm") {
+                syncHtml();
+                scheduleImageCleanup();
+            }
         }, true);
 
         document.addEventListener("click", event => {
             const target = event.target.closest("#blogBackButton, #blogCancelEdit");
-            if (target && quill) setHtml("");
-        });
+            if (target && quill) {
+                setHtml("");
+            }
+
+            const deleteButton = event.target.closest("[data-blog-delete]");
+            if (deleteButton && typeof embeddedBlogPosts !== "undefined") {
+                const postId = deleteButton.dataset.blogDelete;
+                const post = embeddedBlogPosts.find(item => String(item.id) === String(postId));
+                if (post) scheduleDeletedPostCleanup(postId, post.content || "");
+            }
+        }, true);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", watchForBlogEditor);
