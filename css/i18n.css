@@ -1,1 +1,226 @@
-.language-switcher{position:relative;display:flex;align-items:center;margin-left:0;margin-right:0;white-space:nowrap;z-index:1000;order:3;flex-shrink:0}.language-switcher .language-current{display:flex;align-items:center;gap:7px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:#fff;color:inherit;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:7px 10px;opacity:1;box-shadow:0 2px 8px rgba(0,0,0,.08)}.language-switcher .language-options{display:none;position:absolute;right:0;top:calc(100% + 7px);min-width:165px;padding:6px;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.16)}.language-switcher.open .language-options{display:flex;flex-direction:column}.language-switcher .language-options button{display:flex;align-items:center;gap:9px;width:100%;border:0;border-radius:7px;background:transparent;color:#222;font:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:9px 10px;text-align:left;opacity:1}.language-switcher .language-options button:hover,.language-switcher .language-options button.active{background:#f3f6fa}.language-switcher .language-current,.language-switcher .language-options button{font-family:Arial,"Segoe UI",sans-serif}.language-switcher .language-current{font-size:0}.language-switcher .language-current::after{font-size:13px}.language-switcher .language-options button{font-size:0}.language-switcher .language-options button::after{font-size:13px}.language-switcher .language-options button[data-multi-lang="vi"]::before,.language-switcher .language-options button[data-multi-lang="en"]::before,.language-switcher .language-options button[data-multi-lang="zh"]::before,.language-switcher .language-options button[data-multi-lang="ko"]::before,.language-switcher .language-options button[data-multi-lang="ja"]::before{content:"";display:inline-block;width:22px;height:15px;flex:0 0 22px;background-size:cover;background-position:center;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}.language-switcher .language-options button[data-multi-lang="vi"]::before{background-image:url("https://flagcdn.com/w40/vn.png")}.language-switcher .language-options button[data-multi-lang="en"]::before{background-image:url("https://flagcdn.com/w40/gb.png")}.language-switcher .language-options button[data-multi-lang="zh"]::before{background-image:url("https://flagcdn.com/w40/cn.png")}.language-switcher .language-options button[data-multi-lang="ko"]::before{background-image:url("https://flagcdn.com/w40/kr.png")}.language-switcher .language-options button[data-multi-lang="ja"]::before{background-image:url("https://flagcdn.com/w40/jp.png")}.language-switcher .language-options button[data-multi-lang="vi"]::after{content:"Tiếng Việt"}.language-switcher .language-options button[data-multi-lang="en"]::after{content:"English"}.language-switcher .language-options button[data-multi-lang="zh"]::after{content:"中文"}.language-switcher .language-options button[data-multi-lang="ko"]::after{content:"한국어"}.language-switcher .language-options button[data-multi-lang="ja"]::after{content:"日本語"}.language-switcher .language-current::before{content:"";display:inline-block;width:22px;height:15px;flex:0 0 22px;background-size:cover;background-position:center;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}html[lang="vi"] .language-switcher .language-current::before{background-image:url("https://flagcdn.com/w40/vn.png")}html[lang="en"] .language-switcher .language-current::before{background-image:url("https://flagcdn.com/w40/gb.png")}html[lang="zh"] .language-switcher .language-current::before{background-image:url("https://flagcdn.com/w40/cn.png")}html[lang="ko"] .language-switcher .language-current::before{background-image:url("https://flagcdn.com/w40/kr.png")}html[lang="ja"] .language-switcher .language-current::before{background-image:url("https://flagcdn.com/w40/jp.png")}html[lang="vi"] .language-switcher .language-current::after{content:"VI ▾"}html[lang="en"] .language-switcher .language-current::after{content:"EN ▾"}html[lang="zh"] .language-switcher .language-current::after{content:"ZH ▾"}html[lang="ko"] .language-switcher .language-current::after{content:"KO ▾"}html[lang="ja"] .language-switcher .language-current::after{content:"JA ▾"}@media(max-width:900px){.language-switcher{margin:8px 0;order:2}.language-switcher .language-current{font-size:0}.language-switcher .language-options{right:0;min-width:155px}}@media(max-width:650px){.language-switcher{order:2;margin-left:auto;margin-right:0}.header-container{position:relative}}
+.language-switcher {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: 0;
+    margin-right: 0;
+    white-space: nowrap;
+    z-index: 1000;
+    order: 3;
+    flex-shrink: 0
+}
+
+.language-switcher .language-current {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid rgba(0, 0, 0, .12);
+    border-radius: 8px;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 7px 10px;
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08)
+}
+
+.language-switcher .language-options {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 7px);
+    min-width: 165px;
+    padding: 6px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, .12);
+    border-radius: 10px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .16)
+}
+
+.language-switcher.open .language-options {
+    display: flex;
+    flex-direction: column
+}
+
+.language-switcher .language-options button {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #222;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 9px 10px;
+    text-align: left;
+    opacity: 1
+}
+
+.language-switcher .language-options button:hover,
+.language-switcher .language-options button.active {
+    background: #f3f6fa
+}
+
+.language-switcher .language-current,
+.language-switcher .language-options button {
+    font-family: Arial, "Segoe UI", sans-serif
+}
+
+.language-switcher .language-current {
+    font-size: 0
+}
+
+.language-switcher .language-current::after {
+    font-size: 13px
+}
+
+.language-switcher .language-options button {
+    font-size: 0
+}
+
+.language-switcher .language-options button::after {
+    font-size: 13px
+}
+
+.language-switcher .language-options button[data-multi-lang="vi"]::before,
+.language-switcher .language-options button[data-multi-lang="en"]::before,
+.language-switcher .language-options button[data-multi-lang="zh"]::before,
+.language-switcher .language-options button[data-multi-lang="ko"]::before,
+.language-switcher .language-options button[data-multi-lang="ja"]::before {
+    content: "";
+    display: inline-block;
+    width: 22px;
+    height: 15px;
+    flex: 0 0 22px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .08)
+}
+
+.language-switcher .language-options button[data-multi-lang="vi"]::before {
+    background-image: url("https://flagcdn.com/w40/vn.png")
+}
+
+.language-switcher .language-options button[data-multi-lang="en"]::before {
+    background-image: url("https://flagcdn.com/w40/gb.png")
+}
+
+.language-switcher .language-options button[data-multi-lang="zh"]::before {
+    background-image: url("https://flagcdn.com/w40/cn.png")
+}
+
+.language-switcher .language-options button[data-multi-lang="ko"]::before {
+    background-image: url("https://flagcdn.com/w40/kr.png")
+}
+
+.language-switcher .language-options button[data-multi-lang="ja"]::before {
+    background-image: url("https://flagcdn.com/w40/jp.png")
+}
+
+.language-switcher .language-options button[data-multi-lang="vi"]::after {
+    content: "Tiếng Việt"
+}
+
+.language-switcher .language-options button[data-multi-lang="en"]::after {
+    content: "English"
+}
+
+.language-switcher .language-options button[data-multi-lang="zh"]::after {
+    content: "中文"
+}
+
+.language-switcher .language-options button[data-multi-lang="ko"]::after {
+    content: "한국어"
+}
+
+.language-switcher .language-options button[data-multi-lang="ja"]::after {
+    content: "日本語"
+}
+
+.language-switcher .language-current::before {
+    content: "";
+    display: inline-block;
+    width: 22px;
+    height: 15px;
+    flex: 0 0 22px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .08)
+}
+
+html[lang="vi"] .language-switcher .language-current::before {
+    background-image: url("https://flagcdn.com/w40/vn.png")
+}
+
+html[lang="en"] .language-switcher .language-current::before {
+    background-image: url("https://flagcdn.com/w40/gb.png")
+}
+
+html[lang="zh"] .language-switcher .language-current::before {
+    background-image: url("https://flagcdn.com/w40/cn.png")
+}
+
+html[lang="ko"] .language-switcher .language-current::before {
+    background-image: url("https://flagcdn.com/w40/kr.png")
+}
+
+html[lang="ja"] .language-switcher .language-current::before {
+    background-image: url("https://flagcdn.com/w40/jp.png")
+}
+
+html[lang="vi"] .language-switcher .language-current::after {
+    content: "VI ▾"
+}
+
+html[lang="en"] .language-switcher .language-current::after {
+    content: "EN ▾"
+}
+
+html[lang="zh"] .language-switcher .language-current::after {
+    content: "ZH ▾"
+}
+
+html[lang="ko"] .language-switcher .language-current::after {
+    content: "KO ▾"
+}
+
+html[lang="ja"] .language-switcher .language-current::after {
+    content: "JA ▾"
+}
+
+@media(max-width:900px) {
+    .language-switcher {
+        margin: 8px 0;
+        order: 2
+    }
+
+    .language-switcher .language-current {
+        font-size: 0
+    }
+
+    .language-switcher .language-options {
+        right: 0;
+        min-width: 155px
+    }
+}
+
+@media(max-width:650px) {
+    .language-switcher {
+        order: 2;
+        margin-left: auto;
+        margin-right: 0
+    }
+
+    .header-container {
+        position: relative
+    }
+}
