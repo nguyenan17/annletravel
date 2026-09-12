@@ -289,3 +289,155 @@ if (typeof previousShowDashboard21 === "function") {
         refreshDashboard21();
     };
 }
+
+// =========================================================
+// BLOG - embedded inside the main admin dashboard
+// =========================================================
+let embeddedBlogLoaded = false;
+let embeddedBlogPosts = [];
+let embeddedBlogDestinations = [];
+let embeddedBlogEditingId = null;
+
+const BLOG_SECTION_ID = "adminSectionBlog";
+
+function blogEsc(value) {
+    return String(value ?? "").replace(/[&<>\"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
+    }[char]));
+}
+
+function embeddedBlogHtml() {
+    return `
+    <section id="${BLOG_SECTION_ID}" class="admin-content-section hidden">
+        <div class="blog-admin-wrap">
+            <div id="blogListView">
+                <div class="page-title">
+                    <div><h1>Blog / Kinh nghiệm du lịch</h1><p>Viết nội dung SEO và liên kết bài viết với điểm đến.</p></div>
+                    <button id="blogNewPostButton" class="primary-button">+ Bài viết mới</button>
+                </div>
+                <div class="tour-section">
+                    <div class="blog-admin-toolbar"><strong id="blogPostCount">0 bài viết</strong><button id="blogRefreshButton" class="refresh-button">↻ Làm mới</button></div>
+                    <div class="table-wrapper"><table class="blog-admin-table"><thead><tr><th>Bài viết</th><th>Chuyên mục</th><th>Điểm đến</th><th>Trạng thái</th><th>Cập nhật</th><th>Thao tác</th></tr></thead><tbody id="blogPostTableBody"></tbody></table></div>
+                </div>
+            </div>
+            <div id="blogEditorView" class="blog-admin-hidden">
+                <div class="page-title"><div><h1 id="blogEditorTitle">Bài viết mới</h1><p>Tối ưu tiêu đề, mô tả và nội dung trước khi xuất bản.</p></div><button id="blogBackButton" class="refresh-button">← Danh sách</button></div>
+                <form id="blogPostForm"><input type="hidden" id="blogPostId">
+                    <div class="blog-form-grid">
+                        <div class="blog-form-main">
+                            <div class="blog-form-group"><label>Tiêu đề *</label><input id="blogTitle" required></div>
+                            <div class="blog-form-group"><label>Slug *</label><input id="blogSlug" required><span class="blog-hint">Ví dụ: kinh-nghiem-du-lich-han-quoc-tu-tuc</span></div>
+                            <div class="blog-form-group"><label>Mô tả ngắn</label><textarea id="blogExcerpt"></textarea></div>
+                            <div class="blog-form-group"><label>Nội dung HTML *</label><textarea id="blogContent" class="blog-content-editor" required></textarea><span class="blog-hint">Có thể dùng h2, p, ul, li, strong, a và img.</span></div>
+                        </div>
+                        <div class="blog-form-side">
+                            <div class="blog-form-group"><label>Chuyên mục</label><input id="blogCategory" value="Kinh nghiệm du lịch"></div>
+                            <div class="blog-form-group"><label>Điểm đến liên quan</label><select id="blogDestination"><option value="">Không gắn điểm đến</option></select></div>
+                            <div class="blog-form-group"><label>Ảnh cover URL</label><input id="blogCoverImage" placeholder="https://..."><div id="blogCoverPreview" class="blog-cover-preview"></div></div>
+                            <div class="blog-form-group"><label>SEO title</label><input id="blogSeoTitle"></div>
+                            <div class="blog-form-group"><label>SEO description</label><textarea id="blogSeoDescription" rows="4"></textarea></div>
+                            <label class="checkbox-label"><input type="checkbox" id="blogPublished"> Xuất bản ngay</label>
+                        </div>
+                    </div>
+                    <div class="modal-actions" style="margin-top:22px"><button type="button" id="blogCancelEdit" class="cancel-button">Hủy</button><button type="submit" class="primary-button">Lưu bài viết</button></div>
+                </form>
+            </div>
+        </div>
+    </section>`;
+}
+
+function ensureEmbeddedBlogStyles() {
+    if (document.getElementById("embeddedBlogStyles")) return;
+    const style = document.createElement("style");
+    style.id = "embeddedBlogStyles";
+    style.textContent = `
+        .blog-admin-wrap{max-width:1250px;margin:0 auto}.blog-admin-toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:22px}.blog-admin-table{width:100%;border-collapse:collapse}.blog-admin-table th,.blog-admin-table td{padding:13px 12px;border-bottom:1px solid #e7edf0;text-align:left;vertical-align:top}.blog-admin-table th{font-size:12px;text-transform:uppercase;color:#71808a}.blog-admin-title{font-weight:800;color:#173544}.blog-admin-slug{font-size:12px;color:#81909a}.blog-status{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.blog-status.on{background:#e8f7ef;color:#16764a}.blog-status.off{background:#f3f4f5;color:#6c777d}.blog-actions{display:flex;gap:7px;flex-wrap:wrap}.blog-form-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.blog-form-main,.blog-form-side{display:flex;flex-direction:column;gap:14px}.blog-form-group{display:flex;flex-direction:column;gap:7px}.blog-form-group label{font-size:13px;font-weight:700;color:#40525b}.blog-form-group input,.blog-form-group textarea,.blog-form-group select{width:100%;box-sizing:border-box;border:1px solid #d8e1e5;border-radius:9px;padding:11px 12px;font:inherit;background:#fff}.blog-form-group textarea{min-height:110px;resize:vertical}.blog-content-editor{min-height:360px!important;font-family:monospace;line-height:1.6}.blog-cover-preview{height:180px;border-radius:12px;background:#eef3f5 center/cover no-repeat;border:1px solid #dce5e9}.blog-hint{font-size:12px;color:#81909a;line-height:1.5}.blog-admin-hidden{display:none!important}@media(max-width:800px){.blog-form-grid{grid-template-columns:1fr}.blog-admin-table{font-size:13px}.blog-admin-table th:nth-child(3),.blog-admin-table td:nth-child(3){display:none}}
+    `;
+    document.head.appendChild(style);
+}
+
+async function ensureEmbeddedBlogSection() {
+    let section = document.getElementById(BLOG_SECTION_ID);
+    if (!section) {
+        ensureEmbeddedBlogStyles();
+        document.querySelector(".dashboard-container")?.insertAdjacentHTML("beforeend", embeddedBlogHtml());
+        section = document.getElementById(BLOG_SECTION_ID);
+        bindEmbeddedBlogEvents();
+    }
+    if (!embeddedBlogLoaded) {
+        embeddedBlogLoaded = true;
+        await loadEmbeddedBlogDestinations();
+        await loadEmbeddedBlogPosts();
+    }
+    return section;
+}
+
+function setAdminSectionVisible(sectionName) {
+    const sectionMap = { dashboard:"adminSectionDashboard", tours:"adminSectionTours", bookings:"adminSectionBookings", destinations:"adminSectionDestinations", services:"adminSectionServices", blog:BLOG_SECTION_ID };
+    const targetId = sectionMap[sectionName] || sectionMap.dashboard;
+    document.querySelectorAll(".admin-content-section").forEach(section => section.classList.toggle("hidden", section.id !== targetId));
+    document.querySelectorAll(".admin-nav-link").forEach(link => link.classList.toggle("active", link.dataset.section === sectionName));
+    history.replaceState(null, "", `#${sectionName}`);
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function openEmbeddedBlog() {
+    await ensureEmbeddedBlogSection();
+    setAdminSectionVisible("blog");
+}
+
+function bindEmbeddedBlogEvents() {
+    document.getElementById("blogNewPostButton")?.addEventListener("click", () => openEmbeddedBlogEditor());
+    document.getElementById("blogBackButton")?.addEventListener("click", closeEmbeddedBlogEditor);
+    document.getElementById("blogCancelEdit")?.addEventListener("click", closeEmbeddedBlogEditor);
+    document.getElementById("blogRefreshButton")?.addEventListener("click", loadEmbeddedBlogPosts);
+    document.getElementById("blogCoverImage")?.addEventListener("input", updateEmbeddedBlogPreview);
+    document.getElementById("blogTitle")?.addEventListener("blur", () => {
+        if (!document.getElementById("blogSlug").value.trim()) document.getElementById("blogSlug").value = embeddedBlogSlugify(document.getElementById("blogTitle").value);
+        if (!document.getElementById("blogSeoTitle").value.trim()) document.getElementById("blogSeoTitle").value = document.getElementById("blogTitle").value + " | ANNLETRAVEL";
+    });
+    document.getElementById("blogPostForm")?.addEventListener("submit", saveEmbeddedBlogPost);
+}
+
+async function loadEmbeddedBlogDestinations() {
+    const {data,error} = await supabaseClient.from("destinations").select("name,slug").order("sort_order",{ascending:true});
+    if (error) { console.error("Blog destinations:",error); return; }
+    embeddedBlogDestinations=data||[];
+    const select=document.getElementById("blogDestination");
+    if(select) select.innerHTML='<option value="">Không gắn điểm đến</option>'+embeddedBlogDestinations.map(d=>`<option value="${blogEsc(d.name)}">${blogEsc(d.name)}</option>`).join("");
+}
+
+async function loadEmbeddedBlogPosts() {
+    const body=document.getElementById("blogPostTableBody");
+    if(body) body.innerHTML='<tr><td colspan="6">Đang tải...</td></tr>';
+    const {data,error}=await supabaseClient.from("blog_posts").select("*").order("created_at",{ascending:false});
+    if(error){if(body)body.innerHTML=`<tr><td colspan="6">Không tải được bài viết: ${blogEsc(error.message)}</td></tr>`;console.error(error);return;}
+    embeddedBlogPosts=data||[];
+    const count=document.getElementById("blogPostCount");if(count)count.textContent=`${embeddedBlogPosts.length} bài viết`;
+    renderEmbeddedBlogPosts();
+}
+
+function renderEmbeddedBlogPosts(){
+    const body=document.getElementById("blogPostTableBody");if(!body)return;
+    body.innerHTML=embeddedBlogPosts.length?embeddedBlogPosts.map(p=>`<tr><td><div class="blog-admin-title">${blogEsc(p.title)}</div><div class="blog-admin-slug">${blogEsc(p.slug)}</div></td><td>${blogEsc(p.category||"-")}</td><td>${blogEsc(p.destination||"-")}</td><td><span class="blog-status ${p.published?'on':'off'}">${p.published?'Đã xuất bản':'Bản nháp'}</span></td><td>${p.updated_at?new Intl.DateTimeFormat('vi-VN',{dateStyle:'short'}).format(new Date(p.updated_at)):'-'}</td><td><div class="blog-actions"><button class="edit-button" data-blog-edit="${p.id}">Sửa</button><button class="delete-button" data-blog-delete="${p.id}">Xóa</button></div></td></tr>`).join(""):`<tr><td colspan="6">Chưa có bài viết.</td></tr>`;
+    body.querySelectorAll("[data-blog-edit]").forEach(btn=>btn.addEventListener("click",()=>openEmbeddedBlogEditor(embeddedBlogPosts.find(p=>String(p.id)===String(btn.dataset.blogEdit)))));
+    body.querySelectorAll("[data-blog-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteEmbeddedBlogPost(btn.dataset.blogDelete)));
+}
+
+function embeddedBlogSlugify(value){return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");}
+function resetEmbeddedBlogForm(){embeddedBlogEditingId=null;document.getElementById("blogPostForm")?.reset();document.getElementById("blogPostId").value="";document.getElementById("blogCategory").value="Kinh nghiệm du lịch";document.getElementById("blogDestination").value="";document.getElementById("blogCoverPreview").style.backgroundImage="";document.getElementById("blogEditorTitle").textContent="Bài viết mới";}
+function openEmbeddedBlogEditor(post=null){document.getElementById("blogListView").classList.add("blog-admin-hidden");document.getElementById("blogEditorView").classList.remove("blog-admin-hidden");resetEmbeddedBlogForm();if(post){embeddedBlogEditingId=post.id;document.getElementById("blogEditorTitle").textContent="Sửa bài viết";document.getElementById("blogPostId").value=post.id;document.getElementById("blogTitle").value=post.title||"";document.getElementById("blogSlug").value=post.slug||"";document.getElementById("blogExcerpt").value=post.excerpt||"";document.getElementById("blogContent").value=post.content||"";document.getElementById("blogCategory").value=post.category||"Kinh nghiệm du lịch";document.getElementById("blogDestination").value=post.destination||"";document.getElementById("blogCoverImage").value=post.cover_image||"";document.getElementById("blogSeoTitle").value=post.seo_title||"";document.getElementById("blogSeoDescription").value=post.seo_description||"";document.getElementById("blogPublished").checked=!!post.published;updateEmbeddedBlogPreview();}}
+function closeEmbeddedBlogEditor(){document.getElementById("blogEditorView")?.classList.add("blog-admin-hidden");document.getElementById("blogListView")?.classList.remove("blog-admin-hidden");}
+function updateEmbeddedBlogPreview(){const url=document.getElementById("blogCoverImage")?.value.trim();const preview=document.getElementById("blogCoverPreview");if(preview)preview.style.backgroundImage=url?`url("${url.replace(/"/g,"")}")`:"";}
+async function deleteEmbeddedBlogPost(id){const post=embeddedBlogPosts.find(p=>String(p.id)===String(id));if(!post||!confirm(`Xóa bài viết "${post.title}"?`))return;const {error}=await supabaseClient.from("blog_posts").delete().eq("id",id);if(error){alert("Không thể xóa: "+error.message);return;}await loadEmbeddedBlogPosts();}
+async function saveEmbeddedBlogPost(event){event.preventDefault();const title=document.getElementById("blogTitle").value.trim(),slug=embeddedBlogSlugify(document.getElementById("blogSlug").value.trim());const payload={title,slug,excerpt:document.getElementById("blogExcerpt").value.trim(),content:document.getElementById("blogContent").value,cover_image:document.getElementById("blogCoverImage").value.trim()||null,seo_title:document.getElementById("blogSeoTitle").value.trim()||null,seo_description:document.getElementById("blogSeoDescription").value.trim()||null,category:document.getElementById("blogCategory").value.trim()||"Kinh nghiệm du lịch",destination:document.getElementById("blogDestination").value||null,published:document.getElementById("blogPublished").checked,published_at:document.getElementById("blogPublished").checked?new Date().toISOString():null,updated_at:new Date().toISOString()};if(!title||!slug||!payload.content){alert("Vui lòng nhập tiêu đề, slug và nội dung.");return;}let result;if(embeddedBlogEditingId)result=await supabaseClient.from("blog_posts").update(payload).eq("id",embeddedBlogEditingId);else result=await supabaseClient.from("blog_posts").insert(payload);if(result.error){alert("Không thể lưu bài viết:\n"+result.error.message);return;}alert("Đã lưu bài viết.");closeEmbeddedBlogEditor();await loadEmbeddedBlogPosts();}
+
+(function initEmbeddedBlogNavigation(){
+    document.addEventListener("click", event => {
+        const link=event.target.closest('a.admin-nav-link[href="blog.html"]');
+        if(!link)return;
+        event.preventDefault();
+        openEmbeddedBlog();
+    });
+    if(window.location.hash==="#blog") setTimeout(openEmbeddedBlog,0);
+})();
