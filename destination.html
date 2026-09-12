@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết điểm đến du lịch | ANNLETRAVEL</title>
-    <meta name="description" content="Khám phá thông tin điểm đến, trải nghiệm và hành trình du lịch cùng ANNLETRAVEL. Tìm tour phù hợp với lịch trình và nhu cầu của bạn.">
+    <title>Điểm đến du lịch | ANNLETRAVEL</title>
+    <meta name="description" content="Khám phá thông tin điểm đến, trải nghiệm và các tour du lịch phù hợp cùng ANNLETRAVEL.">
     <meta name="robots" content="index,follow">
-    <link rel="canonical" href="https://annletravel.com/destination.html">
+    <link rel="canonical" id="canonicalUrl" href="https://annletravel.com/destination.html">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Chi tiết điểm đến du lịch | ANNLETRAVEL">
-    <meta property="og:description" content="Khám phá các điểm đến và trải nghiệm du lịch cùng ANNLETRAVEL.">
-    <meta property="og:url" content="https://annletravel.com/destination.html">
+    <meta property="og:title" id="ogTitle" content="Điểm đến du lịch | ANNLETRAVEL">
+    <meta property="og:description" id="ogDescription" content="Khám phá các điểm đến và trải nghiệm du lịch cùng ANNLETRAVEL.">
+    <meta property="og:url" id="ogUrl" content="https://annletravel.com/destination.html">
     <meta property="og:site_name" content="ANNLETRAVEL">
+    <meta property="og:image" content="https://annletravel.com/images/logo.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Chi tiết điểm đến du lịch | ANNLETRAVEL">
-    <meta name="twitter:description" content="Khám phá các điểm đến và trải nghiệm du lịch cùng ANNLETRAVEL.">
-    <script type="application/ld+json">
+    <meta name="twitter:title" id="twitterTitle" content="Điểm đến du lịch | ANNLETRAVEL">
+    <meta name="twitter:description" id="twitterDescription" content="Khám phá các điểm đến và trải nghiệm du lịch cùng ANNLETRAVEL.">
+    <meta name="twitter:image" content="https://annletravel.com/images/logo.png">
+    <script type="application/ld+json" id="destinationSchema">
     {
       "@context":"https://schema.org",
       "@type":"WebPage",
-      "name":"Chi tiết điểm đến du lịch | ANNLETRAVEL",
+      "name":"Điểm đến du lịch | ANNLETRAVEL",
       "url":"https://annletravel.com/destination.html",
       "description":"Thông tin chi tiết về điểm đến và trải nghiệm du lịch tại ANNLETRAVEL.",
       "isPartOf":{"@type":"WebSite","name":"ANNLETRAVEL","url":"https://annletravel.com/"}
@@ -46,5 +48,57 @@
 <script src="js/app.js"></script>
 <script src="js/destinations.js"></script>
 <script src="js/hardening.js"></script>
+<script>
+(function () {
+    const originalRender = window.renderDestinationDetail;
+    if (typeof originalRender !== 'function') return;
+
+    window.renderDestinationDetail = async function () {
+        await originalRender();
+
+        const slug = new URLSearchParams(window.location.search).get('slug');
+        if (!slug || !Array.isArray(window.destinations)) return;
+
+        const destination = window.destinations.find(item => item.slug === slug);
+        if (!destination) return;
+
+        const name = String(destination.name || '').trim();
+        const country = String(destination.country || '').trim();
+        const description = String(destination.description || '').trim();
+        const title = `${name} - Tour du lịch & kinh nghiệm | ANNLETRAVEL`;
+        const metaDescription = description
+            ? `${description} Khám phá tour du lịch ${name} cùng ANNLETRAVEL.`
+            : `Khám phá ${name}, kinh nghiệm du lịch và các tour phù hợp cùng ANNLETRAVEL.`;
+        const url = `https://annletravel.com/destination.html?slug=${encodeURIComponent(slug)}`;
+
+        document.title = title;
+        document.querySelector('meta[name="description"]')?.setAttribute('content', metaDescription);
+        document.getElementById('canonicalUrl')?.setAttribute('href', url);
+        document.getElementById('ogTitle')?.setAttribute('content', title);
+        document.getElementById('ogDescription')?.setAttribute('content', metaDescription);
+        document.getElementById('ogUrl')?.setAttribute('content', url);
+        document.getElementById('twitterTitle')?.setAttribute('content', title);
+        document.getElementById('twitterDescription')?.setAttribute('content', metaDescription);
+
+        const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'TouristDestination',
+            name,
+            description: metaDescription,
+            url,
+            touristType: ['Leisure travelers', 'Family travelers'],
+            containedInPlace: country ? { '@type': 'Country', name: country } : undefined,
+            isPartOf: {
+                '@type': 'WebSite',
+                name: 'ANNLETRAVEL',
+                url: 'https://annletravel.com/'
+            }
+        };
+        Object.keys(schema).forEach(key => schema[key] === undefined && delete schema[key]);
+        const schemaElement = document.getElementById('destinationSchema');
+        if (schemaElement) schemaElement.textContent = JSON.stringify(schema);
+    };
+})();
+</script>
 </body>
 </html>
