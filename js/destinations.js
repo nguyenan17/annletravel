@@ -123,6 +123,45 @@ async function renderDestinationsPage() {
         : `<div class="empty-result"><h3>Chưa có điểm đến phù hợp</h3><p>Hãy thử lựa chọn khu vực khác.</p></div>`;
 }
 
+function updateDestinationSeo(destination) {
+    if (!destination) return;
+
+    const name = String(destination.name || "").trim();
+    const country = String(destination.country || "").trim();
+    const description = String(destination.description || "").trim();
+    const title = `${name} - Tour du lịch & kinh nghiệm | ANNLETRAVEL`;
+    const metaDescription = description
+        ? `${description} Khám phá tour du lịch ${name} cùng ANNLETRAVEL.`
+        : `Khám phá ${name}, kinh nghiệm du lịch và các tour phù hợp cùng ANNLETRAVEL.`;
+    const url = `https://annletravel.com/destination.html?slug=${encodeURIComponent(destination.slug)}`;
+
+    document.title = title;
+    document.querySelector('meta[name="description"]')?.setAttribute("content", metaDescription);
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", url);
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content", title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute("content", metaDescription);
+    document.querySelector('meta[property="og:url"]')?.setAttribute("content", url);
+    document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", title);
+    document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", metaDescription);
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "TouristDestination",
+        "name": name,
+        "description": metaDescription,
+        "url": url,
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "ANNLETRAVEL",
+            "url": "https://annletravel.com/"
+        }
+    };
+    if (country) schema.containedInPlace = { "@type": "Country", "name": country };
+
+    const schemaElement = document.getElementById("destinationSchema");
+    if (schemaElement) schemaElement.textContent = JSON.stringify(schema);
+}
+
 async function renderDestinationDetail() {
     const container = document.getElementById("destinationDetail");
     if (!container) return;
@@ -136,7 +175,7 @@ async function renderDestinationDetail() {
         return;
     }
 
-    document.title = `${destination.name} - ANNLETRAVEL`;
+    updateDestinationSeo(destination);
 
     const image = destinationImage(destination.image);
     container.innerHTML = `
