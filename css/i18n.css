@@ -10,7 +10,7 @@
 
 .audience-header .language-switcher,
 .audience-header .multi-language-switcher {
-    position: relative;
+    position: relative !important;
     display: inline-flex !important;
     align-items: center !important;
     margin: 0 !important;
@@ -19,6 +19,8 @@
     order: 3 !important;
 }
 
+/* One stable flag only. The current flag is rendered by CSS background-image;
+   the emoji text injected by JavaScript is hidden. */
 .audience-header .language-current {
     position: relative !important;
     display: inline-flex !important;
@@ -30,55 +32,56 @@
     padding: 0 !important;
     margin: 0 !important;
     border: 0 !important;
-    border-radius: 50% !important;
+    border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: inherit !important;
+    color: transparent !important;
     font-size: 0 !important;
     line-height: 1 !important;
     cursor: pointer !important;
     appearance: none !important;
     -webkit-appearance: none !important;
     overflow: visible !important;
+    transform: none !important;
 }
 
-.audience-header .language-current:hover {
-    background: rgba(255,255,255,.12) !important;
+.audience-header .language-current:hover,
+.audience-header .language-current:focus,
+.audience-header .language-current:active {
+    background: transparent !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .audience-header .language-current .language-flag {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 24px !important;
-    min-width: 24px !important;
+    display: inline-block !important;
+    width: 25px !important;
+    min-width: 25px !important;
     height: 18px !important;
-    flex: 0 0 24px !important;
     margin: 0 !important;
     padding: 0 !important;
     font-size: 0 !important;
-    line-height: 1 !important;
+    line-height: 0 !important;
     color: transparent !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
-    background-size: contain !important;
+    background-size: 25px 18px !important;
     border: 0 !important;
     box-shadow: none !important;
+    transform: none !important;
+}
+
+.audience-header .language-current .language-flag::before,
+.audience-header .language-current .language-flag::after,
+.audience-header .language-current::before,
+.audience-header .language-current::after {
+    content: none !important;
+    display: none !important;
 }
 
 .audience-header .multi-language-switcher .language-current {
     font-size: 0 !important;
     color: transparent !important;
-}
-
-.audience-header .multi-language-switcher .language-current .language-flag {
-    display: inline-flex !important;
-}
-
-.audience-header .language-current::before,
-.audience-header .language-current::after {
-    content: none !important;
-    display: none !important;
 }
 
 .audience-header .language-options {
@@ -104,6 +107,7 @@
     gap: 2px !important;
 }
 
+/* Each option is a fixed-size button. Hover never changes its size or scale. */
 .audience-header .language-options button {
     position: relative !important;
     display: inline-flex !important;
@@ -119,7 +123,7 @@
     background-color: transparent !important;
     color: transparent !important;
     font-size: 0 !important;
-    line-height: 1 !important;
+    line-height: 0 !important;
     text-indent: -9999px !important;
     overflow: hidden !important;
     cursor: pointer !important;
@@ -128,10 +132,20 @@
     background-repeat: no-repeat !important;
     background-position: center !important;
     background-size: 25px 18px !important;
+    transform: none !important;
+    transition: none !important;
 }
 
-/* Never render the emoji/span inside an option. The button background is the
-   single source of truth for the flag, including legacy/multi-language markup. */
+.audience-header .language-options button:hover,
+.audience-header .language-options button:focus,
+.audience-header .language-options button:active {
+    transform: none !important;
+    background-color: #f2f5f8 !important;
+    background-size: 25px 18px !important;
+    box-shadow: none !important;
+}
+
+/* Never render the emoji/span inside an option. */
 .language-options button .language-option-flag,
 .language-options button .language-option-flag::before,
 .language-options button .language-option-flag::after,
@@ -142,50 +156,33 @@
     visibility: hidden !important;
 }
 
-.audience-header .language-options button:hover,
-.audience-header .language-options button.active {
-    background-color: #f2f5f8 !important;
-}
-
 .audience-header .language-options button[data-shared-lang="vi"],
-.audience-header .language-options button[data-multi-lang="vi"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
-}
-.audience-header .language-options button[data-shared-lang="en"],
-.audience-header .language-options button[data-multi-lang="en"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
-}
-.audience-header .language-options button[data-shared-lang="zh"],
-.audience-header .language-options button[data-multi-lang="zh"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
-}
-.audience-header .language-options button[data-shared-lang="ko"],
-.audience-header .language-options button[data-multi-lang="ko"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
-}
-.audience-header .language-options button[data-shared-lang="ja"],
-.audience-header .language-options button[data-multi-lang="ja"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
-}
-
-/* Fallback for the legacy selector: its buttons may not carry data-shared-lang
-   or data-multi-lang. Position is stable: VI, EN, ZH, KO, JA. */
+.audience-header .language-options button[data-multi-lang="vi"],
 .language-options button:nth-child(1) {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
 }
+.audience-header .language-options button[data-shared-lang="en"],
+.audience-header .language-options button[data-multi-lang="en"],
 .language-options button:nth-child(2) {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
 }
+.audience-header .language-options button[data-shared-lang="zh"],
+.audience-header .language-options button[data-multi-lang="zh"],
 .language-options button:nth-child(3) {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
 }
+.audience-header .language-options button[data-shared-lang="ko"],
+.audience-header .language-options button[data-multi-lang="ko"],
 .language-options button:nth-child(4) {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
 }
+.audience-header .language-options button[data-shared-lang="ja"],
+.audience-header .language-options button[data-multi-lang="ja"],
 .language-options button:nth-child(5) {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
 }
 
+/* Current selected flag: CSS only, never the emoji text. */
 .audience-header .language-switcher:has([data-shared-lang="vi"].active) .language-flag,
 .audience-header .language-switcher:has([data-multi-lang="vi"].active) .language-flag {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
@@ -211,11 +208,9 @@
     position: relative !important;
     padding-right: 20px !important;
 }
-
 .audience-header .nav-dropdown > a .nav-chevron {
     display: none !important;
 }
-
 .audience-header .nav-dropdown > a::before {
     content: "▾" !important;
     position: absolute;
