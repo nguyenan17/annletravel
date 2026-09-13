@@ -130,11 +130,13 @@
     background-size: 25px 18px !important;
 }
 
-.audience-header .language-options button::before,
-.audience-header .language-options button::after,
-.audience-header .language-options button .language-option-flag,
-.audience-header .language-options button .language-option-flag::before,
-.audience-header .language-options button .language-option-flag::after {
+/* Never render the emoji/span inside an option. The button background is the
+   single source of truth for the flag, including legacy/multi-language markup. */
+.language-options button .language-option-flag,
+.language-options button .language-option-flag::before,
+.language-options button .language-option-flag::after,
+.language-options button::before,
+.language-options button::after {
     display: none !important;
     content: none !important;
     visibility: hidden !important;
@@ -163,6 +165,24 @@
 }
 .audience-header .language-options button[data-shared-lang="ja"],
 .audience-header .language-options button[data-multi-lang="ja"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
+}
+
+/* Fallback for the legacy selector: its buttons may not carry data-shared-lang
+   or data-multi-lang. Position is stable: VI, EN, ZH, KO, JA. */
+.language-options button:nth-child(1) {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
+}
+.language-options button:nth-child(2) {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
+}
+.language-options button:nth-child(3) {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
+}
+.language-options button:nth-child(4) {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
+}
+.language-options button:nth-child(5) {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
 }
 
