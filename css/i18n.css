@@ -8,8 +8,6 @@
     flex-shrink: 0;
 }
 
-/* Public header: compact flag-only language control. The real flag spans are
-   kept visible; do not replace them with CSS pseudo-elements. */
 .audience-header .language-switcher,
 .audience-header .multi-language-switcher {
     position: relative;
@@ -48,7 +46,6 @@
     background: rgba(255,255,255,.12) !important;
 }
 
-/* Current shared-layout.js markup: <span class="language-flag">🇻🇳</span> */
 .audience-header .language-current .language-flag {
     display: inline-flex !important;
     align-items: center !important;
@@ -69,7 +66,6 @@
     box-shadow: none !important;
 }
 
-/* Older multi-language markup, if it appears during script startup. */
 .audience-header .multi-language-switcher .language-current {
     font-size: 0 !important;
     color: transparent !important;
@@ -120,10 +116,12 @@
     margin: 0 auto !important;
     border: 0 !important;
     border-radius: 8px !important;
-    background: transparent !important;
+    background-color: transparent !important;
     color: transparent !important;
     font-size: 0 !important;
     line-height: 1 !important;
+    text-indent: -9999px !important;
+    overflow: hidden !important;
     cursor: pointer !important;
     appearance: none !important;
     -webkit-appearance: none !important;
@@ -132,70 +130,63 @@
     background-size: 25px 18px !important;
 }
 
+.audience-header .language-options button::before,
+.audience-header .language-options button::after,
+.audience-header .language-options button .language-option-flag,
+.audience-header .language-options button .language-option-flag::before,
+.audience-header .language-options button .language-option-flag::after {
+    display: none !important;
+    content: none !important;
+    visibility: hidden !important;
+}
+
 .audience-header .language-options button:hover,
 .audience-header .language-options button.active {
     background-color: #f2f5f8 !important;
 }
 
-.audience-header .language-options button .language-option-flag {
-    display: none !important;
-}
-
-/* Real flag assets. Using image files avoids Windows/Chrome rendering
-   regional-indicator emoji as plain text such as "VN" or "GB". */
-.audience-header .language-options button[data-shared-lang="vi"] {
+.audience-header .language-options button[data-shared-lang="vi"],
+.audience-header .language-options button[data-multi-lang="vi"] {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
 }
-.audience-header .language-options button[data-shared-lang="en"] {
+.audience-header .language-options button[data-shared-lang="en"],
+.audience-header .language-options button[data-multi-lang="en"] {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
 }
-.audience-header .language-options button[data-shared-lang="zh"] {
+.audience-header .language-options button[data-shared-lang="zh"],
+.audience-header .language-options button[data-multi-lang="zh"] {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
 }
-.audience-header .language-options button[data-shared-lang="ko"] {
+.audience-header .language-options button[data-shared-lang="ko"],
+.audience-header .language-options button[data-multi-lang="ko"] {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
 }
-.audience-header .language-options button[data-shared-lang="ja"] {
+.audience-header .language-options button[data-shared-lang="ja"],
+.audience-header .language-options button[data-multi-lang="ja"] {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
 }
 
-/* The shared switcher marks the selected language on its option button.
-   :has() lets the real current flag follow the selected option without
-   rebuilding the switcher or introducing pseudo-element icons. */
-.audience-header .language-switcher:has([data-shared-lang="vi"].active) .language-flag {
+.audience-header .language-switcher:has([data-shared-lang="vi"].active) .language-flag,
+.audience-header .language-switcher:has([data-multi-lang="vi"].active) .language-flag {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
 }
-.audience-header .language-switcher:has([data-shared-lang="en"].active) .language-flag {
+.audience-header .language-switcher:has([data-shared-lang="en"].active) .language-flag,
+.audience-header .language-switcher:has([data-multi-lang="en"].active) .language-flag {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
 }
-.audience-header .language-switcher:has([data-shared-lang="zh"].active) .language-flag {
+.audience-header .language-switcher:has([data-shared-lang="zh"].active) .language-flag,
+.audience-header .language-switcher:has([data-multi-lang="zh"].active) .language-flag {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
 }
-.audience-header .language-switcher:has([data-shared-lang="ko"].active) .language-flag {
+.audience-header .language-switcher:has([data-shared-lang="ko"].active) .language-flag,
+.audience-header .language-switcher:has([data-multi-lang="ko"].active) .language-flag {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
 }
-.audience-header .language-switcher:has([data-shared-lang="ja"].active) .language-flag {
+.audience-header .language-switcher:has([data-shared-lang="ja"].active) .language-flag,
+.audience-header .language-switcher:has([data-multi-lang="ja"].active) .language-flag {
     background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
 }
 
-/* Fallback for the older multi-language buttons, if they appear briefly. */
-.audience-header .multi-language-switcher .language-options button[data-multi-lang="vi"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
-}
-.audience-header .multi-language-switcher .language-options button[data-multi-lang="en"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
-}
-.audience-header .multi-language-switcher .language-options button[data-multi-lang="zh"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
-}
-.audience-header .multi-language-switcher .language-options button[data-multi-lang="ko"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
-}
-.audience-header .multi-language-switcher .language-options button[data-multi-lang="ja"] {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
-}
-
-/* Keep navigation dropdown arrows independent of translation updates. */
 .audience-header .nav-dropdown > a {
     position: relative !important;
     padding-right: 20px !important;
