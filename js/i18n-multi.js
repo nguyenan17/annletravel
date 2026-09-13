@@ -114,9 +114,13 @@
     }
 
     function updateSwitcher() {
+        // shared-layout.js owns the single visual switcher.
+        // Do not rebuild its DOM here; rebuilding was the source of the race condition.
+        if (document.querySelector('[data-annle-shared-language-switcher]')) return;
+
         const box = document.querySelector('.language-switcher');
         if (!box) return;
-        box.innerHTML = `<button type="button" class="language-current">${LANGUAGES[current].flag} ${LANGUAGES[current].short} ▾</button><div class="language-options">${Object.entries(LANGUAGES).map(([code, item]) => `<button type="button" data-multi-lang="${code}" class="${code === current ? 'active' : ''}">${item.flag} ${item.name}</button>`).join('')}</div>`;
+        box.innerHTML = `<button type="button" class="language-current">${LANGUAGES[current].flag}</button><div class="language-options">${Object.entries(LANGUAGES).map(([code, item]) => `<button type="button" data-multi-lang="${code}" class="${code === current ? 'active' : ''}">${item.flag}</button>`).join('')}</div>`;
         box.querySelector('.language-current').onclick = () => box.classList.toggle('open');
         box.querySelectorAll('[data-multi-lang]').forEach(btn => btn.onclick = () => { apply(btn.dataset.multiLang); box.classList.remove('open'); });
     }
