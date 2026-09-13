@@ -8,8 +8,8 @@
     flex-shrink: 0;
 }
 
-/* The public header owns the language control. Keep it visually minimal:
-   one flag in the trigger, flags only in the dropdown, no text/code/caret. */
+/* Public header: compact flag-only language control. The real flag spans are
+   kept visible; do not replace them with CSS pseudo-elements. */
 .audience-header .language-switcher,
 .audience-header .multi-language-switcher {
     position: relative;
@@ -35,27 +35,30 @@
     border-radius: 50% !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: transparent !important;
+    color: inherit !important;
     font-size: 0 !important;
-    line-height: 0 !important;
+    line-height: 1 !important;
     cursor: pointer !important;
     appearance: none !important;
     -webkit-appearance: none !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 .audience-header .language-current:hover {
     background: rgba(255,255,255,.12) !important;
 }
 
-/* Covers both the current shared markup and the older multi-language markup. */
-.audience-header .language-current::before {
-    content: "🇻🇳" !important;
+/* Current shared-layout.js markup: <span class="language-flag">🇻🇳</span> */
+.audience-header .language-current .language-flag {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 24px !important;
-    height: 20px !important;
+    width: auto !important;
+    min-width: 24px !important;
+    height: 22px !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
     font-size: 21px !important;
     line-height: 1 !important;
     color: initial !important;
@@ -64,18 +67,17 @@
     box-shadow: none !important;
 }
 
-html[lang="en"] .audience-header .language-current::before { content: "🇬🇧" !important; }
-html[lang="zh"] .audience-header .language-current::before { content: "🇨🇳" !important; }
-html[lang="ko"] .audience-header .language-current::before { content: "🇰🇷" !important; }
-html[lang="ja"] .audience-header .language-current::before { content: "🇯🇵" !important; }
-
-.audience-header .language-current > *,
-.audience-header .language-current .language-flag,
-.audience-header .language-current .language-code,
-.audience-header .language-current .language-arrow {
-    display: none !important;
+/* Older multi-language markup, if it appears during script startup. */
+.audience-header .multi-language-switcher .language-current {
+    font-size: 21px !important;
+    color: initial !important;
 }
 
+.audience-header .multi-language-switcher .language-current .language-flag {
+    display: inline-flex !important;
+}
+
+.audience-header .language-current::before,
 .audience-header .language-current::after {
     content: none !important;
     display: none !important;
@@ -117,9 +119,9 @@ html[lang="ja"] .audience-header .language-current::before { content: "🇯🇵"
     border: 0 !important;
     border-radius: 8px !important;
     background: transparent !important;
-    color: transparent !important;
+    color: inherit !important;
     font-size: 0 !important;
-    line-height: 0 !important;
+    line-height: 1 !important;
     cursor: pointer !important;
     appearance: none !important;
     -webkit-appearance: none !important;
@@ -130,33 +132,29 @@ html[lang="ja"] .audience-header .language-current::before { content: "🇯🇵"
     background: #f2f5f8 !important;
 }
 
-.audience-header .language-options button > * {
-    display: none !important;
-}
-
-.audience-header .language-options button[data-shared-lang]::before,
-.audience-header .language-options button[data-multi-lang]::before {
+.audience-header .language-options button .language-option-flag {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 24px !important;
-    height: 20px !important;
+    width: auto !important;
+    min-width: 24px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     font-size: 21px !important;
     line-height: 1 !important;
+    color: initial !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 
-.audience-header .language-options button[data-shared-lang="vi"]::before,
-.audience-header .language-options button[data-multi-lang="vi"]::before { content: "🇻🇳" !important; }
-.audience-header .language-options button[data-shared-lang="en"]::before,
-.audience-header .language-options button[data-multi-lang="en"]::before { content: "🇬🇧" !important; }
-.audience-header .language-options button[data-shared-lang="zh"]::before,
-.audience-header .language-options button[data-multi-lang="zh"]::before { content: "🇨🇳" !important; }
-.audience-header .language-options button[data-shared-lang="ko"]::before,
-.audience-header .language-options button[data-multi-lang="ko"]::before { content: "🇰🇷" !important; }
-.audience-header .language-options button[data-shared-lang="ja"]::before,
-.audience-header .language-options button[data-multi-lang="ja"]::before { content: "🇯🇵" !important; }
+/* Older markup uses the flag directly as button text. */
+.audience-header .language-options button[data-multi-lang] {
+    font-size: 21px !important;
+}
 
-/* Keep the navigation dropdown arrows independent of translation updates. */
+/* Keep navigation dropdown arrows independent of translation updates. */
 .audience-header .nav-dropdown > a {
     position: relative !important;
     padding-right: 20px !important;
