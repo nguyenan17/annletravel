@@ -18,6 +18,7 @@
     margin: 0 !important;
     width: auto !important;
     min-width: 0 !important;
+    order: 3 !important;
 }
 
 .audience-header .language-current {
@@ -68,8 +69,6 @@ html[lang="zh"] .audience-header .language-current::before { content: "🇨🇳"
 html[lang="ko"] .audience-header .language-current::before { content: "🇰🇷" !important; }
 html[lang="ja"] .audience-header .language-current::before { content: "🇯🇵" !important; }
 
-/* Hide any text/emoji produced by old switcher versions. The pseudo flag above
-   is the only visible content of the trigger. */
 .audience-header .language-current > *,
 .audience-header .language-current .language-flag,
 .audience-header .language-current .language-code,
@@ -135,23 +134,7 @@ html[lang="ja"] .audience-header .language-current::before { content: "🇯🇵"
     display: none !important;
 }
 
-/* Shared-layout data attributes. */
-.audience-header .language-options button[data-shared-lang]::before {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 24px !important;
-    height: 20px !important;
-    font-size: 21px !important;
-    line-height: 1 !important;
-}
-.audience-header .language-options button[data-shared-lang="vi"]::before { content: "🇻🇳" !important; }
-.audience-header .language-options button[data-shared-lang="en"]::before { content: "🇬🇧" !important; }
-.audience-header .language-options button[data-shared-lang="zh"]::before { content: "🇨🇳" !important; }
-.audience-header .language-options button[data-shared-lang="ko"]::before { content: "🇰🇷" !important; }
-.audience-header .language-options button[data-shared-lang="ja"]::before { content: "🇯🇵" !important; }
-
-/* Legacy/multi-language data attributes. */
+.audience-header .language-options button[data-shared-lang]::before,
 .audience-header .language-options button[data-multi-lang]::before {
     display: inline-flex !important;
     align-items: center !important;
@@ -161,10 +144,16 @@ html[lang="ja"] .audience-header .language-current::before { content: "🇯🇵"
     font-size: 21px !important;
     line-height: 1 !important;
 }
+
+.audience-header .language-options button[data-shared-lang="vi"]::before,
 .audience-header .language-options button[data-multi-lang="vi"]::before { content: "🇻🇳" !important; }
+.audience-header .language-options button[data-shared-lang="en"]::before,
 .audience-header .language-options button[data-multi-lang="en"]::before { content: "🇬🇧" !important; }
+.audience-header .language-options button[data-shared-lang="zh"]::before,
 .audience-header .language-options button[data-multi-lang="zh"]::before { content: "🇨🇳" !important; }
+.audience-header .language-options button[data-shared-lang="ko"]::before,
 .audience-header .language-options button[data-multi-lang="ko"]::before { content: "🇰🇷" !important; }
+.audience-header .language-options button[data-shared-lang="ja"]::before,
 .audience-header .language-options button[data-multi-lang="ja"]::before { content: "🇯🇵" !important; }
 
 /* Keep the navigation dropdown arrows independent of translation updates. */
@@ -192,7 +181,7 @@ html[lang="ja"] .audience-header .language-current::before { content: "🇯🇵"
 }
 
 @media(max-width:900px) {
-    .audience-header .language-switcher { margin: 0 !important; }
+    .audience-header .language-switcher { margin: 0 !important; order: 3 !important; }
 }
 
 @media(max-width:650px) {
