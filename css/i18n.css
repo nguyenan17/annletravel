@@ -1,243 +1,37 @@
-.language-switcher {
-    position: relative;
-    display: flex;
-    align-items: center;
-    margin: 0;
-    white-space: nowrap;
-    z-index: 1000;
-    flex-shrink: 0;
-}
+.language-switcher{position:relative;display:flex;align-items:center;margin:0;white-space:nowrap;z-index:1000;flex-shrink:0}
+.audience-header .language-switcher,.audience-header .multi-language-switcher{position:relative!important;display:inline-flex!important;align-items:center!important;margin:0!important;width:auto!important;min-width:0!important;order:3!important}
 
-.audience-header .language-switcher,
-.audience-header .multi-language-switcher {
-    position: relative !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    margin: 0 !important;
-    width: auto !important;
-    min-width: 0 !important;
-    order: 3 !important;
-}
+/* One fixed-size language button. The flag is a CSS image, never emoji text. */
+.audience-header .language-current{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:32px!important;min-width:32px!important;height:32px!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background-color:transparent!important;background-repeat:no-repeat!important;background-position:center!important;background-size:25px 18px!important;box-shadow:none!important;color:transparent!important;font-size:0!important;line-height:1!important;cursor:pointer!important;appearance:none!important;-webkit-appearance:none!important;overflow:visible!important;transform:none!important;transition:none!important}
+.audience-header .language-current .language-flag{display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important;font-size:0!important;line-height:0!important;color:transparent!important;background:none!important;border:0!important}
+.audience-header .language-current::before,.audience-header .language-current::after,.audience-header .language-current .language-flag::before,.audience-header .language-current .language-flag::after{content:none!important;display:none!important}
 
-.audience-header .language-current {
-    position: relative !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 32px !important;
-    min-width: 32px !important;
-    height: 32px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background-color: transparent !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
-    background-size: 25px 18px !important;
-    box-shadow: none !important;
-    color: transparent !important;
-    font-size: 0 !important;
-    line-height: 1 !important;
-    cursor: pointer !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    overflow: visible !important;
-    transform: none !important;
-    transition: none !important;
-}
+/* High-specificity background shorthand deliberately beats the old inline style in shared-layout.js. */
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="vi"].active) .language-current{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") center/25px 18px no-repeat!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="en"].active) .language-current{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") center/25px 18px no-repeat!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="zh"].active) .language-current{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") center/25px 18px no-repeat!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="ko"].active) .language-current{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") center/25px 18px no-repeat!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="ja"].active) .language-current{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") center/25px 18px no-repeat!important}
 
-/* The selected flag is rendered ON THE BUTTON only. */
-.audience-header .language-current .language-flag {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    color: transparent !important;
-    background: none !important;
-    border: 0 !important;
-}
+/* Hover/focus/active keep exactly the same geometry and flag. */
+.audience-header .language-switcher[data-annle-shared-language-switcher] .language-current:hover,.audience-header .language-switcher[data-annle-shared-language-switcher] .language-current:focus,.audience-header .language-switcher[data-annle-shared-language-switcher] .language-current:active{width:32px!important;min-width:32px!important;height:32px!important;padding:0!important;margin:0!important;border:0!important;transform:none!important;transition:none!important;box-shadow:none!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="vi"].active) .language-current:hover,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="vi"].active) .language-current:focus,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="vi"].active) .language-current:active{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") center/25px 18px no-repeat!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="en"].active) .language-current:hover,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="en"].active) .language-current:focus,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="en"].active) .language-current:active{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") center/25px 18px no-repeat!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="zh"].active) .language-current:hover,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="zh"].active) .language-current:focus,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="zh"].active) .language-current:active{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") center/25px 18px no-repeat!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="ko"].active) .language-current:hover,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="ko"].active) .language-current:focus,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="ko"].active) .language-current:active{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") center/25px 18px no-repeat!important}
+.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="ja"].active) .language-current:hover,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="ja"].active) .language-current:focus,.audience-header .language-switcher[data-annle-shared-language-switcher]:has([data-shared-lang="ja"].active) .language-current:active{background:transparent url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") center/25px 18px no-repeat!important}
 
-.audience-header .language-current::before,
-.audience-header .language-current::after,
-.audience-header .language-current .language-flag::before,
-.audience-header .language-current .language-flag::after {
-    content: none !important;
-    display: none !important;
-}
+.audience-header .language-options{display:none;position:absolute!important;right:0!important;top:calc(100% + 8px)!important;width:52px!important;min-width:52px!important;padding:5px!important;margin:0!important;background:rgba(255,255,255,.98)!important;border:1px solid rgba(0,0,0,.09)!important;border-radius:12px!important;box-shadow:0 12px 30px rgba(0,0,0,.18)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.audience-header .language-switcher.open .language-options{display:flex!important;flex-direction:column!important;gap:2px!important}
+.audience-header .language-options button{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:42px!important;min-width:42px!important;height:34px!important;padding:0!important;margin:0 auto!important;border:0!important;border-radius:8px!important;background-color:transparent!important;color:transparent!important;font-size:0!important;line-height:0!important;text-indent:-9999px!important;overflow:hidden!important;cursor:pointer!important;appearance:none!important;-webkit-appearance:none!important;background-repeat:no-repeat!important;background-position:center!important;background-size:25px 18px!important;transform:none!important;transition:none!important}
+.audience-header .language-options button:hover,.audience-header .language-options button:focus,.audience-header .language-options button:active{width:42px!important;min-width:42px!important;height:34px!important;padding:0!important;transform:none!important;transition:none!important;background-size:25px 18px!important;box-shadow:none!important;background-color:#f2f5f8!important}
+.language-options button .language-option-flag,.language-options button .language-option-flag::before,.language-options button .language-option-flag::after,.language-options button::before,.language-options button::after{display:none!important;content:none!important;visibility:hidden!important}
+.audience-header .language-options button[data-shared-lang="vi"],.language-options button:nth-child(1){background-image:url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg")!important}
+.audience-header .language-options button[data-shared-lang="en"],.language-options button:nth-child(2){background-image:url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg")!important}
+.audience-header .language-options button[data-shared-lang="zh"],.language-options button:nth-child(3){background-image:url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg")!important}
+.audience-header .language-options button[data-shared-lang="ko"],.language-options button:nth-child(4){background-image:url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg")!important}
+.audience-header .language-options button[data-shared-lang="ja"],.language-options button:nth-child(5){background-image:url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg")!important}
 
-/* Current language flag */
-.audience-header .language-switcher:has([data-shared-lang="vi"].active) .language-current,
-.audience-header .language-switcher:has([data-multi-lang="vi"].active) .language-current {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
-}
-.audience-header .language-switcher:has([data-shared-lang="en"].active) .language-current,
-.audience-header .language-switcher:has([data-multi-lang="en"].active) .language-current {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
-}
-.audience-header .language-switcher:has([data-shared-lang="zh"].active) .language-current,
-.audience-header .language-switcher:has([data-multi-lang="zh"].active) .language-current {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
-}
-.audience-header .language-switcher:has([data-shared-lang="ko"].active) .language-current,
-.audience-header .language-switcher:has([data-multi-lang="ko"].active) .language-current {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
-}
-.audience-header .language-switcher:has([data-shared-lang="ja"].active) .language-current,
-.audience-header .language-switcher:has([data-multi-lang="ja"].active) .language-current {
-    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
-}
-
-/* Hover/focus must never change size, scale or the flag itself. */
-.audience-header .language-current:hover,
-.audience-header .language-current:focus,
-.audience-header .language-current:active {
-    width: 32px !important;
-    min-width: 32px !important;
-    height: 32px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
-    transform: none !important;
-    transition: none !important;
-    box-shadow: none !important;
-    background-color: transparent !important;
-    background-size: 25px 18px !important;
-}
-
-.audience-header .language-switcher:has([data-shared-lang="vi"].active) .language-current:hover,
-.audience-header .language-switcher:has([data-multi-lang="vi"].active) .language-current:hover { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important; }
-.audience-header .language-switcher:has([data-shared-lang="en"].active) .language-current:hover,
-.audience-header .language-switcher:has([data-multi-lang="en"].active) .language-current:hover { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important; }
-.audience-header .language-switcher:has([data-shared-lang="zh"].active) .language-current:hover,
-.audience-header .language-switcher:has([data-multi-lang="zh"].active) .language-current:hover { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important; }
-.audience-header .language-switcher:has([data-shared-lang="ko"].active) .language-current:hover,
-.audience-header .language-switcher:has([data-multi-lang="ko"].active) .language-current:hover { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important; }
-.audience-header .language-switcher:has([data-shared-lang="ja"].active) .language-current:hover,
-.audience-header .language-switcher:has([data-multi-lang="ja"].active) .language-current:hover { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important; }
-
-.audience-header .language-options {
-    display: none;
-    position: absolute !important;
-    right: 0 !important;
-    top: calc(100% + 8px) !important;
-    width: 52px !important;
-    min-width: 52px !important;
-    padding: 5px !important;
-    margin: 0 !important;
-    background: rgba(255,255,255,.98) !important;
-    border: 1px solid rgba(0,0,0,.09) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 12px 30px rgba(0,0,0,.18) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-.audience-header .language-switcher.open .language-options {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 2px !important;
-}
-
-/* Options are background images only. No emoji text is rendered. */
-.audience-header .language-options button {
-    position: relative !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 42px !important;
-    min-width: 42px !important;
-    height: 34px !important;
-    padding: 0 !important;
-    margin: 0 auto !important;
-    border: 0 !important;
-    border-radius: 8px !important;
-    background-color: transparent !important;
-    color: transparent !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    text-indent: -9999px !important;
-    overflow: hidden !important;
-    cursor: pointer !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
-    background-size: 25px 18px !important;
-    transform: none !important;
-    transition: none !important;
-}
-
-.audience-header .language-options button:hover,
-.audience-header .language-options button:focus,
-.audience-header .language-options button:active {
-    width: 42px !important;
-    min-width: 42px !important;
-    height: 34px !important;
-    padding: 0 !important;
-    transform: none !important;
-    transition: none !important;
-    background-size: 25px 18px !important;
-    box-shadow: none !important;
-    background-color: #f2f5f8 !important;
-}
-
-.language-options button .language-option-flag,
-.language-options button .language-option-flag::before,
-.language-options button .language-option-flag::after,
-.language-options button::before,
-.language-options button::after {
-    display: none !important;
-    content: none !important;
-    visibility: hidden !important;
-}
-
-.audience-header .language-options button[data-shared-lang="vi"],
-.audience-header .language-options button[data-multi-lang="vi"],
-.language-options button:nth-child(1) { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important; }
-.audience-header .language-options button[data-shared-lang="en"],
-.audience-header .language-options button[data-multi-lang="en"],
-.language-options button:nth-child(2) { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important; }
-.audience-header .language-options button[data-shared-lang="zh"],
-.audience-header .language-options button[data-multi-lang="zh"],
-.language-options button:nth-child(3) { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important; }
-.audience-header .language-options button[data-shared-lang="ko"],
-.audience-header .language-options button[data-multi-lang="ko"],
-.language-options button:nth-child(4) { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important; }
-.audience-header .language-options button[data-shared-lang="ja"],
-.audience-header .language-options button[data-multi-lang="ja"],
-.language-options button:nth-child(5) { background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important; }
-
-.audience-header .nav-dropdown > a { position: relative !important; padding-right: 20px !important; }
-.audience-header .nav-dropdown > a .nav-chevron { display: none !important; }
-.audience-header .nav-dropdown > a::before {
-    content: "▾" !important;
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: inline-block !important;
-    font-size: 10px !important;
-    line-height: 1 !important;
-    opacity: .8;
-    background: transparent !important;
-    border: 0 !important;
-}
-
-@media(max-width:900px) {
-    .audience-header .language-switcher { margin: 0 !important; order: 3 !important; }
-}
-
-@media(max-width:650px) {
-    .audience-header .language-current,
-    .audience-header .language-current:hover,
-    .audience-header .language-current:focus,
-    .audience-header .language-current:active {
-        width: 30px !important;
-        min-width: 30px !important;
-        height: 30px !important;
-    }
-}
+.audience-header .nav-dropdown>a{position:relative!important;padding-right:20px!important}.audience-header .nav-dropdown>a .nav-chevron{display:none!important}.audience-header .nav-dropdown>a::before{content:"▾"!important;position:absolute;right:6px;top:50%;transform:translateY(-50%);display:inline-block!important;font-size:10px!important;line-height:1!important;opacity:.8;background:transparent!important;border:0!important}
+@media(max-width:900px){.audience-header .language-switcher{margin:0!important;order:3!important}}
+@media(max-width:650px){.audience-header .language-switcher[data-annle-shared-language-switcher] .language-current,.audience-header .language-switcher[data-annle-shared-language-switcher] .language-current:hover,.audience-header .language-switcher[data-annle-shared-language-switcher] .language-current:focus,.audience-header .language-switcher[data-annle-shared-language-switcher] .language-current:active{width:30px!important;min-width:30px!important;height:30px!important}}
