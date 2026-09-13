@@ -7,6 +7,23 @@
 (function () {
     "use strict";
 
+    // Business pages do not include the i18n/shared scripts statically.
+    // Load the same public layout stack there so Personal <-> Business
+    // always uses exactly the same language switcher implementation.
+    if (document.body.classList.contains("business-page")) {
+        const loadScript = src => new Promise(resolve => {
+            const script = document.createElement("script");
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = resolve;
+            document.head.appendChild(script);
+        });
+
+        loadScript("js/shared-layout.js")
+            .then(() => loadScript("js/i18n.js"))
+            .then(() => loadScript("js/i18n-multi.js"));
+    }
+
     const originalRenderTourDetail = window.renderTourDetail;
     const originalLoadTourItinerary = window.loadTourItinerary;
     const originalCreateTourCard = window.createTourCard;
@@ -193,8 +210,6 @@
             try {
                 await originalSubmitBooking(event, tourId);
             } finally {
-                // If the modal is still open, validation/error occurred;
-                // allow the user to correct the form and retry.
                 const modal = document.getElementById("bookingModal");
                 const currentButton = form?.querySelector('button[type="submit"]');
 
