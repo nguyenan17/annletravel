@@ -8,122 +8,166 @@
     flex-shrink: 0;
 }
 
-.language-switcher .language-current {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    border: 1px solid rgba(0,0,0,.12);
-    border-radius: 8px;
-    background: #fff;
-    color: inherit;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 7px 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-.language-switcher .language-options {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: calc(100% + 7px);
-    min-width: 165px;
-    padding: 6px;
-    background: #fff;
-    border: 1px solid rgba(0,0,0,.12);
-    border-radius: 10px;
-    box-shadow: 0 10px 28px rgba(0,0,0,.16);
-}
-
-.language-switcher.open .language-options {
-    display: flex;
-    flex-direction: column;
-}
-
-.language-switcher .language-options button {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    width: 100%;
-    border: 0;
-    border-radius: 7px;
-    background: transparent;
-    color: #222;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 9px 10px;
-    text-align: left;
-}
-
-.language-switcher .language-options button:hover,
-.language-switcher .language-options button.active {
-    background: #f3f6fa;
-}
-
-/* Shared public header: exactly one real flag, no duplicate pseudo icon/text. */
-.audience-header .language-current::before,
-.audience-header .language-current::after,
-.audience-header .language-current .language-code,
-.audience-header .language-current .language-arrow,
-.audience-header .language-options button::before,
-.audience-header .language-options button::after {
-    display: none !important;
-    content: none !important;
+/* The public header owns the language control. Keep it visually minimal:
+   one flag in the trigger, flags only in the dropdown, no text/code/caret. */
+.audience-header .language-switcher,
+.audience-header .multi-language-switcher {
+    position: relative;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
 }
 
 .audience-header .language-current {
-    gap: 0 !important;
-    min-width: 34px !important;
-    width: 34px !important;
-    height: 34px !important;
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    min-width: 32px !important;
+    height: 32px !important;
     padding: 0 !important;
+    margin: 0 !important;
     border: 0 !important;
+    border-radius: 50% !important;
     background: transparent !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    cursor: pointer !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    overflow: hidden !important;
+}
+
+.audience-header .language-current:hover {
+    background: rgba(255,255,255,.12) !important;
+}
+
+/* Covers both the current shared markup and the older multi-language markup. */
+.audience-header .language-current::before {
+    content: "🇻🇳" !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 20px !important;
+    font-size: 21px !important;
+    line-height: 1 !important;
+    color: initial !important;
+    background: none !important;
+    border: 0 !important;
     box-shadow: none !important;
 }
 
-.audience-header .language-flag,
-.audience-header .language-option-flag {
-    display: inline-block;
-    width: 21px;
-    height: 14px;
-    flex: 0 0 21px;
-    border-radius: 2px;
-    background-size: cover;
-    background-position: center;
-    box-shadow: 0 0 0 1px rgba(0,0,0,.1);
+html[lang="en"] .audience-header .language-current::before { content: "🇬🇧" !important; }
+html[lang="zh"] .audience-header .language-current::before { content: "🇨🇳" !important; }
+html[lang="ko"] .audience-header .language-current::before { content: "🇰🇷" !important; }
+html[lang="ja"] .audience-header .language-current::before { content: "🇯🇵" !important; }
+
+/* Hide any text/emoji produced by old switcher versions. The pseudo flag above
+   is the only visible content of the trigger. */
+.audience-header .language-current > *,
+.audience-header .language-current .language-flag,
+.audience-header .language-current .language-code,
+.audience-header .language-current .language-arrow {
+    display: none !important;
 }
 
-.audience-header .language-flag {
-    background-image: url("https://flagcdn.com/w40/vn.png");
-}
-
-.audience-header [data-lang-switch="vi"] .language-option-flag {
-    background-image: url("https://flagcdn.com/w40/vn.png");
-}
-
-.audience-header [data-lang-switch="en"] .language-option-flag {
-    background-image: url("https://flagcdn.com/w40/gb.png");
+.audience-header .language-current::after {
+    content: none !important;
+    display: none !important;
 }
 
 .audience-header .language-options {
-    min-width: 54px !important;
+    display: none;
+    position: absolute !important;
+    right: 0 !important;
+    top: calc(100% + 8px) !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    padding: 5px !important;
+    margin: 0 !important;
+    background: rgba(255,255,255,.98) !important;
+    border: 1px solid rgba(0,0,0,.09) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.18) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.audience-header .language-switcher.open .language-options {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
 }
 
 .audience-header .language-options button {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
     justify-content: center !important;
-    gap: 0 !important;
+    width: 42px !important;
     min-width: 42px !important;
-    padding: 8px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    cursor: pointer !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
 }
 
-/* i18n.js uses textContent on data-i18n links. Keep dropdown chevrons visible
-   independently of the translated DOM, so changing language cannot remove them. */
+.audience-header .language-options button:hover,
+.audience-header .language-options button.active {
+    background: #f2f5f8 !important;
+}
+
+.audience-header .language-options button > * {
+    display: none !important;
+}
+
+/* Shared-layout data attributes. */
+.audience-header .language-options button[data-shared-lang]::before {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 20px !important;
+    font-size: 21px !important;
+    line-height: 1 !important;
+}
+.audience-header .language-options button[data-shared-lang="vi"]::before { content: "🇻🇳" !important; }
+.audience-header .language-options button[data-shared-lang="en"]::before { content: "🇬🇧" !important; }
+.audience-header .language-options button[data-shared-lang="zh"]::before { content: "🇨🇳" !important; }
+.audience-header .language-options button[data-shared-lang="ko"]::before { content: "🇰🇷" !important; }
+.audience-header .language-options button[data-shared-lang="ja"]::before { content: "🇯🇵" !important; }
+
+/* Legacy/multi-language data attributes. */
+.audience-header .language-options button[data-multi-lang]::before {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 20px !important;
+    font-size: 21px !important;
+    line-height: 1 !important;
+}
+.audience-header .language-options button[data-multi-lang="vi"]::before { content: "🇻🇳" !important; }
+.audience-header .language-options button[data-multi-lang="en"]::before { content: "🇬🇧" !important; }
+.audience-header .language-options button[data-multi-lang="zh"]::before { content: "🇨🇳" !important; }
+.audience-header .language-options button[data-multi-lang="ko"]::before { content: "🇰🇷" !important; }
+.audience-header .language-options button[data-multi-lang="ja"]::before { content: "🇯🇵" !important; }
+
+/* Keep the navigation dropdown arrows independent of translation updates. */
 .audience-header .nav-dropdown > a {
     position: relative !important;
     padding-right: 20px !important;
@@ -140,8 +184,6 @@
     top: 50%;
     transform: translateY(-50%);
     display: inline-block !important;
-    width: auto !important;
-    height: auto !important;
     font-size: 10px !important;
     line-height: 1 !important;
     opacity: .8;
@@ -149,125 +191,14 @@
     border: 0 !important;
 }
 
-/* Legacy switcher fallback: flags only. */
-.legacy-language-switcher button[data-lang-switch] {
-    position: relative;
-    width: 34px !important;
-    min-width: 34px !important;
-    height: 30px !important;
-    padding: 0 !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    overflow: hidden;
-}
-
-.legacy-language-switcher button[data-lang-switch]::before {
-    content: "";
-    display: block;
-    width: 22px;
-    height: 15px;
-    margin: auto;
-    border-radius: 2px;
-    background-size: cover;
-    background-position: center;
-    box-shadow: 0 0 0 1px rgba(0,0,0,.08);
-}
-
-.legacy-language-switcher button[data-lang-switch="vi"]::before {
-    background-image: url("https://flagcdn.com/w40/vn.png");
-}
-
-.legacy-language-switcher button[data-lang-switch="en"]::before {
-    background-image: url("https://flagcdn.com/w40/gb.png");
-}
-
-.legacy-language-switcher > span {
-    display: none !important;
-}
-
-/* i18n-multi can rebuild the switcher before shared-layout finishes.
-   Keep that intermediate/final state icon-only as well. */
-.multi-language-switcher .language-current {
-    width: 34px !important;
-    min-width: 34px !important;
-    height: 30px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    gap: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    overflow: hidden;
-}
-
-.multi-language-switcher .language-current::before {
-    content: "" !important;
-    display: block !important;
-    width: 22px !important;
-    height: 15px !important;
-    flex: 0 0 22px !important;
-    margin: auto !important;
-    border-radius: 2px !important;
-    background-size: cover !important;
-    background-position: center !important;
-    box-shadow: 0 0 0 1px rgba(0,0,0,.08) !important;
-}
-
-html[lang="vi"] .multi-language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/vn.png") !important; }
-html[lang="en"] .multi-language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/gb.png") !important; }
-html[lang="zh"] .multi-language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/cn.png") !important; }
-html[lang="ko"] .multi-language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/kr.png") !important; }
-html[lang="ja"] .multi-language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/jp.png") !important; }
-
-.multi-language-switcher .language-options {
-    min-width: 54px !important;
-}
-
-.multi-language-switcher .language-options button {
-    width: 42px !important;
-    min-width: 42px !important;
-    height: 31px !important;
-    padding: 0 !important;
-    margin: 0 auto !important;
-    justify-content: center !important;
-    gap: 0 !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    overflow: hidden;
-}
-
-.multi-language-switcher .language-options button::before {
-    display: block !important;
-    content: "" !important;
-    width: 22px !important;
-    height: 15px !important;
-    flex: 0 0 22px !important;
-    margin: auto !important;
-    border-radius: 2px !important;
-    background-size: cover !important;
-    background-position: center !important;
-    box-shadow: 0 0 0 1px rgba(0,0,0,.08) !important;
-}
-
-.multi-language-switcher .language-options button[data-multi-lang="vi"]::before { background-image: url("https://flagcdn.com/w40/vn.png") !important; }
-.multi-language-switcher .language-options button[data-multi-lang="en"]::before { background-image: url("https://flagcdn.com/w40/gb.png") !important; }
-.multi-language-switcher .language-options button[data-multi-lang="zh"]::before { background-image: url("https://flagcdn.com/w40/cn.png") !important; }
-.multi-language-switcher .language-options button[data-multi-lang="ko"]::before { background-image: url("https://flagcdn.com/w40/kr.png") !important; }
-.multi-language-switcher .language-options button[data-multi-lang="ja"]::before { background-image: url("https://flagcdn.com/w40/jp.png") !important; }
-.multi-language-switcher .language-options button::after { display:none !important; content:none !important; }
-
 @media(max-width:900px) {
-    .language-switcher { margin: 8px 0; order: 2; }
-    .language-switcher .language-options { right: 0; min-width: 155px; }
+    .audience-header .language-switcher { margin: 0 !important; }
 }
 
 @media(max-width:650px) {
-    .language-switcher { order: 2; margin-left: auto; margin-right: 0; }
-    .header-container { position: relative; }
     .audience-header .language-current {
-        min-width: 32px !important;
-        width: 32px !important;
-        height: 28px !important;
+        width: 30px !important;
+        min-width: 30px !important;
+        height: 30px !important;
     }
 }
