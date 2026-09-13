@@ -53,24 +53,26 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: auto !important;
+    width: 24px !important;
     min-width: 24px !important;
-    height: 22px !important;
-    flex: 0 0 auto !important;
+    height: 18px !important;
+    flex: 0 0 24px !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-size: 21px !important;
+    font-size: 0 !important;
     line-height: 1 !important;
-    color: initial !important;
-    background: none !important;
+    color: transparent !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: contain !important;
     border: 0 !important;
     box-shadow: none !important;
 }
 
 /* Older multi-language markup, if it appears during script startup. */
 .audience-header .multi-language-switcher .language-current {
-    font-size: 21px !important;
-    color: initial !important;
+    font-size: 0 !important;
+    color: transparent !important;
 }
 
 .audience-header .multi-language-switcher .language-current .language-flag {
@@ -119,39 +121,78 @@
     border: 0 !important;
     border-radius: 8px !important;
     background: transparent !important;
-    color: inherit !important;
+    color: transparent !important;
     font-size: 0 !important;
     line-height: 1 !important;
     cursor: pointer !important;
     appearance: none !important;
     -webkit-appearance: none !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 25px 18px !important;
 }
 
 .audience-header .language-options button:hover,
 .audience-header .language-options button.active {
-    background: #f2f5f8 !important;
+    background-color: #f2f5f8 !important;
 }
 
 .audience-header .language-options button .language-option-flag {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: auto !important;
-    min-width: 24px !important;
-    height: 22px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-size: 21px !important;
-    line-height: 1 !important;
-    color: initial !important;
-    background: none !important;
-    border: 0 !important;
-    box-shadow: none !important;
+    display: none !important;
 }
 
-/* Older markup uses the flag directly as button text. */
-.audience-header .language-options button[data-multi-lang] {
-    font-size: 21px !important;
+/* Real flag assets. Using image files avoids Windows/Chrome rendering
+   regional-indicator emoji as plain text such as "VN" or "GB". */
+.audience-header .language-options button[data-shared-lang="vi"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
+}
+.audience-header .language-options button[data-shared-lang="en"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
+}
+.audience-header .language-options button[data-shared-lang="zh"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
+}
+.audience-header .language-options button[data-shared-lang="ko"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
+}
+.audience-header .language-options button[data-shared-lang="ja"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
+}
+
+/* The shared switcher marks the selected language on its option button.
+   :has() lets the real current flag follow the selected option without
+   rebuilding the switcher or introducing pseudo-element icons. */
+.audience-header .language-switcher:has([data-shared-lang="vi"].active) .language-flag {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
+}
+.audience-header .language-switcher:has([data-shared-lang="en"].active) .language-flag {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
+}
+.audience-header .language-switcher:has([data-shared-lang="zh"].active) .language-flag {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
+}
+.audience-header .language-switcher:has([data-shared-lang="ko"].active) .language-flag {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
+}
+.audience-header .language-switcher:has([data-shared-lang="ja"].active) .language-flag {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
+}
+
+/* Fallback for the older multi-language buttons, if they appear briefly. */
+.audience-header .multi-language-switcher .language-options button[data-multi-lang="vi"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1fb-1f1f3.svg") !important;
+}
+.audience-header .multi-language-switcher .language-options button[data-multi-lang="en"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ec-1f1e7.svg") !important;
+}
+.audience-header .multi-language-switcher .language-options button[data-multi-lang="zh"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1e8-1f1f3.svg") !important;
+}
+.audience-header .multi-language-switcher .language-options button[data-multi-lang="ko"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1f0-1f1f7.svg") !important;
+}
+.audience-header .multi-language-switcher .language-options button[data-multi-lang="ja"] {
+    background-image: url("https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f1ef-1f1f5.svg") !important;
 }
 
 /* Keep navigation dropdown arrows independent of translation updates. */
