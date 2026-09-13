@@ -59,12 +59,10 @@
         const text = raw.trim();
         if (!text) return;
         originalText.set(node, raw);
-
         let translated = raw;
         const leading = raw.match(/^\s*/)?.[0] || '';
         const trailing = raw.match(/\s*$/)?.[0] || '';
         const core = text;
-
         if (lang === 'en') {
             if (autoPairs[core]) translated = leading + autoPairs[core] + trailing;
             else {
@@ -113,7 +111,6 @@
         localStorage.setItem('annletravel_language', selected);
         document.documentElement.lang = selected;
         injectCss();
-
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const value = getValue(selected, el.dataset.i18n);
             if (value !== undefined) el.textContent = value;
@@ -131,42 +128,17 @@
         window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: selected } }));
     }
 
-    function createSwitcher() {
-        // shared-layout.js owns the visual switcher. This function only supports
-        // legacy pages that still do not have the shared header.
-        const existing = document.querySelector('.language-switcher');
-        if (existing) return;
-
-        const headerContainer = document.querySelector('.header-container, .header-inner');
-        if (!headerContainer) return;
-        const switcher = document.createElement('div');
-        switcher.className = 'language-switcher legacy-language-switcher';
-        switcher.setAttribute('aria-label', 'Language');
-        switcher.innerHTML = '<button type="button" data-lang-switch="vi">🇻🇳 VI</button><span>|</span><button type="button" data-lang-switch="en">🇬🇧 EN</button>';
-        switcher.addEventListener('click', event => {
-            const button = event.target.closest('[data-lang-switch]');
-            if (button) applyLanguage(button.dataset.langSwitch);
-        });
-
-        const headerButton = headerContainer.querySelector('.btn-header, .btn-primary');
-        if (headerButton) headerButton.insertAdjacentElement('afterend', switcher);
-        else headerContainer.appendChild(switcher);
-    }
-
     function ensureSharedHeader() {
-        if (document.querySelector('header.header') && window.__annleSharedLayoutInitialized) return;
-        if (document.querySelector('script[data-annle-shared-layout]')) return;
-        if (document.querySelector('header.header')) {
-            const script = document.createElement('script');
-            script.src = 'js/shared-layout.js';
-            script.dataset.annleSharedLayout = '1';
-            document.head.appendChild(script);
-        }
+        if (window.__annleSharedLayoutInitialized || document.querySelector('script[data-annle-shared-layout]')) return;
+        if (!document.querySelector('header.header')) return;
+        const script = document.createElement('script');
+        script.src = 'js/shared-layout.js';
+        script.dataset.annleSharedLayout = '1';
+        document.head.appendChild(script);
     }
 
     function init() {
         ensureSharedHeader();
-        createSwitcher();
         applyLanguage(getLanguage());
     }
 
