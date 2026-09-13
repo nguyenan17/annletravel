@@ -105,45 +105,17 @@
     box-shadow: 0 0 0 1px rgba(0, 0, 0, .08)
 }
 
-.language-switcher .language-options button[data-multi-lang="vi"]::before {
-    background-image: url("https://flagcdn.com/w40/vn.png")
-}
+.language-switcher .language-options button[data-multi-lang="vi"]::before { background-image: url("https://flagcdn.com/w40/vn.png") }
+.language-switcher .language-options button[data-multi-lang="en"]::before { background-image: url("https://flagcdn.com/w40/gb.png") }
+.language-switcher .language-options button[data-multi-lang="zh"]::before { background-image: url("https://flagcdn.com/w40/cn.png") }
+.language-switcher .language-options button[data-multi-lang="ko"]::before { background-image: url("https://flagcdn.com/w40/kr.png") }
+.language-switcher .language-options button[data-multi-lang="ja"]::before { background-image: url("https://flagcdn.com/w40/jp.png") }
 
-.language-switcher .language-options button[data-multi-lang="en"]::before {
-    background-image: url("https://flagcdn.com/w40/gb.png")
-}
-
-.language-switcher .language-options button[data-multi-lang="zh"]::before {
-    background-image: url("https://flagcdn.com/w40/cn.png")
-}
-
-.language-switcher .language-options button[data-multi-lang="ko"]::before {
-    background-image: url("https://flagcdn.com/w40/kr.png")
-}
-
-.language-switcher .language-options button[data-multi-lang="ja"]::before {
-    background-image: url("https://flagcdn.com/w40/jp.png")
-}
-
-.language-switcher .language-options button[data-multi-lang="vi"]::after {
-    content: "Tiếng Việt"
-}
-
-.language-switcher .language-options button[data-multi-lang="en"]::after {
-    content: "English"
-}
-
-.language-switcher .language-options button[data-multi-lang="zh"]::after {
-    content: "中文"
-}
-
-.language-switcher .language-options button[data-multi-lang="ko"]::after {
-    content: "한국어"
-}
-
-.language-switcher .language-options button[data-multi-lang="ja"]::after {
-    content: "日本語"
-}
+.language-switcher .language-options button[data-multi-lang="vi"]::after { content: "Tiếng Việt" }
+.language-switcher .language-options button[data-multi-lang="en"]::after { content: "English" }
+.language-switcher .language-options button[data-multi-lang="zh"]::after { content: "中文" }
+.language-switcher .language-options button[data-multi-lang="ko"]::after { content: "한국어" }
+.language-switcher .language-options button[data-multi-lang="ja"]::after { content: "日本語" }
 
 .language-switcher .language-current::before {
     content: "";
@@ -157,70 +129,77 @@
     box-shadow: 0 0 0 1px rgba(0, 0, 0, .08)
 }
 
-html[lang="vi"] .language-switcher .language-current::before {
-    background-image: url("https://flagcdn.com/w40/vn.png")
+html[lang="vi"] .language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/vn.png") }
+html[lang="en"] .language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/gb.png") }
+html[lang="zh"] .language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/cn.png") }
+html[lang="ko"] .language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/kr.png") }
+html[lang="ja"] .language-switcher .language-current::before { background-image: url("https://flagcdn.com/w40/jp.png") }
+
+html[lang="vi"] .language-switcher .language-current::after { content: "VI ▾" }
+html[lang="en"] .language-switcher .language-current::after { content: "EN ▾" }
+html[lang="zh"] .language-switcher .language-current::after { content: "ZH ▾" }
+html[lang="ko"] .language-switcher .language-current::after { content: "KO ▾" }
+html[lang="ja"] .language-switcher .language-current::after { content: "JA ▾" }
+
+/* ANNLETRAVEL: language control is icon-only. No duplicated text such as VI/EN. */
+.audience-header .language-current .language-code,
+.audience-header .language-current .language-arrow,
+.audience-header .language-current::after {
+    display: none !important;
+    content: none !important;
+}
+.audience-header .language-current {
+    gap: 0 !important;
+    min-width: 34px !important;
+    width: 34px !important;
+    padding: 0 !important;
+}
+.audience-header .language-options button > span:not(.language-option-flag) {
+    display: none !important;
+}
+.audience-header .language-options button {
+    justify-content: center !important;
+    gap: 0 !important;
+    min-width: 42px !important;
+}
+.audience-header .language-options {
+    min-width: 54px !important;
 }
 
-html[lang="en"] .language-switcher .language-current::before {
-    background-image: url("https://flagcdn.com/w40/gb.png")
+/* Legacy switcher fallback: show only the country flag as well. */
+.legacy-language-switcher button[data-lang-switch] {
+    position: relative;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden;
 }
-
-html[lang="zh"] .language-switcher .language-current::before {
-    background-image: url("https://flagcdn.com/w40/cn.png")
+.legacy-language-switcher button[data-lang-switch]::before {
+    content: "";
+    display: block;
+    width: 22px;
+    height: 15px;
+    margin: auto;
+    border-radius: 2px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.08);
 }
-
-html[lang="ko"] .language-switcher .language-current::before {
-    background-image: url("https://flagcdn.com/w40/kr.png")
-}
-
-html[lang="ja"] .language-switcher .language-current::before {
-    background-image: url("https://flagcdn.com/w40/jp.png")
-}
-
-html[lang="vi"] .language-switcher .language-current::after {
-    content: "VI ▾"
-}
-
-html[lang="en"] .language-switcher .language-current::after {
-    content: "EN ▾"
-}
-
-html[lang="zh"] .language-switcher .language-current::after {
-    content: "ZH ▾"
-}
-
-html[lang="ko"] .language-switcher .language-current::after {
-    content: "KO ▾"
-}
-
-html[lang="ja"] .language-switcher .language-current::after {
-    content: "JA ▾"
-}
+.legacy-language-switcher button[data-lang-switch="vi"]::before { background-image: url("https://flagcdn.com/w40/vn.png") }
+.legacy-language-switcher button[data-lang-switch="en"]::before { background-image: url("https://flagcdn.com/w40/gb.png") }
+.legacy-language-switcher > span { display: none !important; }
 
 @media(max-width:900px) {
-    .language-switcher {
-        margin: 8px 0;
-        order: 2
-    }
-
-    .language-switcher .language-current {
-        font-size: 0
-    }
-
-    .language-switcher .language-options {
-        right: 0;
-        min-width: 155px
-    }
+    .language-switcher { margin: 8px 0; order: 2 }
+    .language-switcher .language-current { font-size: 0 }
+    .language-switcher .language-options { right: 0; min-width: 155px }
 }
 
 @media(max-width:650px) {
-    .language-switcher {
-        order: 2;
-        margin-left: auto;
-        margin-right: 0
-    }
-
-    .header-container {
-        position: relative
-    }
+    .language-switcher { order: 2; margin-left: auto; margin-right: 0 }
+    .header-container { position: relative }
+    .audience-header .language-current { min-width: 32px !important; width: 32px !important; height: 28px !important; }
 }
