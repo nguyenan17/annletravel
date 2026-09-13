@@ -1,0 +1,82 @@
+name: Update Blog Sitemap
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 1 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  sitemap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate sitemap from published Blog posts
+        env:
+          SUPABASE_URL: https://dhnjsgetgvkwtoclapvu.supabase.co
+          SUPABASE_KEY: sb_publishable_9R_mdwBF9kPyS182epm0OA_M-39q7Qf
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from xml.sax.saxutils import escape
+
+          url = os.environ['SUPABASE_URL'].rstrip('/') + '/rest/v1/blog_posts?select=slug,published_at,updated_at&published=eq.true&order=published_at.desc'
+          req = urllib.request.Request(url, headers={
+              'apikey': os.environ['SUPABASE_KEY'],
+              'Authorization': 'Bearer ' + os.environ['SUPABASE_KEY'],
+              'Accept': 'application/json'
+          })
+          with urllib.request.urlopen(req, timeout=30) as response:
+              posts = json.load(response)
+
+          base_urls = [
+              'https://annletravel.com/',
+              'https://annletravel.com/ca-nhan.html',
+              'https://annletravel.com/business.html',
+              'https://annletravel.com/tours.html',
+              'https://annletravel.com/destinations.html',
+              'https://annletravel.com/about.html',
+              'https://annletravel.com/services.html',
+              'https://annletravel.com/tickets.html',
+              'https://annletravel.com/blog.html'
+          ]
+
+          lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+          for item in base_urls:
+              lines.append(f'  <url><loc>{escape(item)}</loc></url>')
+
+          for post in posts:
+              slug = str(post.get('slug') or '').strip()
+              if not slug:
+                  continue
+              loc = 'https://annletravel.com/blog-detail.html?slug=' + urllib.parse.quote(slug, safe='')
+              lastmod = post.get('updated_at') or post.get('published_at')
+              if lastmod:
+                  lines.append(f'  <url><loc>{escape(loc)}</loc><lastmod>{escape(str(lastmod))}</lastmod></url>')
+              else:
+                  lines.append(f'  <url><loc>{escape(loc)}</loc></url>')
+
+          lines.append('</urlset>')
+          with open('sitemap.xml', 'w', encoding='utf-8', newline='\n') as f:
+              f.write('\n'.join(lines) + '\n')
+          print(f'Generated sitemap with {len(posts)} published Blog posts.')
+          PY
+
+      - name: Commit sitemap if changed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add sitemap.xml
+          if git diff --cached --quiet; then
+            echo 'Sitemap unchanged.'
+          else
+            git commit -m 'SEO: auto-update sitemap with published Blog posts'
+            git push
+          fi
