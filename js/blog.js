@@ -9,6 +9,14 @@ function blogFormatDate(value) {
     return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'long' }).format(new Date(value));
 }
 
+function blogSlugify(value) {
+    return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function blogAbsoluteUrl(path) {
+    try { return new URL(path, location.origin).href; } catch (_) { return path; }
+}
+
 function blogCard(post) {
     const image = post.cover_image || 'images/hero-placeholder.jpg';
     return `<article class="blog-card">
@@ -19,7 +27,7 @@ function blogCard(post) {
             <div class="blog-card-date">${blogFormatDate(post.published_at || post.created_at)}</div>
             <h2><a href="blog-detail.html?slug=${encodeURIComponent(post.slug)}">${blogEscape(post.title)}</a></h2>
             <p>${blogEscape(post.excerpt || '')}</p>
-            ${post.destination ? `<a class="blog-destination" href="destination.html?slug=${encodeURIComponent(String(post.destination).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''))}">📍 ${blogEscape(post.destination)}</a>` : ''}
+            ${post.destination ? `<a class="blog-destination" href="destination.html?slug=${encodeURIComponent(blogSlugify(post.destination))}">📍 ${blogEscape(post.destination)}</a>` : ''}
             <a class="blog-read-more" href="blog-detail.html?slug=${encodeURIComponent(post.slug)}">Đọc bài viết →</a>
         </div>
     </article>`;
@@ -36,14 +44,67 @@ async function renderBlogList() {
     if (!grid) return;
     const posts = await loadBlogPosts();
     grid.innerHTML = posts.length ? posts.map(blogCard).join('') : `<div class="blog-empty">Chưa có bài viết. Hãy quay lại sau.</div>`;
+    if (posts.length) updateBlogListSeo(posts);
 }
 
-function blogAbsoluteUrl(path) {
-    try { return new URL(path, location.origin).href; } catch (_) { return path; }
+function setBlogMeta(name, content) {
+    if (!content) return;
+    let el = document.querySelector(`meta[name="${name}"]`);
+    if (!el) { el = document.createElement('meta'); el.name = name; document.head.appendChild(el); }
+    el.content = content;
 }
 
-function blogSlugify(value) {
-    return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+function setBlogProperty(property, content) {
+    if (!content) return;
+    let el = document.querySelector(`meta[property="${property}"]`);
+    if (!el) { el = document.createElement('meta'); el.setAttribute('property', property); document.head.appendChild(el); }
+    el.content = content;
+}
+
+function updateBlogListSeo(posts) {
+    const categories = [...new Set(posts.map(p => p.category).filter(Boolean))];
+    const destinations = [...new Set(posts.map(p => p.destination).filter(Boolean))];
+    const description = destinations.length
+        ? `Kinh nghiệm du lịch ${destinations.slice(0, 4).join(', ')}, lịch trình, chi phí và gợi ý điểm đến từ ANNLETRAVEL.`
+        : `Kinh nghiệm du lịch, lịch trình, chi phí và gợi ý điểm đến trong nước và quốc tế từ ANNLETRAVEL.`;
+
+    document.title = 'Kinh nghiệm du lịch | ANNLETRAVEL';
+    setBlogMeta('description', description);
+    setBlogMeta('keywords', [...categories, ...destinations, 'kinh nghiệm du lịch', 'lịch trình du lịch', 'ANNLETRAVEL'].join(', '));
+    setBlogMeta('robots', 'index,follow,max-image-preview:large');
+    setBlogMeta('twitter:card', 'summary_large_image');
+    setBlogMeta('twitter:title', 'Kinh nghiệm du lịch | ANNLETRAVEL');
+    setBlogMeta('twitter:description', description);
+    setBlogProperty('og:title', 'Kinh nghiệm du lịch | ANNLETRAVEL');
+    setBlogProperty('og:description', description);
+    setBlogProperty('og:type', 'website');
+    setBlogProperty('og:url', 'https://annletravel.com/blog.html');
+    setBlogProperty('og:site_name', 'ANNLETRAVEL');
+
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+    canonical.href = 'https://annletravel.com/blog.html';
+
+    let ld = document.getElementById('blogListSchema');
+    if (!ld) { ld = document.createElement('script'); ld.id = 'blogListSchema'; ld.type = 'application/ld+json'; document.head.appendChild(ld); }
+    ld.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Kinh nghiệm du lịch | ANNLETRAVEL',
+        description,
+        url: 'https://annletravel.com/blog.html',
+        isPartOf: { '@type': 'WebSite', name: 'ANNLETRAVEL', url: 'https://annletravel.com/' },
+        mainEntity: {
+            '@type': 'ItemList',
+            numberOfItems: posts.length,
+            itemListElement: posts.map((post, index) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                name: post.title,
+                url: `https://annletravel.com/blog-detail.html?slug=${encodeURIComponent(post.slug)}`
+            }))
+        }
+    });
 }
 
 function updateBlogSeo(post) {
@@ -58,36 +119,25 @@ function updateBlogSeo(post) {
     const keywords = [post.title, category, destination, 'kinh nghiệm du lịch', 'du lịch', 'ANNLETRAVEL'].filter(Boolean).join(', ');
 
     document.title = title;
-
-    const setMeta = (name, content) => {
-        let el = document.querySelector(`meta[name="${name}"]`);
-        if (!el) { el = document.createElement('meta'); el.name = name; document.head.appendChild(el); }
-        el.content = content;
-    };
-    const setProperty = (property, content) => {
-        let el = document.querySelector(`meta[property="${property}"]`);
-        if (!el) { el = document.createElement('meta'); el.setAttribute('property', property); document.head.appendChild(el); }
-        el.content = content;
-    };
-
-    setMeta('description', description);
-    setMeta('keywords', keywords);
-    setMeta('author', 'ANNLETRAVEL');
-    setMeta('robots', 'index,follow,max-image-preview:large');
-    setMeta('twitter:title', title);
-    setMeta('twitter:description', description);
-    setMeta('twitter:image', imageUrl);
-    setProperty('og:site_name', 'ANNLETRAVEL');
-    setProperty('og:title', title);
-    setProperty('og:description', description);
-    setProperty('og:type', 'article');
-    setProperty('og:url', canonicalUrl);
-    setProperty('og:image', imageUrl);
-    setProperty('og:image:alt', post.title);
-    setProperty('article:published_time', publishedDate || '');
-    setProperty('article:modified_time', modifiedDate || '');
-    setProperty('article:section', category);
-    if (destination) setProperty('article:tag', destination);
+    setBlogMeta('description', description);
+    setBlogMeta('keywords', keywords);
+    setBlogMeta('author', 'ANNLETRAVEL');
+    setBlogMeta('robots', 'index,follow,max-image-preview:large');
+    setBlogMeta('twitter:card', 'summary_large_image');
+    setBlogMeta('twitter:title', title);
+    setBlogMeta('twitter:description', description);
+    setBlogMeta('twitter:image', imageUrl);
+    setBlogProperty('og:site_name', 'ANNLETRAVEL');
+    setBlogProperty('og:title', title);
+    setBlogProperty('og:description', description);
+    setBlogProperty('og:type', 'article');
+    setBlogProperty('og:url', canonicalUrl);
+    setBlogProperty('og:image', imageUrl);
+    setBlogProperty('og:image:alt', post.title);
+    setBlogProperty('article:published_time', publishedDate || '');
+    setBlogProperty('article:modified_time', modifiedDate || '');
+    setBlogProperty('article:section', category);
+    if (destination) setBlogProperty('article:tag', destination);
 
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
