@@ -17,8 +17,35 @@ function serviceImageUrl(value) {
     return /^https:\/\/[^\s"'<>]+$/i.test(url) ? url : '';
 }
 
+function normalizeServiceKey(value) {
+    return String(value ?? '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9]+/g, '');
+}
+
 let publicServiceCategories = [];
 let publicServices = [];
+
+function resolveServiceCategoryId(requestedCategory) {
+    const requested = String(requestedCategory || '').trim();
+    if (!requested || requested.toUpperCase() === 'ALL') return 'ALL';
+
+    const requestedKey = normalizeServiceKey(requested);
+    const category = publicServiceCategories.find(cat =>
+        String(cat.id ?? '') === requested ||
+        String(cat.slug ?? '') === requested ||
+        String(cat.code ?? '') === requested ||
+        normalizeServiceKey(cat.slug) === requestedKey ||
+        normalizeServiceKey(cat.code) === requestedKey ||
+        normalizeServiceKey(cat.name) === requestedKey
+    );
+
+    return category ? String(category.id) : null;
+}
 
 async function loadPublicServices() {
     const [catResult, serviceResult] = await Promise.all([
@@ -33,15 +60,26 @@ async function loadPublicServices() {
     }
     publicServiceCategories = catResult.data || [];
     publicServices = serviceResult.data || [];
-    renderServiceCategories();
-    renderServices();
+
+    const requestedCategory = new URLSearchParams(location.search).get('category');
+    const activeCategory = resolveServiceCategoryId(requestedCategory);
+
+    renderServiceCategories(activeCategory || 'ALL');
+    renderServices(activeCategory || 'ALL');
     renderServiceDetail();
+
+    // When arriving from the header dropdown, take the user straight to the filtered services.
+    if (activeCategory && activeCategory !== 'ALL') {
+        requestAnimationFrame(() => {
+            document.getElementById('serviceCategories')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
 }
 
 function renderServiceCategories(active = 'ALL') {
     const el = document.getElementById('serviceCategories');
     if (!el) return;
-    el.innerHTML = `<button class="service-filter active" data-category="ALL">Tất cả</button>` + publicServiceCategories.map(cat =>
+    el.innerHTML = `<button class="service-filter" data-category="ALL">Tất cả</button>` + publicServiceCategories.map(cat =>
         `<button class="service-filter" data-category="${escapeServiceHtml(cat.id)}">${escapeServiceHtml(cat.icon)} ${escapeServiceHtml(cat.name)}</button>`
     ).join('');
     el.querySelectorAll('.service-filter').forEach(button => {
@@ -49,6 +87,13 @@ function renderServiceCategories(active = 'ALL') {
         button.addEventListener('click', () => {
             renderServiceCategories(button.dataset.category);
             renderServices(button.dataset.category);
+            const url = new URL(window.location.href);
+            if (button.dataset.category === 'ALL') {
+                url.searchParams.delete('category');
+            } else {
+                url.searchParams.set('category', button.dataset.category);
+            }
+            window.history.replaceState({}, '', url);
         });
     });
 }
@@ -56,11 +101,11 @@ function renderServiceCategories(active = 'ALL') {
 function renderServices(categoryId = 'ALL') {
     const grid = document.getElementById('servicesGrid');
     if (!grid) return;
-    const list = categoryId === 'ALL' ? publicServices : publicServices.filter(item => item.category_id === categoryId);
+    const list = categoryId === 'ALL' ? publicServices : publicServices.filter(item => String(item.category_id) === String(categoryId));
     if (!list.length) { grid.innerHTML = '<p>Chưa có dịch vụ phù hợp.</p>'; return; }
     grid.innerHTML = list.map(service => {
         const image = serviceImageUrl(service.image);
-        const category = publicServiceCategories.find(c => c.id === service.category_id);
+        const category = publicServiceCategories.find(c => String(c.id) === String(service.category_id));
         return `<article class="service-card">${image ? `<img src="${escapeServiceHtml(image)}" alt="${escapeServiceHtml(service.name)}" loading="lazy">` : `<div class="service-image-placeholder">${escapeServiceHtml(category?.icon || '✈️')}</div>`}<div class="service-content"><span class="service-category-label">${escapeServiceHtml(category?.name || 'Dịch vụ')}</span><h3>${escapeServiceHtml(service.name)}</h3><p>${escapeServiceHtml(service.short)}</p><a class="btn btn-primary" href="service-detail.html?slug=${encodeURIComponent(service.slug)}">Xem dịch vụ</a></div></article>`;
     }).join('');
 }
@@ -71,7 +116,7 @@ async function renderServiceDetail() {
     const slug = new URLSearchParams(location.search).get('slug');
     const service = publicServices.find(item => item.slug === slug);
     if (!service) { container.innerHTML = '<section class="section"><div class="container"><h1>Không tìm thấy dịch vụ</h1><a href="services.html">← Quay lại dịch vụ</a></div></section>'; return; }
-    const category = publicServiceCategories.find(c => c.id === service.category_id);
+    const category = publicServiceCategories.find(c => String(c.id) === String(service.category_id));
     const image = serviceImageUrl(service.image);
     container.innerHTML = `<section class="page-hero"><div class="container"><p class="section-label">${escapeServiceHtml(category?.name || 'DỊCH VỤ')}</p><h1>${escapeServiceHtml(service.name)}</h1><p>${escapeServiceHtml(service.short)}</p></div></section><section class="section"><div class="container service-detail-grid"><div>${image ? `<img class="service-detail-image" src="${escapeServiceHtml(image)}" alt="${escapeServiceHtml(service.name)}">` : `<div class="service-detail-placeholder">${escapeServiceHtml(category?.icon || '✈️')}</div>`}</div><div><h2>${escapeServiceHtml(service.name)}</h2><p class="lead">${escapeServiceHtml(service.description)}</p>${Number(service.price_from) > 0 ? `<p class="service-price">Từ <strong>${new Intl.NumberFormat('vi-VN').format(Number(service.price_from))} đ</strong></p>` : ''}<a href="index.html#contact" class="btn btn-primary">Nhận tư vấn</a></div></div></section>`;
 }
