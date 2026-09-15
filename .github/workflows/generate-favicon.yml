@@ -42,17 +42,25 @@ jobs:
           print('Generated square favicon files:', canvas.size)
           PY
 
-      - name: Update public favicon references
+      - name: Normalize public favicon references without touching social images
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           files = [Path('index.html'), Path('ca-nhan.html'), Path('business.html')]
           for path in files:
               text = path.read_text(encoding='utf-8')
-              text = text.replace('/images/logo.png\">', '/images/favicon.png\">')
-              text = text.replace('/images/logo.png" />', '/images/favicon.png" />')
-              text = text.replace('/images/logo.png"', '/images/favicon.png"', 2)
+
+              # Google Search favicon: use the dedicated square PNG/ICO.
+              text = re.sub(r'(<link rel="icon"[^>]+href=")[^"]+("[^>]*>)', r'\1/images/favicon.png\2', text, count=1)
+              text = re.sub(r'(<link rel="shortcut icon"[^>]+href=")[^"]+("[^>]*>)', r'\1/images/favicon.ico\2', text, count=1)
+
+              # Keep the full-size brand logo for social previews and Apple touch icon.
+              text = re.sub(r'(<meta property="og:image" content=")[^"]+(">)', r'\1https://annletravel.com/images/logo.png\2', text, count=1)
+              text = re.sub(r'(<meta name="twitter:image" content=")[^"]+(">)', r'\1https://annletravel.com/images/logo.png\2', text, count=1)
+              text = re.sub(r'(<link rel="apple-touch-icon" href=")[^"]+("[^>]*>)', r'\1/images/logo.png\2', text, count=1)
+
               path.write_text(text, encoding='utf-8', newline='\n')
           PY
 
