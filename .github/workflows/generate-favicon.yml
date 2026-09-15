@@ -1,0 +1,69 @@
+name: Generate Square Favicon
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'images/logo.png'
+      - '.github/workflows/generate-favicon.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  favicon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate square PNG and ICO favicon
+        run: |
+          python -m pip install --disable-pip-version-check Pillow
+          python - <<'PY'
+          from PIL import Image, ImageOps
+          from pathlib import Path
+
+          source = Path('images/logo.png')
+          if not source.exists():
+              raise SystemExit('images/logo.png not found')
+
+          image = Image.open(source).convert('RGBA')
+          size = 512
+          contained = ImageOps.contain(image, (size, size), Image.Resampling.LANCZOS)
+          canvas = Image.new('RGBA', (size, size), (255, 255, 255, 0))
+          x = (size - contained.width) // 2
+          y = (size - contained.height) // 2
+          canvas.alpha_composite(contained, (x, y))
+
+          canvas.save('images/favicon.png', 'PNG', optimize=True)
+          canvas.save('images/favicon.ico', format='ICO', sizes=[(16,16), (32,32), (48,48), (64,64), (128,128), (256,256)])
+          print('Generated square favicon files:', canvas.size)
+          PY
+
+      - name: Update public favicon references
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          files = [Path('index.html'), Path('ca-nhan.html'), Path('business.html')]
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              text = text.replace('/images/logo.png\">', '/images/favicon.png\">')
+              text = text.replace('/images/logo.png" />', '/images/favicon.png" />')
+              text = text.replace('/images/logo.png"', '/images/favicon.png"', 2)
+              path.write_text(text, encoding='utf-8', newline='\n')
+          PY
+
+      - name: Commit favicon if changed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add images/favicon.png images/favicon.ico index.html ca-nhan.html business.html
+          if git diff --cached --quiet; then
+            echo 'Favicon unchanged.'
+          else
+            git commit -m 'SEO: add square favicon for Google Search'
+            git push
+          fi
