@@ -22,17 +22,28 @@ body:has(.page-hero) main{background:#f7fafc}
 .destination-detail-hero{box-shadow:inset 0 -1px rgba(255,255,255,.08)}
 .destination-detail-content h1{font-weight:800}
 
+/* Header social: a real second row above the audience actions.
+   Keep the language switcher + audience buttons on the lower row. */
+.public-header-actions{
+  flex-wrap:wrap !important;
+  row-gap:6px !important;
+}
+.public-header-actions .header-social{
+  order:0 !important;
+  flex:0 0 100% !important;
+  justify-content:flex-end !important;
+  width:100% !important;
+}
+.public-header-actions .language-switcher{
+  order:1 !important;
+}
+.public-header-actions .audience-switch-btn,
+.public-header-actions .btn-header{
+  order:2 !important;
+}
+
 @media(max-width:650px){
   .about-page .about-section-heading{gap:10px}
   .destination-list-section{padding-top:48px}
-}
-
-/* Header social: place the social row above the two audience actions.
-   Keep language + audience buttons on the original lower row. */
-.audience-header .public-header-actions{position:relative}
-.audience-header .public-header-actions .header-social{
-  position:absolute !important;
-  right:0 !important;
-  bottom:calc(100% + 8px) !important;
-  z-index:1200 !important;
+  .public-header-actions .header-social{justify-content:flex-end !important}
 }
