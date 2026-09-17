@@ -1,0 +1,166 @@
+/* =========================================================
+   ANNLETRAVEL - SEASONAL TOUR DISCOVERY
+========================================================= */
+
+.seasonal-section {
+    padding: 72px 0 82px;
+    background: #F5FAFC;
+}
+
+.seasonal-header {
+    margin-bottom: 28px;
+}
+
+.seasonal-intro {
+    margin-top: 8px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.seasonal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.seasonal-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    border: 1px solid #DDE9EE;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(14, 49, 67, .07);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.seasonal-card:hover {
+    transform: translateY(-6px);
+    border-color: #BBDDEB;
+    box-shadow: 0 18px 40px rgba(14, 49, 67, .13);
+}
+
+.seasonal-card.is-current {
+    border-color: rgba(0, 168, 232, .45);
+}
+
+.seasonal-image {
+    position: relative;
+    height: 205px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0077B6, #063B57);
+    background-size: cover;
+    background-position: center;
+}
+
+.seasonal-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 42, 62, .58), transparent 62%);
+}
+
+.seasonal-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 2;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .94);
+    color: var(--primary-dark);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .7px;
+}
+
+.seasonal-index {
+    position: absolute;
+    right: 16px;
+    bottom: 11px;
+    z-index: 2;
+    color: rgba(255, 255, 255, .72);
+    font-size: 32px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.seasonal-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 19px 20px 20px;
+}
+
+.seasonal-content h3 {
+    margin: 0 0 8px;
+    color: #17212B;
+    font-size: 21px;
+    line-height: 1.25;
+}
+
+.seasonal-content p {
+    margin: 0 0 13px;
+    color: var(--text-light);
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.seasonal-content small {
+    color: #667780;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.seasonal-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 17px;
+    padding-top: 13px;
+    border-top: 1px solid #E8EFF2;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.seasonal-link b {
+    font-size: 18px;
+    line-height: 1;
+    transition: transform .2s ease;
+}
+
+.seasonal-card:hover .seasonal-link b {
+    transform: translateX(4px);
+}
+
+.seasonal-empty {
+    grid-column: 1 / -1;
+    border-radius: 14px;
+}
+
+.seasonal-empty .btn {
+    margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+    .seasonal-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .seasonal-section {
+        padding: 58px 0 65px;
+    }
+
+    .seasonal-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .seasonal-image {
+        height: 220px;
+    }
+}
