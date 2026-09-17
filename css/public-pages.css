@@ -26,3 +26,13 @@ body:has(.page-hero) main{background:#f7fafc}
   .about-page .about-section-heading{gap:10px}
   .destination-list-section{padding-top:48px}
 }
+
+/* Header social: place the social row above the two audience actions.
+   Keep language + audience buttons on the original lower row. */
+.audience-header .public-header-actions{position:relative}
+.audience-header .public-header-actions .header-social{
+  position:absolute !important;
+  right:0 !important;
+  bottom:calc(100% + 8px) !important;
+  z-index:1200 !important;
+}
