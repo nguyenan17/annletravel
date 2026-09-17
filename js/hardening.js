@@ -222,6 +222,26 @@
         };
     }
 
+    // --------------------------------
+    // Seasonal tour discovery.
+    // Kept as a separate module so the
+    // existing tour/app code stays untouched.
+    // --------------------------------
+    if (
+        document.body.classList.contains("personal-page") ||
+        document.getElementById("allTours")
+    ) {
+        const seasonalScript = document.createElement("script");
+        seasonalScript.src = "js/seasonal-tours.js";
+        seasonalScript.defer = true;
+        document.head.appendChild(seasonalScript);
+
+        const seasonalStyles = document.createElement("link");
+        seasonalStyles.rel = "stylesheet";
+        seasonalStyles.href = "css/seasonal.css";
+        document.head.appendChild(seasonalStyles);
+    }
+
     function escapeHtmlSafe(value) {
         return String(value ?? "")
             .replace(/&/g, "&amp;")
