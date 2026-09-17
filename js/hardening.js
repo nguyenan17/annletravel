@@ -158,6 +158,8 @@
 
     // --------------------------------
     // Safer monthly departure rendering.
+    // Only show today/future departures,
+    // sorted by the actual departure date.
     // --------------------------------
     if (typeof originalRenderMonthlyTours === "function") {
         window.renderMonthlyTours = async function () {
@@ -168,7 +170,35 @@
                 return;
             }
 
-            const monthlyTours = data.slice(0, 4);
+            const today = new Date();
+            const todayKey = [
+                today.getFullYear(),
+                String(today.getMonth() + 1).padStart(2, "0"),
+                String(today.getDate()).padStart(2, "0")
+            ].join("-");
+
+            const monthlyTours = data
+                .filter(tour => {
+                    const departureKey = String(tour.departure ?? "").slice(0, 10);
+                    return /^\d{4}-\d{2}-\d{2}$/.test(departureKey)
+                        && departureKey >= todayKey;
+                })
+                .sort((a, b) => {
+                    const dateA = String(a.departure ?? "").slice(0, 10);
+                    const dateB = String(b.departure ?? "").slice(0, 10);
+                    return dateA.localeCompare(dateB);
+                })
+                .slice(0, 4);
+
+            if (monthlyTours.length === 0) {
+                container.innerHTML = `
+                    <div class="departure-empty">
+                        <p>Hiện chưa có tour nào có lịch khởi hành sắp tới.</p>
+                        <a href="tours.html" class="btn btn-primary">Xem tất cả tour</a>
+                    </div>
+                `;
+                return;
+            }
 
             container.innerHTML = monthlyTours.map(tour => `
                 <div class="departure-row">
