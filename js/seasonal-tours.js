@@ -177,14 +177,14 @@
                 return originalFilterTours();
             }
 
-            await originalFilterTours();
             const data = await window.loadTours();
             const seasonData = filterBySeason(data, seasonKey);
             const destination = document.getElementById("filterDestination")?.value || "";
             const date = document.getElementById("filterDate")?.value || "";
             const price = document.getElementById("filterPrice")?.value || "";
+            const sort = document.getElementById("filterSort")?.value || "";
 
-            const filtered = seasonData.filter(tour => {
+            let filtered = seasonData.filter(tour => {
                 if (destination && !String(tour.destination || "").toLowerCase().includes(destination.toLowerCase())) return false;
                 if (date && String(tour.departure) !== date) return false;
                 if (price === "under10" && Number(tour.price) >= 10000000) return false;
@@ -192,6 +192,10 @@
                 if (price === "over20" && Number(tour.price) <= 20000000) return false;
                 return true;
             });
+
+            if (sort === "priceAsc") filtered.sort((a, b) => Number(a.price) - Number(b.price));
+            else if (sort === "priceDesc") filtered.sort((a, b) => Number(b.price) - Number(a.price));
+            else if (sort === "dateAsc") filtered.sort((a, b) => String(a.departure).localeCompare(String(b.departure)));
 
             if (typeof window.renderFilteredTours === "function") window.renderFilteredTours(filtered);
             const count = document.getElementById("tourCount");
@@ -202,9 +206,15 @@
         window.filterTours = wrapped;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function init() {
         renderSeasonalCards();
         installFilterWrapper();
         applySeasonFilter();
-    });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init, { once: true });
+    } else {
+        init();
+    }
 })();
