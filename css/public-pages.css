@@ -22,42 +22,82 @@ body:has(.page-hero) main{background:#f7fafc}
 .destination-detail-hero{box-shadow:inset 0 -1px rgba(255,255,255,.08)}
 .destination-detail-content h1{font-weight:800}
 
-/* Header social: dedicated row above the audience buttons, aligned to their right edge. */
-.public-header-actions{
-  display:grid !important;
-  grid-template-columns:auto auto auto;
-  grid-template-rows:32px 40px;
-  align-items:center;
-  justify-content:end;
-  column-gap:9px;
-  row-gap:7px;
+/* Header social: use the existing "Tư vấn ngay" position as a compact social dropdown. */
+.audience-header .public-header-actions{
+  flex-wrap:nowrap !important;
+  align-items:center !important;
+  position:relative;
 }
-.public-header-actions .header-social{
-  position:static !important;
-  grid-column:1 / -1 !important;
-  grid-row:1 !important;
-  justify-self:end !important;
-  margin:0 !important;
+.audience-header .public-header-actions .header-social{
+  position:absolute !important;
+  right:0 !important;
+  top:calc(100% + 6px) !important;
+  z-index:1300 !important;
+  width:170px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  gap:4px !important;
+  padding:7px !important;
+  border:1px solid rgba(255,255,255,.22) !important;
+  border-radius:14px !important;
+  background:rgba(10,30,43,.94) !important;
+  box-shadow:0 14px 30px rgba(0,0,0,.22) !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  transform:translateY(-5px) !important;
+  transition:opacity .18s ease,transform .18s ease,visibility .18s ease !important;
 }
-.public-header-actions .language-switcher{
-  grid-column:1 !important;
-  grid-row:2 !important;
+.audience-header .public-header-actions .header-social-link{
+  width:100% !important;
+  height:34px !important;
+  min-height:34px !important;
+  justify-content:flex-start !important;
+  gap:10px !important;
+  padding:0 10px !important;
+  border:0 !important;
+  border-radius:9px !important;
+  background:transparent !important;
+  color:#fff !important;
+  transform:none !important;
+  box-shadow:none !important;
+  font-size:13px !important;
+  font-weight:700 !important;
 }
-.public-header-actions .audience-switch-btn{
-  grid-column:2 !important;
-  grid-row:2 !important;
+.audience-header .public-header-actions .header-social-link svg{width:16px !important;height:16px !important;flex:0 0 16px !important}
+.audience-header .public-header-actions .header-social-link::after{
+  content:attr(aria-label);
+  display:block;
+  font-size:13px;
+  font-weight:700;
 }
-.public-header-actions .btn-header{
-  grid-column:3 !important;
-  grid-row:2 !important;
+.audience-header .public-header-actions .header-social-zalo span{display:none !important}
+.audience-header .public-header-actions .header-social-link:hover,
+.audience-header .public-header-actions .header-social-link:focus-visible{
+  background:rgba(255,255,255,.12) !important;
+  color:#fff !important;
 }
+.audience-header .public-header-actions:has(.btn-header:hover) .header-social,
+.audience-header .public-header-actions .header-social:hover,
+.audience-header .public-header-actions .header-social:focus-within{
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  transform:translateY(0) !important;
+}
+
+/* Keep the lower action row clean; the social dropdown replaces the old standalone icon row. */
+.audience-header .public-header-actions .btn-header{order:3 !important}
+.audience-header .public-header-actions .audience-switch-btn{order:2 !important}
+.audience-header .public-header-actions .language-switcher{order:1 !important}
 
 @media(max-width:650px){
   .about-page .about-section-heading{gap:10px}
   .destination-list-section{padding-top:48px}
-  .public-header-actions{
-    grid-template-rows:28px 36px;
-    column-gap:6px;
-    row-gap:5px;
+  .audience-header .public-header-actions .header-social{
+    width:158px !important;
+    right:0 !important;
   }
+  .audience-header .public-header-actions .header-social-link{height:32px !important;min-height:32px !important}
 }
