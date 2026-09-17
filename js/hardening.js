@@ -272,6 +272,84 @@
         document.head.appendChild(seasonalStyles);
     }
 
+    // --------------------------------
+    // Public header social icons.
+    // Render into both the static public
+    // header and the shared business header.
+    // The footer social block is intentionally
+    // left untouched.
+    // --------------------------------
+    function renderHeaderSocial() {
+        if (document.querySelector(".header-social")) {
+            return;
+        }
+
+        const header = document.querySelector("header.header");
+        if (!header) {
+            return;
+        }
+
+        const actions = header.querySelector(".public-header-actions");
+        const container = actions || header.querySelector(".header-container");
+        if (!container) {
+            return;
+        }
+
+        const social = document.createElement("div");
+        social.className = "header-social";
+        social.setAttribute("aria-label", "Kết nối với AnnLeTravel");
+        social.innerHTML = `
+            <a class="header-social-link" href="https://web.facebook.com/profile.php?id=61550505475800" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.6 1.6-1.6h1.7V3.8c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.3v3h2.8v8h3.4Z"/></svg>
+            </a>
+            <a class="header-social-link" href="https://www.threads.net/" target="_blank" rel="noopener noreferrer" aria-label="Threads" title="Threads">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.1 11.1c-.2-4.3-2.8-6.8-7-6.8-4.3 0-7.1 2.6-7.1 6.8 0 4.7 2.9 7.5 7.5 7.5 3.8 0 6.2-1.9 6.2-4.9 0-2.4-1.8-4-4.6-4-2.2 0-3.7 1-3.7 2.6 0 1.3 1.1 2.1 2.6 2.1 1.6 0 2.8-.8 3.5-2.1-.3 2.1-1.5 3.3-3.8 3.3-3.5 0-5.5-1.7-5.5-4.7 0-3 1.8-4.7 4.9-4.7 2.8 0 4.5 1.2 5 3.5-1.3-.5-2.6-.7-3.8-.7-1.8 0-2.8.7-2.8 1.9-1.8 0-2.8.7-2.8 1.9 0 .8.7 1.3 1.7 1.3 1.7 0 3-1.2 3.1-3.1.1 0 .2 0 .3.1 1.7.3 2.7 1.2 2.7 2.7 0 1.9-1.6 3-4.1 3-3.8 0-6.2-2.2-6.2-5.9 0-3.5 2.2-5.7 5.6-5.7 3.1 0 5.1 1.6 5.6 4.4l2.2.1c-.1-.3-.2-.6-.3-.9Z"/></svg>
+            </a>
+            <a class="header-social-link header-social-zalo" href="https://zalo.me/862421655" target="_blank" rel="noopener noreferrer" aria-label="Zalo" title="Zalo"><span>Zalo</span></a>
+            <a class="header-social-link" href="mailto:dulichannle@gmail.com" aria-label="Email AnnLeTravel" title="Email">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 6.2A2.2 2.2 0 0 1 4.7 4h14.6a2.2 2.2 0 0 1 2.2 2.2v11.6a2.2 2.2 0 0 1-2.2 2.2H4.7a2.2 2.2 0 0 1-2.2-2.2V6.2Zm2.2-.1 7.3 5.7 7.3-5.7H4.7Zm14.6 2.8-6.6 5.1a1.1 1.1 0 0 1-1.4 0L4.7 8.9v8.9h14.6v-8.9Z"/></svg>
+            </a>`;
+
+        if (actions) {
+            actions.insertBefore(social, actions.firstElementChild || null);
+        } else {
+            const consult = container.querySelector(".btn-header");
+            if (consult) {
+                container.insertBefore(social, consult);
+            } else {
+                container.appendChild(social);
+            }
+        }
+    }
+
+    function injectHeaderSocialStyles() {
+        if (document.getElementById("annle-header-social-styles")) {
+            return;
+        }
+
+        const style = document.createElement("style");
+        style.id = "annle-header-social-styles";
+        style.textContent = `
+            .header-social{display:flex;align-items:center;gap:5px;flex-shrink:0}
+            .header-social-link{position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid rgba(255,255,255,.28);border-radius:50%;background:rgba(255,255,255,.09);color:#fff;text-decoration:none;transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease}
+            .header-social-link svg{width:15px;height:15px;fill:currentColor}
+            .header-social-zalo{font-size:8px;font-weight:900;letter-spacing:-.3px}
+            .header-social-link:hover,.header-social-link:focus-visible{transform:translateY(-2px);background:#fff;color:#006b93;border-color:#fff;box-shadow:0 6px 14px rgba(0,0,0,.16);outline:none}
+            .business-shared-header .header-social-link{border-color:rgba(0,91,143,.2);background:rgba(0,91,143,.06);color:#005b8f}
+            .business-shared-header .header-social-link:hover,.business-shared-header .header-social-link:focus-visible{background:#005b8f;color:#fff;border-color:#005b8f}
+            @media(max-width:1100px){.header-social{gap:3px}.header-social-link{width:28px;height:28px}.header-social-link svg{width:14px;height:14px}}
+            @media(max-width:820px){.header-social{gap:2px}.header-social-link{width:26px;height:26px}.header-social-link svg{width:13px;height:13px}.header-social-zalo{font-size:7px}.public-header-actions{gap:4px!important}}
+            @media(max-width:650px){.header-social-link{width:25px;height:25px}.header-social-link svg{width:12px;height:12px}.header-social-zalo{font-size:6.5px}}
+        `;
+        document.head.appendChild(style);
+    }
+
+    injectHeaderSocialStyles();
+    renderHeaderSocial();
+
+    const headerObserver = new MutationObserver(() => renderHeaderSocial());
+    headerObserver.observe(document.body, { childList: true, subtree: true });
+
     function escapeHtmlSafe(value) {
         return String(value ?? "")
             .replace(/&/g, "&amp;")
