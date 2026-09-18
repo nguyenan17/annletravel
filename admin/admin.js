@@ -499,7 +499,1584 @@ function escapeHtml(value) {
 
 
 // =========================
-// LOAD REMAINING ADMIN LOGIC
+// OPEN ADD MODAL
 // =========================
 
-// Giữ các hàm quản lý tour/ảnh/lịch trình được kh... (truncated)
+addTourButton.addEventListener(
+    "click",
+    function () {
+
+        editingTourId = null;
+
+        imagesToDelete = [];
+
+        document.getElementById(
+            "modalTitle"
+        ).textContent = "Thêm tour";
+
+        tourForm.reset();
+
+        imagePreview.innerHTML = "";
+
+        galleryPreview.innerHTML = "";
+
+        editingTourImages = [];
+
+        selectedGalleryFiles = [];
+
+        document.getElementById(
+            "tourId"
+        ).value = "";
+
+        tourModal.classList.remove(
+            "hidden"
+        );
+    }
+);
+
+// =========================
+// IMAGE PREVIEW
+// =========================
+
+const tourImageFile =
+    document.getElementById("tourImageFile");
+
+const imagePreview =
+    document.getElementById("imagePreview");
+
+
+// =========================
+// MAIN IMAGE PREVIEW
+// =========================
+
+tourImageFile.addEventListener(
+    "change",
+    function () {
+
+        const file =
+            this.files[0];
+
+        if (!file) {
+            return;
+        }
+
+
+        const imageUrl =
+            URL.createObjectURL(file);
+
+
+        imagePreview.innerHTML = `
+
+            <img
+                src="${imageUrl}"
+                alt="Preview"
+            >
+
+        `;
+    }
+);
+
+
+// =========================
+// GALLERY PREVIEW
+// =========================
+
+tourGalleryFiles.addEventListener(
+    "change",
+    function () {
+
+        selectedGalleryFiles =
+            Array.from(this.files);
+
+
+        renderGalleryPreview();
+
+    }
+);
+
+
+function renderGalleryPreview() {
+
+    galleryPreview.innerHTML = "";
+
+
+    selectedGalleryFiles.forEach(
+        (file, index) => {
+
+            const imageUrl =
+                URL.createObjectURL(file);
+
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "gallery-preview-item";
+
+
+            item.innerHTML = `
+
+                <img
+                    src="${imageUrl}"
+                    alt="Gallery ${index + 1}"
+                >
+
+                <button
+                    type="button"
+                    onclick="removeGalleryFile(${index})"
+                >
+                    ×
+                </button>
+
+            `;
+
+
+            galleryPreview.appendChild(item);
+
+        }
+    );
+}
+
+
+window.removeGalleryFile =
+    function (index) {
+
+        selectedGalleryFiles.splice(
+            index,
+            1
+        );
+
+
+        renderGalleryPreview();
+
+    };
+
+
+// =========================
+// EDIT TOUR
+// =========================
+
+window.editTour =
+    function (tourId) {
+
+        const tour =
+            tours.find(
+                item => item.id === tourId
+            );
+
+        if (!tour) {
+            return;
+        }
+
+
+        editingTourId =
+            tour.id;
+
+
+        document.getElementById(
+            "modalTitle"
+        ).textContent =
+            "Sửa tour";
+
+
+        document.getElementById(
+            "tourId"
+        ).value =
+            tour.id;
+
+
+        document.getElementById(
+            "tourName"
+        ).value =
+            tour.name || "";
+
+
+        document.getElementById(
+            "tourDestination"
+        ).value =
+            tour.destination || "";
+
+
+        document.getElementById(
+            "tourDeparture"
+        ).value =
+            tour.departure || "";
+
+
+        document.getElementById(
+            "tourSeats"
+        ).value =
+            tour.seats || 0;
+
+
+        document.getElementById(
+            "tourPrice"
+        ).value =
+            tour.price || 0;
+
+
+        document.getElementById(
+            "tourImage"
+        ).value =
+            tour.image || "";
+
+        editingTourImages =
+            Array.isArray(tour.images)
+                ? [...tour.images]
+                : [];
+
+        selectedGalleryFiles = [];
+
+        imagesToDelete = [];
+
+        tourGalleryFiles.value = "";
+
+        renderExistingGallery();
+
+        if (tour.image) {
+
+            imagePreview.innerHTML = `
+        <img
+            src="${tour.image}"
+            alt="${escapeHtml(tour.name)}"
+        >
+    `;
+
+        } else {
+
+            imagePreview.innerHTML = "";
+
+        }
+
+
+        document.getElementById(
+            "tourShort"
+        ).value =
+            tour.short || "";
+
+
+        tourModal.classList.remove(
+            "hidden"
+        );
+    };
+
+function renderExistingGallery() {
+
+    galleryPreview.innerHTML = "";
+
+
+    editingTourImages.forEach(
+        (imageUrl, index) => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "gallery-preview-item";
+
+
+            item.innerHTML = `
+
+                <img
+                    src="${imageUrl}"
+                    alt="Gallery"
+                >
+
+                <button
+                    type="button"
+                    onclick="removeExistingGalleryImage(${index})"
+                >
+                    ×
+                </button>
+
+            `;
+
+
+            galleryPreview.appendChild(item);
+
+        }
+    );
+}
+
+window.removeExistingGalleryImage =
+    function (index) {
+
+        const imageUrl =
+            editingTourImages[index];
+
+        if (!imageUrl) {
+            return;
+        }
+
+        const confirmed =
+            confirm(
+                "Bạn có chắc muốn xóa ảnh này?"
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        // Đánh dấu ảnh để xóa khỏi Storage
+        imagesToDelete.push(imageUrl);
+
+        // Xóa khỏi danh sách gallery hiện tại
+        editingTourImages.splice(
+            index,
+            1
+        );
+
+        renderExistingGallery();
+    };
+
+// =========================
+// MANAGE ITINERARY
+// =========================
+
+window.manageItinerary =
+    async function (tourId) {
+
+        const tour =
+            tours.find(
+                item => item.id === tourId
+            );
+
+        if (!tour) {
+            alert("Không tìm thấy tour.");
+            return;
+        }
+
+        editingItineraryTourId =
+            tourId;
+
+        itineraryModalTitle.textContent =
+            "Lịch trình";
+
+        itineraryTourName.textContent =
+            tour.name;
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("tour_itineraries")
+                    .select("*")
+                    .eq(
+                        "tour_id",
+                        tourId
+                    )
+                    .order(
+                        "day",
+                        {
+                            ascending: true
+                        }
+                    );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            itineraryItems =
+                data || [];
+
+
+            renderItinerary();
+
+
+            itineraryModal.classList.remove(
+                "hidden"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Load itinerary error:",
+                error
+            );
+
+            alert(
+                "Không thể tải lịch trình.\n\n" +
+                error.message
+            );
+        }
+    };
+
+
+// =========================
+// RENDER ITINERARY
+// =========================
+
+function renderItinerary() {
+
+    if (
+        !itineraryItems ||
+        itineraryItems.length === 0
+    ) {
+
+        itineraryList.innerHTML = `
+            <div class="itinerary-empty">
+                Chưa có lịch trình.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    itineraryList.innerHTML =
+        itineraryItems
+            .map(
+                (item, index) => `
+
+                <div
+                    class="itinerary-item"
+                    data-index="${index}"
+                >
+
+                    <div class="itinerary-item-header">
+
+                        <div class="itinerary-day-title">
+                            Ngày ${item.day}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="itinerary-delete-button"
+                            onclick="removeItineraryDay(${index})"
+                        >
+                            Xóa ngày
+                        </button>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Tiêu đề
+                        </label>
+
+                        <input
+                            type="text"
+                            class="itinerary-title"
+                            value="${escapeHtml(
+                    item.title || ""
+                )}"
+                            placeholder="Ví dụ: Hà Nội → Seoul"
+                            oninput="updateItineraryItem(
+                                ${index},
+                                'title',
+                                this.value
+                            )"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Nội dung
+                        </label>
+
+                        <textarea
+                            class="itinerary-description"
+                            placeholder="Mô tả lịch trình trong ngày..."
+                            oninput="updateItineraryItem(
+                                ${index},
+                                'description',
+                                this.value
+                            )"
+                        >${escapeHtml(
+                    item.description || ""
+                )}</textarea>
+
+                    </div>
+
+                </div>
+
+            `
+            )
+            .join("");
+}
+
+
+// =========================
+// UPDATE ITINERARY ITEM
+// =========================
+
+window.updateItineraryItem =
+    function (
+        index,
+        field,
+        value
+    ) {
+
+        if (!itineraryItems[index]) {
+            return;
+        }
+
+        itineraryItems[index][field] =
+            value;
+    };
+
+
+// =========================
+// ADD ITINERARY DAY
+// =========================
+
+addItineraryDayButton.addEventListener(
+    "click",
+    function () {
+
+        const nextDay =
+            itineraryItems.length + 1;
+
+
+        itineraryItems.push({
+
+            id: null,
+
+            tour_id:
+                editingItineraryTourId,
+
+            day:
+                nextDay,
+
+            title:
+                "",
+
+            description:
+                ""
+
+        });
+
+
+        renderItinerary();
+    }
+);
+
+
+// =========================
+// REMOVE ITINERARY DAY
+// =========================
+
+window.removeItineraryDay =
+    function (index) {
+
+        if (!itineraryItems[index]) {
+            return;
+        }
+
+
+        const confirmed =
+            confirm(
+                `Bạn có chắc muốn xóa Ngày ${itineraryItems[index].day}?`
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        itineraryItems.splice(
+            index,
+            1
+        );
+
+
+        // Đánh lại số ngày
+
+        itineraryItems.forEach(
+            (item, itemIndex) => {
+
+                item.day =
+                    itemIndex + 1;
+
+            }
+        );
+
+
+        renderItinerary();
+    };
+
+
+// =========================
+// SAVE ITINERARY
+// =========================
+
+saveItineraryButton.addEventListener(
+    "click",
+    async function () {
+
+        if (!editingItineraryTourId) {
+            return;
+        }
+
+
+        // Kiểm tra tiêu đề
+
+        const invalidItem =
+            itineraryItems.find(
+                item =>
+                    !item.title ||
+                    !item.title.trim()
+            );
+
+
+        if (invalidItem) {
+
+            alert(
+                `Vui lòng nhập tiêu đề cho Ngày ${invalidItem.day}.`
+            );
+
+            return;
+        }
+
+
+        try {
+
+            saveItineraryButton.disabled =
+                true;
+
+            saveItineraryButton.textContent =
+                "Đang lưu...";
+
+
+            // Xóa toàn bộ lịch trình cũ
+
+            const {
+                error: deleteError
+            } =
+                await supabaseClient
+                    .from("tour_itineraries")
+                    .delete()
+                    .eq(
+                        "tour_id",
+                        editingItineraryTourId
+                    );
+
+
+            if (deleteError) {
+                throw deleteError;
+            }
+
+
+            // Nếu có lịch trình mới thì insert
+
+            if (itineraryItems.length > 0) {
+
+                const rows =
+                    itineraryItems.map(
+                        item => ({
+
+                            tour_id:
+                                editingItineraryTourId,
+
+                            day:
+                                item.day,
+
+                            title:
+                                item.title.trim(),
+
+                            description:
+                                item.description
+                                    ? item.description.trim()
+                                    : ""
+
+                        })
+                    );
+
+
+                const {
+                    error: insertError
+                } =
+                    await supabaseClient
+                        .from(
+                            "tour_itineraries"
+                        )
+                        .insert(rows);
+
+
+                if (insertError) {
+                    throw insertError;
+                }
+            }
+
+
+            alert(
+                "Lưu lịch trình thành công!"
+            );
+
+
+            closeItineraryModal();
+
+
+        } catch (error) {
+
+            console.error(
+                "Save itinerary error:",
+                error
+            );
+
+
+            alert(
+                "Không thể lưu lịch trình.\n\n" +
+                error.message
+            );
+
+
+        } finally {
+
+            saveItineraryButton.disabled =
+                false;
+
+            saveItineraryButton.textContent =
+                "Lưu lịch trình";
+        }
+    }
+);
+
+
+// =========================
+// CLOSE ITINERARY MODAL
+// =========================
+
+function closeItineraryModal() {
+
+    itineraryModal.classList.add(
+        "hidden"
+    );
+
+    editingItineraryTourId =
+        null;
+
+    itineraryItems = [];
+
+    itineraryList.innerHTML = "";
+}
+
+
+closeItineraryModalButton.addEventListener(
+    "click",
+    closeItineraryModal
+);
+
+
+cancelItineraryButton.addEventListener(
+    "click",
+    closeItineraryModal
+);
+
+
+// =========================
+// DELETE TOUR
+// =========================
+
+window.deleteTour =
+    async function (tourId) {
+
+        const tour =
+            tours.find(
+                item => item.id === tourId
+            );
+
+        if (!tour) {
+            return;
+        }
+
+
+        const confirmed =
+            confirm(
+                `Bạn có chắc muốn xóa tour "${tour.name}"?`
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        try {
+
+            // =========================
+            // LẤY TOÀN BỘ ẢNH
+            // =========================
+
+            const imagesToRemove = [
+                tour.image,
+                ...(Array.isArray(tour.images)
+                    ? tour.images
+                    : [])
+            ].filter(Boolean);
+
+
+            // =========================
+            // XÓA TOUR TRONG DATABASE
+            // =========================
+
+            const { error } =
+                await supabaseClient
+                    .from("tours")
+                    .delete()
+                    .eq("id", tourId);
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            // =========================
+            // XÓA ẢNH KHỎI STORAGE
+            // =========================
+
+            if (imagesToRemove.length > 0) {
+
+                try {
+
+                    await deleteTourStorageImages(
+                        imagesToRemove
+                    );
+
+                } catch (storageError) {
+
+                    console.error(
+                        "Tour đã xóa nhưng ảnh Storage chưa xóa hết:",
+                        storageError
+                    );
+
+                }
+            }
+
+
+            alert(
+                "Xóa tour thành công!"
+            );
+
+
+            await loadTours();
+
+
+        } catch (error) {
+
+            console.error(
+                "Delete tour error:",
+                error
+            );
+
+            alert(
+                "Không thể xóa tour.\n\n" +
+                error.message
+            );
+        }
+    };
+
+// =========================
+// IMAGE COMPRESSION
+// =========================
+
+async function compressImage(file) {
+
+    const maxWidth = 1600;
+    const maxHeight = 1200;
+    const quality = 0.82;
+
+    const bitmap =
+        await createImageBitmap(file);
+
+    let width = bitmap.width;
+    let height = bitmap.height;
+
+    const ratio =
+        Math.min(
+            maxWidth / width,
+            maxHeight / height,
+            1
+        );
+
+    width =
+        Math.round(width * ratio);
+
+    height =
+        Math.round(height * ratio);
+
+
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.width = width;
+    canvas.height = height;
+
+
+    const ctx =
+        canvas.getContext("2d");
+
+    ctx.drawImage(
+        bitmap,
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    const blob =
+        await new Promise(resolve => {
+
+            canvas.toBlob(
+                resolve,
+                "image/webp",
+                quality
+            );
+
+        });
+
+
+    if (!blob) {
+        throw new Error(
+            "Không thể nén ảnh."
+        );
+    }
+
+
+    return new File(
+        [blob],
+        `${crypto.randomUUID()}.webp`,
+        {
+            type: "image/webp"
+        }
+    );
+}
+
+
+// =========================
+// UPLOAD ONE IMAGE
+// =========================
+
+async function uploadTourImage(file) {
+
+    if (!file) {
+        return null;
+    }
+
+
+    const compressedFile =
+        await compressImage(file);
+
+
+    const fileName =
+        `${crypto.randomUUID()}.webp`;
+
+
+    const filePath =
+        `tours/${fileName}`;
+
+
+    const {
+        error: uploadError
+    } =
+        await supabaseClient
+            .storage
+            .from("tour-images")
+            .upload(
+                filePath,
+                compressedFile,
+                {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: "image/webp"
+                }
+            );
+
+
+    if (uploadError) {
+        throw uploadError;
+    }
+
+
+    const {
+        data
+    } =
+        supabaseClient
+            .storage
+            .from("tour-images")
+            .getPublicUrl(
+                filePath
+            );
+
+
+    return data.publicUrl;
+}
+
+// =========================
+// UPLOAD GALLERY
+// =========================
+
+async function uploadTourGallery(files) {
+
+    if (!files || files.length === 0) {
+        return [];
+    }
+
+
+    const urls = [];
+
+
+    for (const file of files) {
+
+        const url =
+            await uploadTourImage(file);
+
+        if (url) {
+            urls.push(url);
+        }
+
+    }
+
+
+    return urls;
+}
+
+// =========================
+// GET STORAGE PATH
+// =========================
+
+function getTourStoragePath(imageUrl) {
+
+    if (!imageUrl) {
+        return null;
+    }
+
+    const marker =
+        "/storage/v1/object/public/tour-images/";
+
+    const index =
+        imageUrl.indexOf(marker);
+
+    if (index === -1) {
+        console.warn(
+            "Không xác định được Storage path:",
+            imageUrl
+        );
+
+        return null;
+    }
+
+    return decodeURIComponent(
+        imageUrl.substring(
+            index + marker.length
+        )
+    );
+}
+
+// =========================
+// DELETE IMAGES FROM STORAGE
+// =========================
+
+async function deleteTourStorageImages(imageUrls = []) {
+
+    const paths = [
+        ...new Set(
+            imageUrls
+                .map(getTourStoragePath)
+                .filter(Boolean)
+        )
+    ];
+
+    if (paths.length === 0) {
+        console.log("Không có ảnh cần xóa.");
+        return;
+    }
+
+    console.log("========== STORAGE DELETE ==========");
+    console.log("Bucket:", "tour-images");
+    console.log("Paths:", paths);
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .storage
+        .from("tour-images")
+        .remove(paths);
+
+    console.log("REMOVE DATA:", data);
+    console.log("REMOVE ERROR:", error);
+
+    if (error) {
+        console.error(
+            "❌ STORAGE DELETE ERROR:",
+            error
+        );
+
+        throw error;
+    }
+
+    console.log(
+        "✅ REMOVE REQUEST SUCCESS"
+    );
+
+    // =========================
+    // KIỂM TRA FILE CÒN TRONG STORAGE KHÔNG
+    // =========================
+
+    const { data: files, error: listError } =
+        await supabaseClient
+            .storage
+            .from("tour-images")
+            .list("tours", {
+                limit: 1000
+            });
+
+    if (listError) {
+
+        console.error(
+            "❌ Không thể kiểm tra Storage:",
+            listError
+        );
+
+        return;
+    }
+
+    const existingFiles =
+        new Set(
+            (files || []).map(
+                file => `tours/${file.name}`
+            )
+        );
+
+    console.log(
+        "========== STORAGE CHECK =========="
+    );
+
+    paths.forEach(path => {
+
+        console.log(
+            path,
+            existingFiles.has(path)
+                ? "❌ VẪN CÒN"
+                : "✅ ĐÃ XÓA"
+        );
+
+    });
+
+    console.log(
+        "===================================="
+    );
+
+    return data;
+}
+
+// =========================
+// SAVE TOUR
+// =========================
+
+
+function generateTourId(name) {
+
+    return name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        + "-" +
+        Date.now();
+
+}
+
+tourForm.addEventListener(
+    "submit",
+    async function (event) {
+
+        event.preventDefault();
+
+        const imageFile =
+            document
+                .getElementById("tourImageFile")
+                .files[0];
+
+        const oldTour =
+            editingTourId
+                ? tours.find(
+                    tour =>
+                        tour.id === editingTourId
+                )
+                : null;
+
+        const oldCoverImage =
+            oldTour?.image || null;
+
+
+        let imageUrl =
+            document
+                .getElementById("tourImage")
+                .value
+                .trim();
+
+
+        if (imageFile) {
+
+            imageUrl =
+                await uploadTourImage(
+                    imageFile
+                );
+
+        }
+
+        // =========================
+        // UPLOAD GALLERY
+        // =========================
+
+        let newGalleryUrls = [];
+
+
+        if (selectedGalleryFiles.length > 0) {
+
+            newGalleryUrls =
+                await uploadTourGallery(
+                    selectedGalleryFiles
+                );
+
+        }
+
+        let finalGalleryImages = [];
+
+
+        if (editingTourId) {
+
+            finalGalleryImages = [
+                ...editingTourImages,
+                ...newGalleryUrls
+            ];
+
+        } else {
+
+            finalGalleryImages =
+                newGalleryUrls;
+
+        }
+
+        const tourData = {
+
+            id:
+                editingTourId ||
+                generateTourId(
+                    document
+                        .getElementById("tourName")
+                        .value
+                        .trim()
+                ),
+
+            name:
+                document
+                    .getElementById("tourName")
+                    .value
+                    .trim(),
+
+            destination:
+                document
+                    .getElementById("tourDestination")
+                    .value
+                    .trim(),
+
+            departure:
+                document
+                    .getElementById("tourDeparture")
+                    .value,
+
+            seats:
+                Number(
+                    document
+                        .getElementById("tourSeats")
+                        .value
+                ),
+
+            price:
+                Number(
+                    document
+                        .getElementById("tourPrice")
+                        .value
+                ),
+
+            image: imageUrl,
+
+            images:
+                finalGalleryImages,
+
+            short:
+                document
+                    .getElementById("tourShort")
+                    .value
+                    .trim()
+
+        };
+
+
+        try {
+
+            if (editingTourId) {
+
+                const { error } =
+                    await supabaseClient
+                        .from("tours")
+                        .update({
+
+                            name: tourData.name,
+
+                            destination:
+                                tourData.destination,
+
+                            departure:
+                                tourData.departure,
+
+                            seats:
+                                tourData.seats,
+
+                            price:
+                                tourData.price,
+
+                            image:
+                                tourData.image,
+
+                            images:
+                                tourData.images,
+
+                            short:
+                                tourData.short,
+
+                            updated_at:
+                                new Date().toISOString()
+
+                        })
+                        .eq(
+                            "id",
+                            editingTourId
+                        );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                // =========================
+                // XÓA ẢNH CŨ KHỎI STORAGE
+                // =========================
+
+                const storageImagesToDelete = [
+                    ...imagesToDelete
+                ];
+
+                // Nếu thay ảnh đại diện
+                if (
+                    imageFile &&
+                    oldCoverImage &&
+                    oldCoverImage !== imageUrl
+                ) {
+                    storageImagesToDelete.push(
+                        oldCoverImage
+                    );
+                }
+
+
+                // Không xóa nhầm ảnh vẫn đang được sử dụng
+                const finalImagesSet =
+                    new Set([
+                        tourData.image,
+                        ...tourData.images
+                    ]);
+
+                const safeImagesToDelete =
+                    storageImagesToDelete.filter(
+                        imageUrl =>
+                            !finalImagesSet.has(imageUrl)
+                    );
+
+
+                if (safeImagesToDelete.length > 0) {
+
+                    try {
+
+                        await deleteTourStorageImages(
+                            safeImagesToDelete
+                        );
+
+                    } catch (storageError) {
+
+                        console.error(
+                            "Storage delete error:",
+                            storageError
+                        );
+
+                        alert(
+                            "Tour đã cập nhật nhưng có ảnh chưa xóa được khỏi Storage.\n\n" +
+                            storageError.message
+                        );
+
+                    }
+                }
+
+                // ✅ THÔNG BÁO THÀNH CÔNG
+                alert(
+                    oldTour
+                        ? "✅ Cập nhật tour thành công!"
+                        : "✅ Thêm tour thành công!"
+                );
+
+            } else {
+                const { error } =
+                    await supabaseClient
+                        .from("tours")
+                        .insert(
+                            tourData
+                        );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                alert(
+                    "Thêm tour thành công!"
+                );
+            }
+
+
+            closeModal();
+
+            await loadTours();
+
+
+        } catch (error) {
+
+            console.error(
+                "Save tour error:",
+                error
+            );
+
+            alert(
+                "Không thể lưu tour.\n\n" +
+                error.message
+            );
+        }
+
+    }
+);
+
+
+// =========================
+// CLOSE MODAL
+// =========================
+
+function closeModal() {
+
+    tourModal.classList.add(
+        "hidden"
+    );
+
+    editingTourId = null;
+
+    editingTourImages = [];
+
+    selectedGalleryFiles = [];
+
+    imagesToDelete = [];
+
+    tourForm.reset();
+
+    imagePreview.innerHTML = "";
+
+    galleryPreview.innerHTML = "";
+}
+
+
+closeModalButton.addEventListener(
+    "click",
+    closeModal
+);
+
+
+cancelButton.addEventListener(
+    "click",
+    closeModal
+);
+
+
+// =========================
+// REFRESH
+// =========================
+
+refreshButton.addEventListener(
+    "click",
+    loadTours
+);
+
+
+// =========================
+// BOOKING EVENTS
+// =========================
+
+refreshBookingButton.addEventListener(
+    "click",
+    loadBookings
+);
+
+
+bookingStatusFilter.addEventListener(
+    "change",
+    renderBookings
+);
+
+
+// =========================
+// LOGOUT
+// =========================
+
+logoutButton.addEventListener(
+    "click",
+    async function () {
+
+        await supabaseClient.auth.signOut();
+
+        tours = [];
+
+        showLogin();
+
+    }
+);
+
+
+// =========================
+// AUTH STATE
+// =========================
+
+supabaseClient.auth.onAuthStateChange(
+    function (event, session) {
+
+        if (!session) {
+
+            showLogin();
+
+        }
+
+    }
+);
+
+
+// =========================
+// INIT
+// =========================
+
+checkAuth();
