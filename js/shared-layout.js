@@ -85,6 +85,8 @@
         setLanguageUi(selected);
     }
 
+    const headerSocial = `<div class="header-social" aria-label="Kết nối với AnnLeTravel"><a class="header-social-link header-social-facebook" href="https://web.facebook.com/profile.php?id=61550505475800" target="_blank" rel="noopener noreferrer" aria-label="Facebook" data-social="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.6 1.6-1.6h1.7V3.8c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.3v3h2.8v8h3.4Z"/></svg></a><a class="header-social-link header-social-threads" href="https://www.threads.net/" target="_blank" rel="noopener noreferrer" aria-label="Threads" data-social="Threads"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.1 11.1c-.2-4.3-2.8-6.8-7-6.8-4.3 0-7.1 2.6-7.1 6.8 0 4.7 2.9 7.5 7.5 7.5 3.8 0 6.2-1.9 6.2-4.9 0-2.4-1.8-4-4.6-4-2.2 0-3.7 1-3.7 2.6 0 1.3 1.1 2.1 2.6 2.1 1.6 0 2.8-.8 3.5-2.1-.3 2.1-1.5 3.3-3.8 3.3-3.5 0-5.5-1.7-5.5-4.7 0-3 1.8-5.7 5.6-5.7 3.1 0 5.1 1.6 5.6 4.4l2.2.1c-.1-.3-.2-.6-.3-.9Z"/></svg></a><a class="header-social-link header-social-zalo" href="https://zalo.me/862421655" target="_blank" rel="noopener noreferrer" aria-label="Zalo" data-social="Zalo"><span>Zalo</span></a><a class="header-social-link header-social-gmail" href="mailto:dulichannle@gmail.com" aria-label="Email AnnLeTravel" data-social="Gmail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 6.2A2.2 2.2 0 0 1 4.7 4h14.6a2.2 2.2 0 0 1 2.2 2.2v11.6a2.2 2.2 0 0 1-2.2 2.2H4.7a2.2 2.2 0 0 1-2.2-2.2V6.2Zm2.2-.1 7.3 5.7 7.3-5.7H4.7Zm14.6 2.8-6.6 5.1a1.1 1.1 0 0 1-1.4 0L4.7 8.9v8.9h14.6v-8.9Z"/></svg></a></div>`;
+
     const header = document.querySelector("header.header");
     if (header) {
         const homeHref = isBusiness ? "business.html" : "ca-nhan.html";
@@ -96,7 +98,7 @@
             : `<a href="${homeHref}" class="${active("home")}" data-i18n="nav.home">Trang chủ</a><a href="tours.html" class="${active("tours")}" data-i18n="nav.tours">Tour</a>${destinationMenu}${serviceMenu}<a href="blog.html" class="${active("blog")}" data-i18n="nav.blog">Blog</a><a href="about.html" class="${active("about")}" data-i18n="nav.about">Về chúng tôi</a><a href="${contactHref}" data-i18n="nav.contact">Liên hệ</a>`;
 
         header.className = `header audience-header ${isBusiness ? "business-shared-header" : "personal-shared-header"}`;
-        header.innerHTML = `<div class="container header-container"><a href="${homeHref}" class="logo"><img src="images/logo.png" alt="ANNLETRAVEL"></a><nav class="menu">${menu}</nav><div class="public-header-actions">${renderLanguageSwitcher()}<a href="${switchHref}" class="audience-switch-btn">${switchLabel}</a><a href="${contactHref}" class="btn btn-header" data-i18n="nav.consult">Tư vấn ngay</a></div></div>`;
+        header.innerHTML = `<div class="container header-container"><a href="${homeHref}" class="logo"><img src="images/logo.png" alt="ANNLETRAVEL"></a><nav class="menu">${menu}</nav><div class="public-header-actions">${renderLanguageSwitcher()}<a href="${switchHref}" class="audience-switch-btn">${switchLabel}</a><a href="${contactHref}" class="btn btn-header" data-i18n="nav.consult">Tư vấn ngay</a>${headerSocial}</div></div>`;
 
         const languageSwitcher = header.querySelector("[data-annle-shared-language-switcher]");
         const currentButton = languageSwitcher?.querySelector(".language-current");
