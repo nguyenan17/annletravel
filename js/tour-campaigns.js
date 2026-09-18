@@ -11,7 +11,14 @@
 
   function esc(v) {
     return String(v == null ? "" : v).replace(/[&<>\"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[c];
+      var map = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      };
+      return map[c] || c;
     });
   }
 
@@ -47,20 +54,24 @@
 
     host.innerHTML = items.slice(0, 3).map(function (t) {
       var image = String(t.image || "").replace(/'/g, "%27");
-      return '<article class="campaign-tour-card">' +
-        '<a class="campaign-tour-image" href="tour-detail.html?id=' + encodeURIComponent(t.id) + '" style="background-image:url('' + image + '')">' +
-          '<span class="campaign-badge">🔥 ƯU ĐÃI CÓ HẠN</span>' +
-        '</a>' +
-        '<div class="campaign-tour-body">' +
-          '<p class="campaign-tour-destination">' + esc(t.destination) + '</p>' +
-          '<h3>' + esc(t.name) + '</h3>' +
-          '<p>' + esc(t.short) + '</p>' +
-          '<div class="campaign-tour-bottom">' +
-            '<strong>' + (t.sale_price ? formatCampaignPrice(t.sale_price) : formatCampaignPrice(t.price)) + '</strong>' +
-            '<a href="tour-detail.html?id=' + encodeURIComponent(t.id) + '">Xem tour →</a>' +
-          '</div>' +
-        '</div>' +
-      '</article>';
+      var href = "tour-detail.html?id=" + encodeURIComponent(t.id);
+
+      return [
+        '<article class="campaign-tour-card">',
+          '<a class="campaign-tour-image" href="', href, '" style="background-image:url(', "'", image, "'", ')">',
+            '<span class="campaign-badge">🔥 ƯU ĐÃI CÓ HẠN</span>',
+          '</a>',
+          '<div class="campaign-tour-body">',
+            '<p class="campaign-tour-destination">', esc(t.destination), '</p>',
+            '<h3>', esc(t.name), '</h3>',
+            '<p>', esc(t.short), '</p>',
+            '<div class="campaign-tour-bottom">',
+              '<strong>', (t.sale_price ? formatCampaignPrice(t.sale_price) : formatCampaignPrice(t.price)), '</strong>',
+              '<a href="', href, '">Xem tour →</a>',
+            '</div>',
+          '</div>',
+        '</article>'
+      ].join("");
     }).join("");
 
     var first = items[0];
