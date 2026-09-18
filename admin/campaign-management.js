@@ -17,5 +17,5 @@ async function save(id,modal){var start=document.getElementById('campaignStart')
 window.editCampaign=openEditor;
 nav.addEventListener('click',function(e){e.preventDefault();document.querySelectorAll('.admin-content-section').forEach(function(x){x.classList.add('hidden');});section.classList.remove('hidden');document.querySelectorAll('.admin-nav-link').forEach(function(x){x.classList.remove('active');});nav.classList.add('active');history.replaceState(null,'','#campaigns');load();window.scrollTo({top:0,behavior:'smooth'});});
 refresh.addEventListener('click',load);
-if(location.hash==='#campaigns')setTimeout(load,300);
+if(location.hash==='#campaigns')setTimeout(function(){nav.click();},300);
 })();
