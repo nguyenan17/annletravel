@@ -38,6 +38,7 @@ const supabaseClient =
             loadScript("js/i18n-multi.js", function () {
                 // Re-install after shared-layout replaced the header.
                 window.AnnLeMultiI18n?.install?.();
+                loadScript("js/tour-i18n.js");
             });
         });
 
