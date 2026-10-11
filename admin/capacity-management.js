@@ -40,6 +40,11 @@
 
     form.addEventListener("submit", async function (event) {
         const tourId = document.getElementById("tourId")?.value?.trim();
+        if (document.getElementById("tourUnlimitedSeats")?.checked === true) {
+            const existingTour = tours.find(item => String(item.id) === String(tourId));
+            seatsInput.value = String(Number(existingTour?.seats || 0));
+            return;
+        }
         const capacity = Number(seatsInput.value);
 
         if (!Number.isInteger(capacity) || capacity < 0) {
@@ -85,6 +90,7 @@
 
     document.getElementById("addTourButton")?.addEventListener("click", function () {
         setTimeout(() => {
+            if (document.getElementById("tourUnlimitedSeats")?.checked) return;
             seatsInput.value = "20";
         }, 0);
     });
