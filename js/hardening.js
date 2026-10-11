@@ -81,8 +81,10 @@
             const short = escapeHtmlSafe(tour.short);
             const image = safeImageUrl(tour.image);
             const seats = Number(tour.seats) || 0;
+            const seatLabel = tour.unlimited_seats ? "Không giới hạn chỗ" : `Còn ${seats} chỗ`;
+            const metaSeats = tour.unlimited_seats ? "Không giới hạn chỗ" : `${seats} chỗ`;
             const price = Number(tour.price) || 0;
-            return `<article class="tour-card"><a href="tour-detail.html?id=${id}" class="tour-image" style="background-image: url('${escapeCssUrl(image)}')"><span class="tour-location">${destination}</span><span class="tour-seats">Còn ${seats} chỗ</span></a><div class="tour-content"><div class="tour-date">📅 ${escapeHtmlSafe(tour.displayDate)}</div><h3>${name}</h3><p>${short}</p><div class="tour-meta"><span>📍 ${destination}</span><span>👥 ${seats} chỗ</span></div><div class="tour-footer"><div class="tour-price"><small>Chỉ từ</small><strong>${formatPrice(price)}</strong></div><a href="tour-detail.html?id=${id}" class="tour-button">Xem tour <span>→</span></a></div></div></article>`;
+            return `<article class="tour-card"><a href="tour-detail.html?id=${id}" class="tour-image" style="background-image: url('${escapeCssUrl(image)}')"><span class="tour-location">${destination}</span><span class="tour-seats">${seatLabel}</span></a><div class="tour-content"><div class="tour-date">📅 ${escapeHtmlSafe(tour.displayDate)}</div><h3>${name}</h3><p>${short}</p><div class="tour-meta"><span>📍 ${destination}</span><span>👥 ${metaSeats}</span></div><div class="tour-footer"><div class="tour-price"><small>Chỉ từ</small><strong>${formatPrice(price)}</strong></div><a href="tour-detail.html?id=${id}" class="tour-button">Xem tour <span>→</span></a></div></div></article>`;
         };
     }
 
@@ -94,14 +96,19 @@
             const today = new Date();
             const todayKey = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, "0"), String(today.getDate()).padStart(2, "0")].join("-");
             const monthlyTours = data.filter(tour => {
+                if (tour.is_daily) return true;
                 const departureKey = String(tour.departure ?? "").slice(0, 10);
                 return /^\d{4}-\d{2}-\d{2}$/.test(departureKey) && departureKey >= todayKey;
-            }).sort((a, b) => String(a.departure ?? "").slice(0, 10).localeCompare(String(b.departure ?? "").slice(0, 10))).slice(0, 4);
+            }).sort((a, b) => {
+                if (a.is_daily && !b.is_daily) return -1;
+                if (!a.is_daily && b.is_daily) return 1;
+                return String(a.departure ?? "").slice(0, 10).localeCompare(String(b.departure ?? "").slice(0, 10));
+            }).slice(0, 4);
             if (monthlyTours.length === 0) {
                 container.innerHTML = `<div class="departure-empty"><p>Hiện chưa có tour nào có lịch khởi hành sắp tới.</p><a href="tours.html" class="btn btn-primary">Xem tất cả tour</a></div>`;
                 return;
             }
-            container.innerHTML = monthlyTours.map(tour => `<div class="departure-row"><div><strong>${escapeHtmlSafe(tour.displayDate)}</strong><small>${escapeHtmlSafe(tour.destination)}</small></div><strong>${escapeHtmlSafe(tour.name)}</strong><span>Còn ${Number(tour.seats) || 0} chỗ</span><strong>${formatPrice(Number(tour.price) || 0)}</strong><a href="tour-detail.html?id=${encodeURIComponent(String(tour.id ?? ""))}">Xem tour</a></div>`).join("");
+            container.innerHTML = monthlyTours.map(tour => `<div class="departure-row"><div><strong>${escapeHtmlSafe(tour.displayDate)}</strong><small>${escapeHtmlSafe(tour.destination)}</small></div><strong>${escapeHtmlSafe(tour.name)}</strong><span>${tour.unlimited_seats ? "Không giới hạn chỗ" : `Còn ${Number(tour.seats) || 0} chỗ`}</span><strong>${formatPrice(Number(tour.price) || 0)}</strong><a href="tour-detail.html?id=${encodeURIComponent(String(tour.id ?? ""))}">Xem tour</a></div>`).join("");
         };
     }
 
