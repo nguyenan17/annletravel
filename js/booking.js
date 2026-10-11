@@ -43,7 +43,14 @@ async function submitBooking(event, tourId) {
     }
 
     try {
-        const { data, error } = await supabaseClient.rpc("create_booking", {
+        const selectedTour = Array.isArray(tours)
+            ? tours.find(item => String(item.id) === String(tourId))
+            : null;
+        const bookingRpc = selectedTour?.unlimited_seats
+            ? "create_booking_unlimited"
+            : "create_booking";
+
+        const { data, error } = await supabaseClient.rpc(bookingRpc, {
             p_tour_id: String(tourId),
             p_customer_name: name,
             p_phone: phone,
@@ -64,7 +71,7 @@ async function submitBooking(event, tourId) {
         // Update that same array so the current page
         // can display the new number of available seats
         // without requiring a full browser reload.
-        if (Array.isArray(tours) && Number.isInteger(remainingSeats)) {
+        if (!selectedTour?.unlimited_seats && Array.isArray(tours) && Number.isInteger(remainingSeats)) {
             const cachedTour = tours.find(
                 item => String(item.id) === String(tourId)
             );
@@ -77,7 +84,9 @@ async function submitBooking(event, tourId) {
         alert(
             Number.isInteger(remainingSeats)
                 ? `Đăng ký tour thành công! Cảm ơn bạn đã đăng ký. Tour hiện còn ${remainingSeats} chỗ.`
-                : "Đăng ký tour thành công! Cảm ơn bạn đã đăng ký."
+                : (selectedTour?.unlimited_seats
+                    ? "Đăng ký tour thành công! Cảm ơn bạn đã đăng ký. Tour này không giới hạn chỗ."
+                    : "Đăng ký tour thành công! Cảm ơn bạn đã đăng ký.")
         );
 
         if (typeof closeBookingModal === "function") {
