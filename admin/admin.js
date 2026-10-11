@@ -1846,8 +1846,6 @@ tourForm.addEventListener(
 
                             seats:
                                 tourData.seats,
-                            is_daily: tourData.is_daily,
-                            unlimited_seats: tourData.unlimited_seats,
 
                             price:
                                 tourData.price,
