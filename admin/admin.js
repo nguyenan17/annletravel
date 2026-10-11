@@ -440,6 +440,8 @@ function renderStats() {
     const currentYear = now.getFullYear();
 
     const monthlyTours = tours.filter(tour => {
+        if (tour.is_daily) return true;
+        if (!tour.departure) return false;
         const date = new Date(tour.departure + "T00:00:00");
         return date.getMonth() + 1 === currentMonth && date.getFullYear() === currentYear;
     }).length;
