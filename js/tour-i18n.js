@@ -76,7 +76,9 @@
         const element = node?.nodeType === Node.ELEMENT_NODE
             ? node
             : node?.parentElement;
-        const card = element?.closest(".tour-card, .departure-row");
+        // Defensive guard for stale callers or unexpected node-like values.
+        if (!element || typeof element.closest !== "function") return null;
+        const card = element.closest(".tour-card, .departure-row");
         const link = card?.querySelector('a[href*="tour-detail.html?id="]');
         if (!link) return null;
 
