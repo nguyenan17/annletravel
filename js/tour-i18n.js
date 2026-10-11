@@ -71,10 +71,21 @@
     }
 
     function getTourId(node) {
-        const card = node.closest(".tour-card, .departure-row");
+        // TreeWalker returns Text nodes, which do not implement closest().
+        // Resolve the containing element before searching for the tour card.
+        const element = node?.nodeType === Node.ELEMENT_NODE
+            ? node
+            : node?.parentElement;
+        const card = element?.closest(".tour-card, .departure-row");
         const link = card?.querySelector('a[href*="tour-detail.html?id="]');
         if (!link) return null;
-        return new URL(link.href, window.location.href).searchParams.get("id");
+
+        try {
+            return new URL(link.href, window.location.href).searchParams.get("id");
+        } catch (error) {
+            console.warn("Không xác định được ID tour để dịch:", error);
+            return null;
+        }
     }
 
     function findTourField(core) {
