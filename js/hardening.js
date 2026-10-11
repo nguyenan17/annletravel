@@ -44,7 +44,7 @@
             const container = document.getElementById("tourItinerary");
             if (!container) return;
             try {
-                const { data, error } = await window.supabaseClient
+                const { data, error } = await supabaseClient
                     .from("tour_itineraries")
                     .select("day, title, description")
                     .eq("tour_id", tourId)
@@ -60,7 +60,14 @@
                         ${item.description ? `<p>${escapeHtmlSafe(item.description)}</p>` : ""}
                     </div>`).join("");
             } catch (error) {
-                console.error("Load itinerary error:", error);
+                console.error("Load itinerary error:", {
+                    tourId,
+                    message: error?.message,
+                    code: error?.code,
+                    details: error?.details,
+                    hint: error?.hint,
+                    error
+                });
                 container.innerHTML = "<p>Không thể tải lịch trình.</p>";
             }
         };
