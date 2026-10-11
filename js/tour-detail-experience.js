@@ -119,7 +119,7 @@
         <button type="button" aria-label="Đăng ký tour này">Đăng ký ngay <span aria-hidden="true">→</span></button>
       </div>`;
     bar.querySelector("button").addEventListener("click", () => {
-      if (typeof registerTour === "function") registerTour(String(tour.id));
+      if (typeof registerTour === "function") registerTour(tour.id);
     });
     document.body.appendChild(bar);
     document.body.classList.add("tour-mobile-cta-visible");
