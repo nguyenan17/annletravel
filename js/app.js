@@ -1461,15 +1461,18 @@ async function loadTourItinerary(tourId) {
 
     } catch (error) {
 
-        console.error(
-            "Load itinerary error:",
+        console.error("Load itinerary error:", {
+            tourId,
+            message: error?.message,
+            code: error?.code,
+            details: error?.details,
+            hint: error?.hint,
             error
-        );
-
+        });
 
         container.innerHTML = `
             <p>
-                Không thể tải lịch trình.
+                Chưa thể tải lịch trình lúc này. Vui lòng tải lại trang sau ít phút.
             </p>
         `;
 
