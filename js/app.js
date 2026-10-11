@@ -53,13 +53,7 @@ async function loadTours() {
 
             ...tour,
 
-            displayDate:
-                new Intl.DateTimeFormat("vi-VN")
-                    .format(
-                        new Date(
-                            tour.departure + "T00:00:00"
-                        )
-                    )
+            displayDate: tour.is_daily ? "Hằng ngày" : (tour.departure ? new Intl.DateTimeFormat("vi-VN").format(new Date(tour.departure + "T00:00:00")) : "Chưa xác định")
 
         }));
 
@@ -146,7 +140,7 @@ function createTourCard(tour) {
                 </span>
 
                 <span class="tour-seats">
-                    Còn ${tour.seats} chỗ
+                    ${tour.unlimited_seats ? "Không giới hạn chỗ" : `Còn ${Number(tour.seats) || 0} chỗ`}
                 </span>
 
             </a>
@@ -174,7 +168,7 @@ function createTourCard(tour) {
                     </span>
 
                     <span>
-                        👥 ${tour.seats} chỗ
+                        👥 ${tour.unlimited_seats ? "Không giới hạn chỗ" : `${Number(tour.seats) || 0} chỗ`}
                     </span>
 
                 </div>
@@ -286,7 +280,7 @@ async function renderMonthlyTours() {
 
 
                 <span>
-                    Còn ${tour.seats} chỗ
+                    ${tour.unlimited_seats ? "Không giới hạn chỗ" : `Còn ${Number(tour.seats) || 0} chỗ`}
                 </span>
 
 
@@ -957,7 +951,7 @@ async function renderTourDetail() {
                     <p>
                         👥 Số chỗ còn:
                         <strong>
-                            ${tour.seats} chỗ
+                            ${tour.unlimited_seats ? "Không giới hạn chỗ" : `${Number(tour.seats) || 0} chỗ`}
                         </strong>
                     </p>
 
@@ -1016,7 +1010,7 @@ async function renderTourDetail() {
                     <p>
                         Còn:
                         <strong>
-                            ${tour.seats} chỗ
+                            ${tour.unlimited_seats ? "Không giới hạn chỗ" : `${Number(tour.seats) || 0} chỗ`}
                         </strong>
                     </p>
 
@@ -1807,7 +1801,7 @@ async function submitBooking(event, tourId) {
     if (people > tour.seats) {
 
         alert(
-            `Tour chỉ còn ${tour.seats} chỗ.\n\n` +
+            `Tour chỉ còn ${tour.unlimited_seats ? "Không giới hạn chỗ" : `${Number(tour.seats) || 0} chỗ`}.\n\n` +
             `Vui lòng giảm số người đăng ký.`
         );
 
