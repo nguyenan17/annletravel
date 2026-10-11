@@ -44,6 +44,16 @@ const closeItineraryModalButton = document.getElementById("closeItineraryModalBu
 const cancelItineraryButton = document.getElementById("cancelItineraryButton");
 const tourGalleryFiles = document.getElementById("tourGalleryFiles");
 const galleryPreview = document.getElementById("galleryPreview");
+const tourIsDaily = document.getElementById("tourIsDaily");
+const tourUnlimitedSeats = document.getElementById("tourUnlimitedSeats");
+const tourDeparture = document.getElementById("tourDeparture");
+const tourSeats = document.getElementById("tourSeats");
+function syncTourScheduleControls() {
+    if (tourDeparture) { tourDeparture.disabled = !!tourIsDaily?.checked; tourDeparture.required = !tourIsDaily?.checked; if (tourIsDaily?.checked) tourDeparture.value = ""; }
+    if (tourSeats) { tourSeats.disabled = !!tourUnlimitedSeats?.checked; tourSeats.required = !tourUnlimitedSeats?.checked; if (tourUnlimitedSeats?.checked) tourSeats.value = "0"; else if (!tourSeats.value || Number(tourSeats.value) < 0) tourSeats.value = "20"; }
+}
+tourIsDaily?.addEventListener("change", syncTourScheduleControls);
+tourUnlimitedSeats?.addEventListener("change", syncTourScheduleControls);
 
 
 // =========================
@@ -455,9 +465,8 @@ function renderTours() {
     }
 
     tourTableBody.innerHTML = tours.map(tour => {
-        const date = new Intl.DateTimeFormat("vi-VN").format(
-            new Date(tour.departure + "T00:00:00")
-        );
+        const date = tour.is_daily ? "Hằng ngày" : (tour.departure ? new Intl.DateTimeFormat("vi-VN").format(new Date(tour.departure + "T00:00:00")) : "Chưa xác định");
+        const seatsLabel = tour.unlimited_seats ? "Không giới hạn" : String(Number(tour.seats || 0));
         const price = Number(tour.price || 0).toLocaleString("vi-VN");
 
         return `
@@ -468,7 +477,7 @@ function renderTours() {
                 </td>
                 <td>${escapeHtml(tour.destination)}</td>
                 <td>${date}</td>
-                <td>${tour.seats}</td>
+                <td>${seatsLabel}</td>
                 <td>${price} ₫</td>
                 <td>
                     <div class="action-buttons">
@@ -515,6 +524,7 @@ addTourButton.addEventListener(
         ).textContent = "Thêm tour";
 
         tourForm.reset();
+        syncTourScheduleControls();
 
         imagePreview.innerHTML = "";
 
@@ -697,16 +707,11 @@ window.editTour =
             tour.destination || "";
 
 
-        document.getElementById(
-            "tourDeparture"
-        ).value =
-            tour.departure || "";
-
-
-        document.getElementById(
-            "tourSeats"
-        ).value =
-            tour.seats || 0;
+        document.getElementById("tourIsDaily").checked = !!tour.is_daily;
+        document.getElementById("tourUnlimitedSeats").checked = !!tour.unlimited_seats;
+        document.getElementById("tourDeparture").value = tour.departure || "";
+        document.getElementById("tourSeats").value = tour.unlimited_seats ? "0" : (tour.capacity ?? tour.seats ?? 0);
+        syncTourScheduleControls();
 
 
         document.getElementById(
@@ -1386,9 +1391,10 @@ window.deleteTour =
 
 async function compressImage(file) {
 
-    const maxWidth = 1600;
+    // Giữ độ phân giải phù hợp cho ảnh cover desktop, không phóng to ảnh nguồn.
+    const maxWidth = 1920;
     const maxHeight = 1200;
-    const quality = 0.82;
+    const quality = 0.86;
 
     const bitmap =
         await createImageBitmap(file);
@@ -1790,17 +1796,11 @@ tourForm.addEventListener(
                     .value
                     .trim(),
 
-            departure:
-                document
-                    .getElementById("tourDeparture")
-                    .value,
+            departure: document.getElementById("tourIsDaily").checked ? null : (document.getElementById("tourDeparture").value || null),
+            is_daily: document.getElementById("tourIsDaily").checked,
+            unlimited_seats: document.getElementById("tourUnlimitedSeats").checked,
 
-            seats:
-                Number(
-                    document
-                        .getElementById("tourSeats")
-                        .value
-                ),
+            seats: document.getElementById("tourUnlimitedSeats").checked ? Number(oldTour?.seats || 0) : Number(document.getElementById("tourSeats").value),
 
             price:
                 Number(
@@ -1839,9 +1839,13 @@ tourForm.addEventListener(
 
                             departure:
                                 tourData.departure,
+                            is_daily: tourData.is_daily,
+                            unlimited_seats: tourData.unlimited_seats,
 
                             seats:
                                 tourData.seats,
+                            is_daily: tourData.is_daily,
+                            unlimited_seats: tourData.unlimited_seats,
 
                             price:
                                 tourData.price,
