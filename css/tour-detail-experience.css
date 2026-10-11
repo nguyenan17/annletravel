@@ -144,7 +144,6 @@ body:has(#tourDetail) .header { position:absolute; }
   min-height:46px; padding:0 22px; border:0; border-radius:12px; color:#fff;
   background:#0077b6; font-weight:900; white-space:nowrap; box-shadow:0 6px 16px rgba(0,119,182,.2);
 }
-body.tour-mobile-cta-visible { padding-bottom:82px; }
 @media(max-width:900px) {
   #tourDetail .detail-grid { grid-template-columns:minmax(0,1fr) 290px; gap:24px; }
   #tourDetail .booking-box { padding:22px; }
@@ -175,6 +174,7 @@ body.tour-mobile-cta-visible { padding-bottom:82px; }
   #tourDetail .booking-box { position:static; display:none; }
   #tourDetail .tour-information-sections { margin-bottom:34px; padding:0 14px; }
   .tour-mobile-booking { display:block; }
+  body.tour-mobile-cta-visible { padding-bottom:82px; }
   body:has(#tourDetail) footer { padding-bottom:78px; }
 }
 @media(prefers-reduced-motion:reduce) {
