@@ -357,11 +357,7 @@ async function renderAllTours() {
 
     if (date) {
 
-        filteredTours =
-            filteredTours.filter(
-                tour =>
-                    tour.departure >= date
-            );
+        filteredTours = filteredTours.filter(tour => tour.is_daily || (tour.departure && tour.departure >= date));
 
     }
 
