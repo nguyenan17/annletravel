@@ -57,7 +57,7 @@
                 container.innerHTML = data.map(item => `
                     <div class="itinerary-day">
                         <h3>Ngày ${Number(item.day) || 0}: ${escapeHtmlSafe(item.title)}</h3>
-                        ${item.description ? `<p>${escapeHtmlSafe(item.description)}</p>` : ""}
+                        ${item.description ? `<p style="white-space:pre-line">${escapeHtmlSafe(item.description)}</p>` : ""}
                     </div>`).join("");
             } catch (error) {
                 console.error("Load itinerary error:", {
