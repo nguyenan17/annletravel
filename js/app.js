@@ -1784,7 +1784,7 @@ async function submitBooking(event, tourId) {
     // CHECK SEATS
     // ================================
 
-    if (tour.seats <= 0) {
+    if (!tour.unlimited_seats && Number(tour.seats) <= 0) {
 
         alert(
             "Tour này hiện đã hết chỗ."
@@ -1794,7 +1794,7 @@ async function submitBooking(event, tourId) {
     }
 
 
-    if (people > tour.seats) {
+    if (!tour.unlimited_seats && people > Number(tour.seats)) {
 
         alert(
             `Tour chỉ còn ${tour.unlimited_seats ? "Không giới hạn chỗ" : `${Number(tour.seats) || 0} chỗ`}.\n\n` +
