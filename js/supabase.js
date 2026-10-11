@@ -10,6 +10,9 @@ const supabaseClient =
         SUPABASE_PUBLISHABLE_KEY
     );
 
+// hardening.js calls the client through window; expose the same initialized instance.
+window.supabaseClient = supabaseClient;
+
 // Shared public header/footer. Admin pages are excluded by shared-layout.js.
 (function loadSharedLayout() {
     if (window.location.pathname.includes("/admin/")) return;
@@ -38,7 +41,7 @@ const supabaseClient =
             loadScript("js/i18n-multi.js", function () {
                 // Re-install after shared-layout replaced the header.
                 window.AnnLeMultiI18n?.install?.();
-                loadScript("js/tour-i18n.js");
+                loadScript("js/tour-i18n.js?v=20261011");
             });
         });
 
