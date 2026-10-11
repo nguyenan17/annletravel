@@ -69,3 +69,17 @@ button,input,select,textarea{font-family:inherit}
 /* PUBLIC LOGO - LARGER */
 .logo img{width:82px;height:82px}
 @media(max-width:650px){.logo img{width:64px;height:64px}}
+
+/* Structured tour pricing and policy sections */
+.tour-information-sections{max-width:1180px;margin:28px auto 64px;padding:0 20px;color:#253746}
+.tour-information-block{background:#fff;border:1px solid #e2eaf0;border-radius:16px;padding:24px;margin:18px 0;box-shadow:0 8px 28px rgba(20,55,80,.045)}
+.tour-information-block h2{margin:0 0 16px;font-size:22px;color:#123c58}
+.tour-information-block h3{font-size:16px;margin:0 0 10px;color:#174d70}
+.tour-information-pricing{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tour-information-price-item{background:#f4f9fc;border-radius:12px;padding:16px}
+.tour-information-price-item span{display:block;color:#647887;font-size:13px;margin-bottom:7px}
+.tour-information-price-item strong{font-size:19px;color:#006ca8}
+.tour-information-block ul{padding-left:22px;margin:0}
+.tour-information-block li{margin:8px 0;line-height:1.7}
+.tour-information-text{white-space:pre-line;line-height:1.8;margin:0;color:#465b69}
+@media(max-width:680px){.tour-information-sections{padding:0 14px}.tour-information-block{padding:18px}.tour-information-pricing{grid-template-columns:1fr}.tour-information-block h2{font-size:19px}}
