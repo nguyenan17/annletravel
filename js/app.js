@@ -1447,8 +1447,8 @@ async function loadTourItinerary(tourId) {
 
                     ${item.description
                     ? `
-                                <p>
-                                    ${item.description}
+                                <p style="white-space: pre-line">
+                                    ${escapeHtml(item.description)}
                                 </p>
                               `
                     : ""
