@@ -11,7 +11,7 @@
 
   async function renderInformation() {
     const container = document.getElementById("tourDetail");
-    if (!container || !window.supabaseClient) return;
+    if (!container || typeof supabaseClient === "undefined") return;
     const tourId = new URLSearchParams(window.location.search).get("id");
     if (!tourId || container.dataset.policyLoadingFor === tourId || container.dataset.policyRenderedFor === tourId) return;
     if (!container.children.length) return;
