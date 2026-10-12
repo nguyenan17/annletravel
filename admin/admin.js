@@ -709,10 +709,14 @@ window.editTour =
             tour.destination || "";
 
 
-        document.getElementById("tourIsDaily").checked = !!tour.is_daily;
-        document.getElementById("tourUnlimitedSeats").checked = !!tour.unlimited_seats;
-        document.getElementById("tourDeparture").value = tour.departure || "";
-        document.getElementById("tourSeats").value = tour.unlimited_seats ? "0" : (tour.capacity ?? tour.seats ?? 0);
+        const tourIsDailyInput = document.getElementById("tourIsDaily");
+        const tourUnlimitedSeatsInput = document.getElementById("tourUnlimitedSeats");
+        const tourDepartureInput = document.getElementById("tourDeparture");
+        const tourSeatsInput = document.getElementById("tourSeats");
+        if (tourIsDailyInput) tourIsDailyInput.checked = !!tour.is_daily;
+        if (tourUnlimitedSeatsInput) tourUnlimitedSeatsInput.checked = !!tour.unlimited_seats;
+        if (tourDepartureInput) tourDepartureInput.value = tour.departure || "";
+        if (tourSeatsInput) tourSeatsInput.value = tour.unlimited_seats ? "0" : (tour.capacity ?? tour.seats ?? 0);
         syncTourScheduleControls();
 
 
@@ -1798,11 +1802,11 @@ tourForm.addEventListener(
                     .value
                     .trim(),
 
-            departure: document.getElementById("tourIsDaily").checked ? null : (document.getElementById("tourDeparture").value || null),
-            is_daily: document.getElementById("tourIsDaily").checked,
-            unlimited_seats: document.getElementById("tourUnlimitedSeats").checked,
+            departure: document.getElementById("tourIsDaily")?.checked ? null : (document.getElementById("tourDeparture")?.value || null),
+            is_daily: !!document.getElementById("tourIsDaily")?.checked,
+            unlimited_seats: !!document.getElementById("tourUnlimitedSeats")?.checked,
 
-            seats: document.getElementById("tourUnlimitedSeats").checked ? Number(oldTour?.seats || 0) : Number(document.getElementById("tourSeats").value),
+            seats: document.getElementById("tourUnlimitedSeats")?.checked ? Number(oldTour?.seats || 0) : Number(document.getElementById("tourSeats")?.value || 0),
 
             price:
                 Number(
