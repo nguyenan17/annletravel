@@ -772,6 +772,54 @@ async function renderTourDetail() {
 
     currentGalleryIndex = 0;
 
+    // Hiển thị các tour cùng nhóm/điểm đến, nhưng giữ giá và booking độc lập.
+    const normalizeTourGroup = value => String(value || "")
+        .normalize("NFD")
+        .replace(/[\\u0300-\\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    const currentTourGroup = normalizeTourGroup(tour.tour_group || tour.destination);
+    const relatedTours = data.filter(item =>
+        String(item.id) !== String(tour.id) &&
+        currentTourGroup &&
+        normalizeTourGroup(item.tour_group || item.destination) === currentTourGroup
+    );
+    const relatedToursSection = relatedTours.length ? `
+        <section class="tour-related-section">
+            <div class="container">
+                <div class="tour-related-heading">
+                    <span class="section-label">CÙNG ĐIỂM ĐẾN</span>
+                    <h2>Khám phá thêm hành trình này</h2>
+                    <p>Chọn thời lượng phù hợp với quỹ thời gian của bạn.</p>
+                </div>
+                <div class="tour-related-grid">
+                    ${relatedTours.map(related => {
+                        const relatedImage = related.image || (Array.isArray(related.images) ? related.images.find(Boolean) : "") || "";
+                        const relatedDate = related.is_daily ? "Khởi hành hằng ngày" : (related.displayDate || "Liên hệ xác nhận");
+                        return `
+                            <article class="tour-related-card">
+                                <a class="tour-related-image" href="tour-detail.html?id=${encodeURIComponent(related.id)}" aria-label="Xem ${escapeHtml(related.name)}">
+                                    ${relatedImage ? `<img src="${escapeHtml(relatedImage)}" alt="${escapeHtml(related.name)}" loading="lazy">` : `<span class="tour-related-placeholder">ANNLETRAVEL</span>`}
+                                </a>
+                                <div class="tour-related-content">
+                                    <span class="tour-related-date">${escapeHtml(relatedDate)}</span>
+                                    <h3><a href="tour-detail.html?id=${encodeURIComponent(related.id)}">${escapeHtml(related.name)}</a></h3>
+                                    <p>${escapeHtml(related.short || related.destination || "")}</p>
+                                    <div class="tour-related-footer">
+                                        <strong>${formatPrice(related.price)}</strong>
+                                        <a class="tour-related-link" href="tour-detail.html?id=${encodeURIComponent(related.id)}">Xem tour <span aria-hidden="true">→</span></a>
+                                    </div>
+                                </div>
+                            </article>
+                        `;
+                    }).join("")}
+                </div>
+            </div>
+        </section>
+    ` : "";
+
 
     document.title =
         tour.name + " - ANNLETRAVEL";
@@ -1042,6 +1090,8 @@ async function renderTourDetail() {
 
         </section>
 
+
+        ${relatedToursSection}
 
         <!-- ================================= -->
         <!-- LIGHTBOX -->
