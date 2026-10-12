@@ -235,6 +235,11 @@ async function loadTours() {
         }
 
         tours = data || [];
+        const groupSuggestions = document.getElementById("tourGroupSuggestions");
+        if (groupSuggestions) {
+            const groups = [...new Set(tours.map(tour => String(tour.tour_group || tour.destination || "").trim()).filter(Boolean))];
+            groupSuggestions.innerHTML = groups.map(group => "<option value=\"" + String(group).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "\"></option>").join("");
+        }
         renderStats();
         renderTours();
     } catch (error) {
