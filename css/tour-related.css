@@ -1,0 +1,28 @@
+/* ANNLETRAVEL — related tour cards */
+.tour-related-section {
+  padding: 64px 0 76px;
+  background: linear-gradient(180deg, #f7fafb 0%, #ffffff 100%);
+  border-top: 1px solid #e8eff2;
+}
+.tour-related-heading { max-width: 720px; margin: 0 auto 28px; text-align: center; }
+.tour-related-heading h2 { margin: 8px 0 10px; color: #123847; font-size: clamp(26px, 3vw, 36px); line-height: 1.2; }
+.tour-related-heading p { margin: 0; color: #61727b; }
+.tour-related-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.tour-related-card { min-width: 0; overflow: hidden; background: #fff; border: 1px solid #e3ecef; border-radius: 18px; box-shadow: 0 10px 28px rgba(15, 54, 70, .07); transition: transform .2s ease, box-shadow .2s ease; }
+.tour-related-card:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(15, 54, 70, .12); }
+.tour-related-image { display: block; position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #e9f0f2; }
+.tour-related-image img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.tour-related-card:hover .tour-related-image img { transform: scale(1.04); }
+.tour-related-placeholder { display: grid; place-items: center; width: 100%; height: 100%; color: #607982; font-weight: 700; letter-spacing: .08em; }
+.tour-related-content { padding: 20px; }
+.tour-related-date { display: inline-block; margin-bottom: 10px; color: #287c84; font-size: 12px; font-weight: 700; }
+.tour-related-content h3 { margin: 0 0 10px; color: #173d4b; font-size: 19px; line-height: 1.35; }
+.tour-related-content h3 a { color: inherit; text-decoration: none; }
+.tour-related-content h3 a:hover { color: #16818a; }
+.tour-related-content p { display: -webkit-box; min-height: 42px; margin: 0 0 18px; overflow: hidden; color: #647780; font-size: 14px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.tour-related-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 15px; border-top: 1px solid #edf1f3; }
+.tour-related-footer strong { color: #b75b2a; font-size: 19px; white-space: nowrap; }
+.tour-related-link { color: #176b78; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.tour-related-link:hover { color: #0c4754; }
+@media (max-width: 900px) { .tour-related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .tour-related-section { padding: 44px 0 56px; } .tour-related-grid { grid-template-columns: 1fr; gap: 16px; } .tour-related-content { padding: 17px; } }
