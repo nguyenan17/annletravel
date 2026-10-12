@@ -775,7 +775,7 @@ async function renderTourDetail() {
     // Hiển thị các tour cùng nhóm/điểm đến, nhưng giữ giá và booking độc lập.
     const normalizeTourGroup = value => String(value || "")
         .normalize("NFD")
-        .replace(/[\\u0300-\\u036f]/g, "")
+        .replace(/[\u0300-\u036f]/g, "")
         .replace(/đ/g, "d")
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, " ")
