@@ -708,6 +708,9 @@ window.editTour =
         ).value =
             tour.destination || "";
 
+        const tourGroupInput = document.getElementById("tourGroup");
+        if (tourGroupInput) tourGroupInput.value = tour.tour_group || tour.destination || "";
+
 
         const tourIsDailyInput = document.getElementById("tourIsDaily");
         const tourUnlimitedSeatsInput = document.getElementById("tourUnlimitedSeats");
@@ -1802,6 +1805,10 @@ tourForm.addEventListener(
                     .value
                     .trim(),
 
+            tour_group:
+                (document.getElementById("tourGroup")?.value || "").trim() ||
+                document.getElementById("tourDestination").value.trim(),
+
             departure: document.getElementById("tourIsDaily")?.checked ? null : (document.getElementById("tourDeparture")?.value || null),
             is_daily: !!document.getElementById("tourIsDaily")?.checked,
             unlimited_seats: !!document.getElementById("tourUnlimitedSeats")?.checked,
@@ -1842,6 +1849,9 @@ tourForm.addEventListener(
 
                             destination:
                                 tourData.destination,
+
+                            tour_group:
+                                tourData.tour_group,
 
                             departure:
                                 tourData.departure,
