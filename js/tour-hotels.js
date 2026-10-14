@@ -77,7 +77,7 @@
         const container = document.getElementById("tourDetail");
         if (!container) return;
         const id = new URLSearchParams(location.search).get("id");
-        if (!id || container.dataset.hotelOptionsTour === id || loadingTourId === id) return;
+        if (!id || (container.dataset.hotelOptionsTour === id && document.getElementById("tourHotelOptions")) || loadingTourId === id) return;
         loadingTourId = id;
         try {
             const result = await supabaseClient.from("tour_hotel_options")
