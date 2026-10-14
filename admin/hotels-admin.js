@@ -24,4 +24,3 @@ window.initHotelManagement = async function(){
   hotelsLoaded = true;
   await loadAll();
 };
-if (window.location.hash === '#hotels') window.initHotelManagement();
