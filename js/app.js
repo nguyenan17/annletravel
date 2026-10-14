@@ -1007,6 +1007,13 @@ async function renderTourDetail() {
                         </strong>
                     </p>
 
+                    <p class="tour-transport-info">
+                        🚌 Phương tiện di chuyển:
+                        <strong>
+                            ${escapeHtml(tour.transport || "Liên hệ xác nhận")}
+                        </strong>
+                    </p>
+
 
                     <br>
 
