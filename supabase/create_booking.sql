@@ -1,7 +1,6 @@
 -- ANNLETRAVEL atomic booking RPC with optional hotel selection.
 -- Run after 20261015_hotel_catalogue_and_tour_pricing.sql.
 DROP FUNCTION IF EXISTS public.create_booking(text, text, text, integer, text);
-DROP FUNCTION IF EXISTS public.create_booking_unlimited(text, text, text, integer, text);
 
 CREATE OR REPLACE FUNCTION public.create_booking(
     p_tour_id text,
