@@ -721,6 +721,9 @@ window.editTour =
         ).value =
             tour.destination || "";
 
+        const tourTransportInput = document.getElementById("tourTransport");
+        if (tourTransportInput) tourTransportInput.value = tour.transport || "";
+
         const tourGroupInput = document.getElementById("tourGroup");
         if (tourGroupInput) tourGroupInput.value = tour.tour_group || tour.destination || "";
 
@@ -1865,6 +1868,8 @@ tourForm.addEventListener(
 
                             tour_group:
                                 tourData.tour_group,
+
+                            transport: tourData.transport,
 
                             departure:
                                 tourData.departure,
