@@ -16,7 +16,7 @@ async function submitBooking(event, tourId) {
     const name = document.getElementById("bookingName")?.value.trim() || "";
     const phone = document.getElementById("bookingPhone")?.value.trim() || "";
     const people = Number(document.getElementById("bookingPeople")?.value);
-    const note = document.getElementById("bookingNote")?.value.trim() || "";
+    let note = document.getElementById("bookingNote")?.value.trim() || "";
     const submitButton = event.submitter || event.currentTarget?.querySelector("button[type='submit']");
 
     if (!name || !phone) {
@@ -46,6 +46,36 @@ async function submitBooking(event, tourId) {
         const selectedTour = Array.isArray(tours)
             ? tours.find(item => String(item.id) === String(tourId))
             : null;
+
+        // Preserve the selected accommodation and price estimate in the booking note.
+        const hotelOption = window.selectedTourHotelOption;
+        if (hotelOption && String(hotelOption.id || "")) {
+            const roomCount = Math.ceil(people / Math.max(1, Number(hotelOption.maxGuests || 2)));
+            const hotelAmount = hotelOption.pricingMode === "ADD_ON"
+                ? (Number(hotelOption.pricePerPerson || 0) * people)
+                    + roomCount * Number(hotelOption.roomPricePerNight || 0) * Math.max(1, Number(hotelOption.nights || 1))
+                : 0;
+            const perPersonPrice = hotelOption.pricingMode === "INCLUDED"
+                ? Number(hotelOption.packagePricePerPerson ?? hotelOption.baseTourPrice ?? selectedTour?.price ?? 0)
+                : Number(hotelOption.baseTourPrice ?? selectedTour?.price ?? 0)
+                    + Number(hotelOption.pricePerPerson || 0)
+                    + roomCount * Number(hotelOption.roomPricePerNight || 0) * Math.max(1, Number(hotelOption.nights || 1)) / people;
+            const estimatedTotal = hotelOption.pricingMode === "INCLUDED"
+                ? perPersonPrice * people
+                : Number(hotelOption.baseTourPrice ?? selectedTour?.price ?? 0) * people + hotelAmount;
+            const snapshot = [
+                "[LỰA CHỌN LƯU TRÚ]",
+                "Khách sạn: " + String(hotelOption.hotelName || ""),
+                "Gói/phòng: " + String(hotelOption.roomLabel || ""),
+                "Cách tính: " + (hotelOption.pricingMode === "INCLUDED" ? "Giá tour đã bao gồm khách sạn" : "Cộng thêm tiền khách sạn"),
+                "Số khách: " + people,
+                "Tiền lưu trú cộng thêm: " + new Intl.NumberFormat("vi-VN").format(hotelAmount) + "đ",
+                "Tổng dự kiến: " + new Intl.NumberFormat("vi-VN").format(estimatedTotal) + "đ",
+                hotelOption.note ? "Ghi chú: " + String(hotelOption.note) : ""
+            ].filter(Boolean).join(" | ");
+            note = note ? note + "\n\n" + snapshot : snapshot;
+        }
+
         const bookingRpc = selectedTour?.unlimited_seats
             ? "create_booking_unlimited"
             : "create_booking";
