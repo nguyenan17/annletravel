@@ -1603,11 +1603,18 @@ async function registerTour(tourId) {
 
 
                 <div>
-                    <span>Giá tour</span>
+                    <span>Giá tour cơ bản</span>
                     <strong>
                         ${formatPrice(tour.price)}
                     </strong>
                 </div>
+
+                ${window.selectedTourHotelOption ? `
+                <div class="booking-hotel-summary">
+                    <span>Khách sạn đã chọn</span>
+                    <strong>${escapeHtml(window.selectedTourHotelOption.hotelName)} · ${escapeHtml(window.selectedTourHotelOption.roomLabel)}</strong>
+                    <small>${formatPrice(window.selectedTourHotelOption.estimatedPerPerson)} / người (ước tính)</small>
+                </div>` : ""}
 
             </div>
 
