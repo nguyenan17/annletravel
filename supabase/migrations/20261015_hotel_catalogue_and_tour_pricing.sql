@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS public.hotel_room_types (
 
 CREATE TABLE IF NOT EXISTS public.tour_hotel_options (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    tour_id text NOT NULL REFERENCES public.tours(id) ON DELETE CASCADE,
+    tour_id text NOT NULL,
     hotel_id uuid NOT NULL REFERENCES public.hotels(id) ON DELETE CASCADE,
     room_type_id uuid REFERENCES public.hotel_room_types(id) ON DELETE SET NULL,
     pricing_mode text NOT NULL DEFAULT 'INCLUDED' CHECK (pricing_mode IN ('INCLUDED', 'ADD_ON')),
@@ -79,7 +79,7 @@ CREATE POLICY "Public can read active hotels" ON public.hotels
 
 DROP POLICY IF EXISTS "Authenticated can manage hotels" ON public.hotels;
 CREATE POLICY "Authenticated can manage hotels" ON public.hotels
-    FOR ALL TO authenticated USING (true) WITH CHECK (true);
+    FOR ALL TO authenticated USING (EXISTS (SELECT 1 FROM public.admin_users a WHERE a.user_id = auth.uid())) WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users a WHERE a.user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Public can read active hotel rooms" ON public.hotel_room_types;
 CREATE POLICY "Public can read active hotel rooms" ON public.hotel_room_types
