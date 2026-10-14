@@ -4,12 +4,8 @@ const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const slugify=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const money=v=>new Intl.NumberFormat('vi-VN').format(Number(v)||0)+'đ';
 function msg(s,bad){el('notice').textContent=s;el('notice').style.color=bad?'#b42318':'#087a50';window.scrollTo({top:0,behavior:'smooth'});}
-async function isAdmin(){const {data:{session}}=await supabaseClient.auth.getSession();if(!session)return false;const {data,error}=await supabaseClient.from('admin_users').select('user_id').eq('user_id',session.user.id).maybeSingle();if(error)console.error(error);return !!data;}
-async function init(){if(!(await isAdmin()))return;el('loginPage').classList.add('hidden');el('dashboardPage').classList.remove('hidden');await loadAll();}
-el('loginForm').addEventListener('submit',async e=>{e.preventDefault();const {error}=await supabaseClient.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});if(error){el('loginError').textContent='Email hoặc mật khẩu không đúng.';return;}if(!(await isAdmin())){await supabaseClient.auth.signOut();el('loginError').textContent='Tài khoản này không có quyền Admin.';return;}await init();});
-el('logoutButton').addEventListener('click',async()=>{await supabaseClient.auth.signOut();location.reload();});
 el('name').addEventListener('input',()=>{if(!el('hotelId').value)el('slug').value=slugify(el('name').value);});
-el('reset').addEventListener('click',resetHotel);el('optionReset').addEventListener('click',resetOption);
+el('reset').addEventListener('click',resetHotel);el('optionReset').addEventListener('click',resetOption);el('refreshHotelsButton')?.addEventListener('click',loadAll);
 function resetHotel(){el('hotelForm').reset();el('hotelId').value='';el('sort').value='0';el('active').checked=true;el('formTitle').textContent='Thêm khách sạn';}
 function resetOption(){el('optionForm').reset();el('optionId').value='';el('mode').value='INCLUDED';el('personPrice').value='0';el('roomPrice').value='0';el('maxGuests').value='2';el('nights').value='1';el('optionActive').checked=true;}
 async function loadAll(){try{const r=await Promise.all([supabaseClient.from('hotels').select('*').order('sort_order').order('name'),supabaseClient.from('tours').select('id,name,destination,price').order('name'),supabaseClient.from('tour_hotel_options').select('*').order('sort_order')]);const bad=r.find(x=>x.error);if(bad)throw bad.error;hotels=r[0].data||[];tourRows=r[1].data||[];options=r[2].data||[];renderHotels();fillOptions();renderOptionList();}catch(e){msg('Không tải được dữ liệu. Hãy chạy migration Supabase trước: '+e.message,true);}}
@@ -22,4 +18,10 @@ function renderOptionList(){el('optionList').innerHTML=options.length?options.ma
 window.editOption=id=>{const o=options.find(x=>x.id===id);if(!o)return;el('optionId').value=o.id;el('tourId').value=o.tour_id;el('hotelRef').value=o.hotel_id;el('optionLabel').value=o.label||'';el('mode').value=o.pricing_mode;el('packagePrice').value=o.package_price_per_person??'';el('personPrice').value=o.price_per_person||0;el('roomPrice').value=o.room_price_per_night||0;el('maxGuests').value=o.max_guests_per_room||2;el('nights').value=o.nights||1;el('optionNote').value=o.note||'';el('optionActive').checked=!!o.active;el('optionForm').scrollIntoView({behavior:'smooth'});};
 window.deleteOption=async id=>{if(!confirm('Xóa lựa chọn khách sạn khỏi tour?'))return;const {error}=await supabaseClient.from('tour_hotel_options').delete().eq('id',id);if(error){msg(error.message,true);return;}msg('Đã xóa lựa chọn giá.');await loadAll();};
 el('optionForm').addEventListener('submit',async e=>{e.preventDefault();const payload={tour_id:el('tourId').value,hotel_id:el('hotelRef').value,label:el('optionLabel').value.trim()||'Gói lưu trú',pricing_mode:el('mode').value,package_price_per_person:el('packagePrice').value===''?null:Number(el('packagePrice').value),price_per_person:Number(el('personPrice').value)||0,room_price_per_night:Number(el('roomPrice').value)||0,max_guests_per_room:Number(el('maxGuests').value)||2,nights:Number(el('nights').value)||1,note:el('optionNote').value.trim(),active:el('optionActive').checked,updated_at:new Date().toISOString()};try{const id=el('optionId').value;const r=id?await supabaseClient.from('tour_hotel_options').update(payload).eq('id',id):await supabaseClient.from('tour_hotel_options').insert(payload);if(r.error)throw r.error;msg(id?'Đã cập nhật lựa chọn.':'Đã gán khách sạn vào tour.');resetOption();await loadAll();}catch(e){msg('Không lưu được lựa chọn: '+e.message,true);}});
-init();
+let hotelsLoaded = false;
+window.initHotelManagement = async function(){
+  if (hotelsLoaded) return;
+  hotelsLoaded = true;
+  await loadAll();
+};
+if (window.location.hash === '#hotels') window.initHotelManagement();
