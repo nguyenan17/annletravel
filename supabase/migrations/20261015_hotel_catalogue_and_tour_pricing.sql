@@ -101,6 +101,19 @@ DROP POLICY IF EXISTS "Authenticated can manage tour hotel options" ON public.to
 CREATE POLICY "Authenticated can manage tour hotel options" ON public.tour_hotel_options
     FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+
+DROP POLICY IF EXISTS "Admins can read all hotels" ON public.hotels;
+CREATE POLICY "Admins can read all hotels" ON public.hotels
+    FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM public.admin_users a WHERE a.user_id = auth.uid()));
+
+DROP POLICY IF EXISTS "Admins can read all hotel rooms" ON public.hotel_room_types;
+CREATE POLICY "Admins can read all hotel rooms" ON public.hotel_room_types
+    FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM public.admin_users a WHERE a.user_id = auth.uid()));
+
+DROP POLICY IF EXISTS "Admins can read all tour hotel options" ON public.tour_hotel_options;
+CREATE POLICY "Admins can read all tour hotel options" ON public.tour_hotel_options
+    FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM public.admin_users a WHERE a.user_id = auth.uid()));
+
 COMMENT ON TABLE public.hotels IS 'Reusable hotel catalogue shared by the hotel landing page and tour options.';
 COMMENT ON TABLE public.tour_hotel_options IS 'Accommodation choices and pricing for a specific tour. INCLUDED means package price is used; ADD_ON means lodging is added to the base tour price.';
 COMMENT ON COLUMN public.bookings.hotel_name_snapshot IS 'Hotel name captured at booking time; independent of later catalogue edits.';
