@@ -1530,9 +1530,7 @@ async function registerTour(tourId) {
     const tour = data.find(item => String(item.id) === String(tourId));
     if (!tour) { alert("Không tìm thấy tour."); return; }
 
-    const oldModal = document.getElementById("bookingModal");
-    if (oldModal) oldModal.remove();
-
+    document.getElementById("bookingModal")?.remove();
     let hotelOptions = [];
     try {
         const result = await supabaseClient.from("tour_hotel_options")
@@ -1549,60 +1547,76 @@ async function registerTour(tourId) {
     const previousId = window.selectedTourHotelOption?.id;
     const initialOption = hotelOptions.find(option => String(option.id) === String(previousId)) || hotelOptions[0] || null;
     window.selectedTourHotelOption = null;
-
-    const hotelOptionsHtml = hotelOptions.length
-        ? hotelOptions.map(option => {
-            const price = Number(option.package_price_per_person ?? tour.price ?? 0);
-            const label = [option.hotels.name, option.label].filter(Boolean).join(" · ");
-            return '<option value="' + escapeHtml(option.id) + '">' + escapeHtml(label) + ' — ' + formatPrice(price) + '/người (trọn gói)</option>';
-        }).join("")
-        : '<option value="">Chưa có lựa chọn khách sạn cho tour này</option>';
-
     const initialPrice = Number(initialOption?.package_price_per_person ?? tour.price ?? 0);
+    const hotelCards = hotelOptions.map(option => {
+        const hotel = option.hotels || {};
+        const price = Number(option.package_price_per_person ?? tour.price ?? 0);
+        const image = hotel.cover_image || (Array.isArray(hotel.gallery_images) ? hotel.gallery_images[0] : "");
+        const title = [hotel.name, option.label].filter(Boolean).join(" · ");
+        return `<button type="button" class="booking-hotel-card" data-booking-option="${escapeHtml(option.id)}" aria-pressed="false">
+            ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<span class="booking-hotel-card-placeholder" aria-hidden="true">🏨</span>'}
+            <span class="booking-hotel-card-copy"><strong>${escapeHtml(title)}</strong>
+                <span>${Number(option.nights || 1)} đêm${hotel.breakfast_included ? " · Có buffet sáng" : ""}</span>
+                <b>${formatPrice(price)}<small>/người · trọn gói</small></b>
+            </span><span class="booking-hotel-check" aria-hidden="true">✓</span>
+        </button>`;
+    }).join("");
+
     const modal = document.createElement("div");
     modal.id = "bookingModal";
     modal.className = "booking-modal";
     modal.innerHTML = `
-        <div class="booking-overlay" onclick="closeBookingModal()"></div>
-        <div class="booking-modal-content">
-            <button type="button" class="booking-close" onclick="closeBookingModal()">×</button>
-            <span class="section-label">ĐĂNG KÝ TOUR</span>
-            <h2>${escapeHtml(tour.name)}</h2>
-            <div class="booking-summary">
-                <div><span>Khởi hành</span><strong>${escapeHtml(tour.displayDate || "Chưa xác định")}</strong></div>
-                <div><span>Điểm đến</span><strong>${escapeHtml(tour.destination || "")}</strong></div>
+        <div class="booking-overlay" data-booking-close></div>
+        <section class="booking-modal-content" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+            <button type="button" class="booking-close" data-booking-close aria-label="Đóng form">×</button>
+            <div class="booking-modal-heading">
+                <span class="booking-eyebrow">ANNLETRAVEL · BOOKING</span>
+                <h2 id="bookingTitle">Đăng ký chuyến đi</h2>
+                <p>Để lại thông tin, đội ngũ AnnLeTravel sẽ liên hệ xác nhận với bạn.</p>
             </div>
-            ${hotelOptions.length ? `
-            <div class="form-group booking-hotel-picker">
-                <label for="bookingHotelOption">Chọn khách sạn — giá đã bao gồm trong tour *</label>
-                <select id="bookingHotelOption" required>${hotelOptionsHtml}</select>
-                <p class="booking-note">Giá mỗi lựa chọn là giá trọn gói/người, đã gồm chương trình tour và khách sạn. Chọn khách sạn khác sẽ cập nhật giá ngay.</p>
-            </div>` : `
-            <p class="booking-note">Tour này chưa có cấu hình khách sạn. Giá hiện tại là giá cơ bản của tour.</p>`}
-            <div class="booking-package-price" aria-live="polite">
-                <div><span>Giá trọn gói/người</span><strong id="bookingPackagePerPerson">${formatPrice(initialPrice)}</strong></div>
-                <div><span>Số người</span><strong id="bookingPackagePeople">1 người</strong></div>
-                <div class="booking-package-total"><span>Tổng giá dự kiến</span><strong id="bookingPackageTotal">${formatPrice(initialPrice)}</strong></div>
-            </div>
-            <form onsubmit="submitBooking(event, '${String(tour.id).replace(/'/g, "\\'")}')" class="booking-form">
-                <div class="form-group"><label for="bookingName">Họ và tên *</label><input type="text" id="bookingName" placeholder="Nhập họ và tên" required></div>
-                <div class="form-group"><label for="bookingPhone">Số điện thoại *</label><input type="tel" id="bookingPhone" placeholder="09xxxxxxxx" required></div>
-                <div class="form-group"><label for="bookingPeople">Số người *</label>
-                    <select id="bookingPeople"><option value="1">1 người</option><option value="2">2 người</option><option value="3">3 người</option><option value="4">4 người</option><option value="5">5 người</option></select>
+            <div class="booking-tour-summary">
+                <div class="booking-tour-summary-icon" aria-hidden="true">✈</div>
+                <div class="booking-tour-summary-copy">
+                    <strong>${escapeHtml(tour.name)}</strong>
+                    <span>📍 ${escapeHtml(tour.destination || "Điểm đến đang cập nhật")}</span>
+                    <span>📅 ${escapeHtml(tour.displayDate || "Chưa xác định")}</span>
+                    <span>🚌 ${escapeHtml(tour.transport || "Phương tiện sẽ được xác nhận")}</span>
                 </div>
-                <div class="form-group"><label for="bookingNote">Ghi chú</label><textarea id="bookingNote" rows="3" placeholder="Bạn muốn yêu cầu gì thêm?"></textarea></div>
-                <button type="submit" class="btn btn-primary full">Gửi yêu cầu đăng ký</button>
-                <p class="booking-note">Sale sẽ liên hệ lại để xác nhận lịch trình và thông tin đặt tour.</p>
+            </div>
+            <form onsubmit="submitBooking(event, '${String(tour.id).replace(/'/g, "\\'")}')" class="booking-form booking-form-redesigned">
+                <div class="booking-form-section-title"><span>01</span><div><strong>Thông tin liên hệ</strong><small>Thông tin để chúng tôi liên lạc với bạn</small></div></div>
+                <div class="booking-form-grid">
+                    <div class="form-group"><label for="bookingName">Họ và tên <em>*</em></label><input type="text" id="bookingName" placeholder="Nguyễn Văn A" autocomplete="name" required></div>
+                    <div class="form-group"><label for="bookingPhone">Số điện thoại <em>*</em></label><input type="tel" id="bookingPhone" placeholder="09xx xxx xxx" autocomplete="tel" inputmode="tel" required></div>
+                </div>
+                <div class="booking-form-section-title"><span>02</span><div><strong>Tuỳ chọn chuyến đi</strong><small>Chọn số người và gói phù hợp</small></div></div>
+                <div class="form-group booking-people-field"><label for="bookingPeople">Số người tham gia</label>
+                    <select id="bookingPeople">
+                    ${Array.from({length:20},(_,i)=>`<option value="${i+1}" ${i===0?"selected":""}>${i+1} ${i===0?"người":"người"}</option>`).join("")}
+                    </select>
+                </div>
+                ${hotelOptions.length ? `
+                    <div class="form-group booking-hotel-picker">
+                        <div class="booking-field-heading"><label>Chọn gói khách sạn <em>*</em></label><span>Giá đã bao gồm tour + khách sạn</span></div>
+                        <div class="booking-hotel-card-list">${hotelCards}</div>
+                        <p class="booking-note">Chọn một gói bên trên. Giá trọn gói/người và tổng tiền sẽ tự cập nhật.</p>
+                    </div>
+                ` : `<div class="booking-no-hotel"><span aria-hidden="true">ℹ</span><p><strong>Giá tour cơ bản</strong><br>Tour này chưa có gói khách sạn cần chọn. Nhân viên sẽ xác nhận chi tiết khi liên hệ.</p></div>`}
+                <div class="form-group booking-note-field"><label for="bookingNote">Yêu cầu thêm <span>(không bắt buộc)</span></label><textarea id="bookingNote" rows="3" placeholder="Ví dụ: điểm đón mong muốn, yêu cầu ăn uống…"></textarea></div>
+                <div class="booking-price-panel" aria-live="polite">
+                    <div><span>Giá trọn gói / người</span><strong id="bookingPackagePerPerson">${formatPrice(initialPrice)}</strong></div>
+                    <div><span>Số người</span><strong id="bookingPackagePeople">1 người</strong></div>
+                    <div class="booking-price-total"><span>Tổng dự kiến</span><strong id="bookingPackageTotal">${formatPrice(initialPrice)}</strong></div>
+                    <p>Giá cuối cùng sẽ được xác nhận trước khi đặt cọc.</p>
+                </div>
+                <button type="submit" class="btn btn-primary full booking-submit-button"><span>Gửi yêu cầu đăng ký</span><span aria-hidden="true">→</span></button>
+                <p class="booking-privacy-note">Thông tin của bạn chỉ được sử dụng để tư vấn và xác nhận tour.</p>
             </form>
-        </div>`;
+        </section>`;
     document.body.appendChild(modal);
     document.body.classList.add("modal-open");
-
-    if (hotelOptions.length) {
-        const selector = document.getElementById("bookingHotelOption");
-        selector.value = initialOption ? String(initialOption.id) : "";
-        selector.addEventListener("change", () => window.setBookingHotelOption(selector.value));
-    }
+    modal.querySelectorAll("[data-booking-close]").forEach(button => button.addEventListener("click", closeBookingModal));
+    modal.querySelectorAll("[data-booking-option]").forEach(button => button.addEventListener("click", () => window.setBookingHotelOption(button.dataset.bookingOption)));
     document.getElementById("bookingPeople")?.addEventListener("change", window.updateBookingPackagePrice);
     if (initialOption) window.setBookingHotelOption(initialOption.id);
     else window.updateBookingPackagePrice();
@@ -1626,6 +1640,11 @@ window.setBookingHotelOption = function(optionId) {
         packagePricePerPerson: packagePrice, baseTourPrice: Number(tour.price || 0),
         note: option.note || "", estimatedPerPerson: packagePrice
     };
+    document.querySelectorAll("[data-booking-option]").forEach(button => {
+        const chosen = String(button.dataset.bookingOption) === String(option.id);
+        button.classList.toggle("selected", chosen);
+        button.setAttribute("aria-pressed", String(chosen));
+    });
     window.updateBookingPackagePrice();
 };
 
@@ -1643,7 +1662,6 @@ window.updateBookingPackagePrice = function() {
 };
 
 
-// ================================
 // CLOSE BOOKING MODAL
 // ================================
 
