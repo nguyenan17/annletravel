@@ -85,7 +85,8 @@ async function submitBooking(event, tourId) {
             p_customer_name: name,
             p_phone: phone,
             p_people: people,
-            p_note: note
+            p_note: note,
+            p_hotel_option_id: hotelOption?.id || null
         });
 
         if (error) {
@@ -144,6 +145,8 @@ async function submitBooking(event, tourId) {
             alert("Không tìm thấy tour hoặc tour đã được cập nhật. Vui lòng tải lại trang.");
         } else if (message.includes("INVALID_PEOPLE")) {
             alert("Số người đăng ký không hợp lệ.");
+        } else if (message.includes("INVALID_HOTEL_OPTION")) {
+            alert("Lựa chọn khách sạn vừa thay đổi hoặc không còn khả dụng. Vui lòng tải lại trang và chọn lại.");
         } else {
             alert("Không thể gửi đăng ký tour. Vui lòng thử lại sau.");
         }
