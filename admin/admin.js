@@ -1821,6 +1821,8 @@ tourForm.addEventListener(
                     .value
                     .trim(),
 
+            transport: (document.getElementById("tourTransport")?.value || "").trim(),
+
             tour_group:
                 (document.getElementById("tourGroup")?.value || "").trim() ||
                 document.getElementById("tourDestination").value.trim(),
