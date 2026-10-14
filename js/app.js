@@ -1526,213 +1526,121 @@ async function loadTourItinerary(tourId) {
 // ================================
 
 async function registerTour(tourId) {
-
     const data = await loadTours();
+    const tour = data.find(item => String(item.id) === String(tourId));
+    if (!tour) { alert("Không tìm thấy tour."); return; }
 
-    const tour =
-        data.find(item => item.id === tourId);
+    const oldModal = document.getElementById("bookingModal");
+    if (oldModal) oldModal.remove();
 
-
-    if (!tour) {
-        alert("Không tìm thấy tour.");
-        return;
+    let hotelOptions = [];
+    try {
+        const result = await supabaseClient.from("tour_hotel_options")
+            .select("*, hotels(*)").eq("tour_id", String(tour.id))
+            .eq("active", true).order("sort_order");
+        if (result.error) throw result.error;
+        hotelOptions = (result.data || []).filter(option => option.hotels && option.hotels.active);
+    } catch (error) {
+        console.error("Không tải được lựa chọn khách sạn khi đăng ký:", error);
     }
 
+    window.bookingHotelOptions = hotelOptions;
+    window.bookingCurrentTour = tour;
+    const previousId = window.selectedTourHotelOption?.id;
+    const initialOption = hotelOptions.find(option => String(option.id) === String(previousId)) || hotelOptions[0] || null;
+    window.selectedTourHotelOption = null;
 
-    // Xóa popup cũ nếu có
-    const oldModal =
-        document.getElementById("bookingModal");
+    const hotelOptionsHtml = hotelOptions.length
+        ? hotelOptions.map(option => {
+            const price = Number(option.package_price_per_person ?? tour.price ?? 0);
+            const label = [option.hotels.name, option.label].filter(Boolean).join(" · ");
+            return '<option value="' + escapeHtml(option.id) + '">' + escapeHtml(label) + ' — ' + formatPrice(price) + '/người (trọn gói)</option>';
+        }).join("")
+        : '<option value="">Chưa có lựa chọn khách sạn cho tour này</option>';
 
-    if (oldModal) {
-        oldModal.remove();
-    }
-
-
+    const initialPrice = Number(initialOption?.package_price_per_person ?? tour.price ?? 0);
     const modal = document.createElement("div");
-
     modal.id = "bookingModal";
-
     modal.className = "booking-modal";
-
-
     modal.innerHTML = `
-
-        <div class="booking-overlay"
-             onclick="closeBookingModal()">
-        </div>
-
-
+        <div class="booking-overlay" onclick="closeBookingModal()"></div>
         <div class="booking-modal-content">
-
-
-            <button
-                class="booking-close"
-                onclick="closeBookingModal()">
-
-                ×
-
-            </button>
-
-
-            <span class="section-label">
-                ĐĂNG KÝ TOUR
-            </span>
-
-
-            <h2>
-                ${tour.name}
-            </h2>
-
-
+            <button type="button" class="booking-close" onclick="closeBookingModal()">×</button>
+            <span class="section-label">ĐĂNG KÝ TOUR</span>
+            <h2>${escapeHtml(tour.name)}</h2>
             <div class="booking-summary">
-
-                <div>
-                    <span>Khởi hành</span>
-                    <strong>
-                        ${tour.displayDate}
-                    </strong>
-                </div>
-
-
-                <div>
-                    <span>Điểm đến</span>
-                    <strong>
-                        ${tour.destination}
-                    </strong>
-                </div>
-
-
-                <div>
-                    <span>Giá tour cơ bản</span>
-                    <strong>
-                        ${formatPrice(tour.price)}
-                    </strong>
-                </div>
-
-                ${window.selectedTourHotelOption ? `
-                <div class="booking-hotel-summary">
-                    <span>Khách sạn đã chọn</span>
-                    <strong>${escapeHtml(window.selectedTourHotelOption.hotelName)} · ${escapeHtml(window.selectedTourHotelOption.roomLabel)}</strong>
-                    <small>${formatPrice(window.selectedTourHotelOption.estimatedPerPerson)} / người (ước tính)</small>
-                </div>` : ""}
-
+                <div><span>Khởi hành</span><strong>${escapeHtml(tour.displayDate || "Chưa xác định")}</strong></div>
+                <div><span>Điểm đến</span><strong>${escapeHtml(tour.destination || "")}</strong></div>
             </div>
-
-
-            <form
-                onsubmit="submitBooking(event, '${tour.id}')"
-                class="booking-form">
-
-
-                <div class="form-group">
-
-                    <label>
-                        Họ và tên *
-                    </label>
-
-                    <input
-                        type="text"
-                        id="bookingName"
-                        placeholder="Nhập họ và tên"
-                        required
-                    >
-
+            ${hotelOptions.length ? `
+            <div class="form-group booking-hotel-picker">
+                <label for="bookingHotelOption">Chọn khách sạn — giá đã bao gồm trong tour *</label>
+                <select id="bookingHotelOption" required>${hotelOptionsHtml}</select>
+                <p class="booking-note">Giá mỗi lựa chọn là giá trọn gói/người, đã gồm chương trình tour và khách sạn. Chọn khách sạn khác sẽ cập nhật giá ngay.</p>
+            </div>` : `
+            <p class="booking-note">Tour này chưa có cấu hình khách sạn. Giá hiện tại là giá cơ bản của tour.</p>`}
+            <div class="booking-package-price" aria-live="polite">
+                <div><span>Giá trọn gói/người</span><strong id="bookingPackagePerPerson">${formatPrice(initialPrice)}</strong></div>
+                <div><span>Số người</span><strong id="bookingPackagePeople">1 người</strong></div>
+                <div class="booking-package-total"><span>Tổng giá dự kiến</span><strong id="bookingPackageTotal">${formatPrice(initialPrice)}</strong></div>
+            </div>
+            <form onsubmit="submitBooking(event, '${String(tour.id).replace(/'/g, "\\'")}')" class="booking-form">
+                <div class="form-group"><label for="bookingName">Họ và tên *</label><input type="text" id="bookingName" placeholder="Nhập họ và tên" required></div>
+                <div class="form-group"><label for="bookingPhone">Số điện thoại *</label><input type="tel" id="bookingPhone" placeholder="09xxxxxxxx" required></div>
+                <div class="form-group"><label for="bookingPeople">Số người *</label>
+                    <select id="bookingPeople"><option value="1">1 người</option><option value="2">2 người</option><option value="3">3 người</option><option value="4">4 người</option><option value="5">5 người</option></select>
                 </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Số điện thoại *
-                    </label>
-
-                    <input
-                        type="tel"
-                        id="bookingPhone"
-                        placeholder="09xxxxxxxx"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Số người
-                    </label>
-
-                    <select id="bookingPeople">
-
-                        <option value="1">
-                            1 người
-                        </option>
-
-                        <option value="2">
-                            2 người
-                        </option>
-
-                        <option value="3">
-                            3 người
-                        </option>
-
-                        <option value="4">
-                            4 người
-                        </option>
-
-                        <option value="5">
-                            5 người
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Ghi chú
-                    </label>
-
-                    <textarea
-                        id="bookingNote"
-                        rows="3"
-                        placeholder="Bạn muốn yêu cầu gì thêm?"
-                    ></textarea>
-
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="btn btn-primary full">
-
-                    Gửi yêu cầu đăng ký
-
-                </button>
-
-
-                <p class="booking-note">
-
-                    Sale sẽ liên hệ lại để xác nhận
-                    lịch trình và thông tin đặt tour.
-
-                </p>
-
-
+                <div class="form-group"><label for="bookingNote">Ghi chú</label><textarea id="bookingNote" rows="3" placeholder="Bạn muốn yêu cầu gì thêm?"></textarea></div>
+                <button type="submit" class="btn btn-primary full">Gửi yêu cầu đăng ký</button>
+                <p class="booking-note">Sale sẽ liên hệ lại để xác nhận lịch trình và thông tin đặt tour.</p>
             </form>
-
-        </div>
-
-    `;
-
-
+        </div>`;
     document.body.appendChild(modal);
-
     document.body.classList.add("modal-open");
 
+    if (hotelOptions.length) {
+        const selector = document.getElementById("bookingHotelOption");
+        selector.value = initialOption ? String(initialOption.id) : "";
+        selector.addEventListener("change", () => window.setBookingHotelOption(selector.value));
+    }
+    document.getElementById("bookingPeople")?.addEventListener("change", window.updateBookingPackagePrice);
+    if (initialOption) window.setBookingHotelOption(initialOption.id);
+    else window.updateBookingPackagePrice();
 }
+
+window.setBookingHotelOption = function(optionId) {
+    const option = (window.bookingHotelOptions || []).find(item => String(item.id) === String(optionId));
+    const tour = window.bookingCurrentTour;
+    if (!option || !tour) {
+        window.selectedTourHotelOption = null;
+        window.updateBookingPackagePrice();
+        return;
+    }
+    const hotel = option.hotels || {};
+    const packagePrice = Number(option.package_price_per_person ?? tour.price ?? 0);
+    window.selectedTourHotelOption = {
+        id: option.id, hotelId: option.hotel_id, hotelName: hotel.name || "",
+        hotelImage: hotel.cover_image || "", roomLabel: option.label || "Gói lưu trú",
+        pricingMode: "INCLUDED", pricePerPerson: 0, roomPricePerNight: 0,
+        maxGuests: Number(option.max_guests_per_room || 2), nights: Number(option.nights || 1),
+        packagePricePerPerson: packagePrice, baseTourPrice: Number(tour.price || 0),
+        note: option.note || "", estimatedPerPerson: packagePrice
+    };
+    window.updateBookingPackagePrice();
+};
+
+window.updateBookingPackagePrice = function() {
+    const tour = window.bookingCurrentTour;
+    if (!tour) return;
+    const people = Math.max(1, Number(document.getElementById("bookingPeople")?.value || 1));
+    const perPerson = Number(window.selectedTourHotelOption?.packagePricePerPerson ?? tour.price ?? 0);
+    const perPersonEl = document.getElementById("bookingPackagePerPerson");
+    const peopleEl = document.getElementById("bookingPackagePeople");
+    const totalEl = document.getElementById("bookingPackageTotal");
+    if (perPersonEl) perPersonEl.textContent = formatPrice(perPerson);
+    if (peopleEl) peopleEl.textContent = people + " người";
+    if (totalEl) totalEl.textContent = formatPrice(perPerson * people);
+};
 
 
 // ================================
