@@ -5,7 +5,7 @@ const slugify=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').r
 const money=v=>new Intl.NumberFormat('vi-VN').format(Number(v)||0)+'đ';
 function msg(s,bad){el('notice').textContent=s;el('notice').style.color=bad?'#b42318':'#087a50';window.scrollTo({top:0,behavior:'smooth'});}
 el('name').addEventListener('input',()=>{if(!el('hotelId').value)el('slug').value=slugify(el('name').value);});
-el('reset').addEventListener('click',resetHotel);el('optionReset').addEventListener('click',resetOption);el('refreshHotelsButton')?.addEventListener('click',loadAll);
+el('resetHotelButton').addEventListener('click',resetHotel);el('optionReset').addEventListener('click',resetOption);el('refreshHotelsButton')?.addEventListener('click',loadAll);
 function resetHotel(){el('hotelForm').reset();el('hotelId').value='';el('sort').value='0';el('active').checked=true;el('formTitle').textContent='Thêm khách sạn';}
 function resetOption(){el('optionForm').reset();el('optionId').value='';el('mode').value='INCLUDED';el('personPrice').value='0';el('roomPrice').value='0';el('maxGuests').value='2';el('nights').value='1';el('optionActive').checked=true;}
 async function loadAll(){try{const r=await Promise.all([supabaseClient.from('hotels').select('*').order('sort_order').order('name'),supabaseClient.from('tours').select('id,name,destination,price').order('name'),supabaseClient.from('tour_hotel_options').select('*').order('sort_order')]);const bad=r.find(x=>x.error);if(bad)throw bad.error;hotels=r[0].data||[];tourRows=r[1].data||[];options=r[2].data||[];renderHotels();fillOptions();renderOptionList();}catch(e){msg('Không tải được dữ liệu. Hãy chạy migration Supabase trước: '+e.message,true);}}
