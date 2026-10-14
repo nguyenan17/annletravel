@@ -272,7 +272,12 @@ async function loadBookings() {
                 note,
                 status,
                 created_at,
-                updated_at
+                updated_at,
+                hotel_name_snapshot,
+                room_type_snapshot,
+                pricing_mode_snapshot,
+                hotel_amount_snapshot,
+                total_amount_snapshot
             `)
             .order("created_at", { ascending: false });
 
@@ -307,7 +312,7 @@ function renderBookings() {
     if (filteredBookings.length === 0) {
         bookingTableBody.innerHTML = `
             <tr>
-                <td colspan="8" class="empty-booking">Không có đơn đăng ký nào.</td>
+                <td colspan="9" class="empty-booking">Không có đơn đăng ký nào.</td>
             </tr>
         `;
         return;
@@ -329,6 +334,7 @@ function renderBookings() {
                 <td>${escapeHtml(tourName)}</td>
                 <td>${booking.people}</td>
                 <td>${escapeHtml(booking.phone)}</td>
+                <td><div class="booking-note">${escapeHtml(booking.hotel_name_snapshot ? (booking.hotel_name_snapshot + (booking.room_type_snapshot ? " · " + booking.room_type_snapshot : "") + (booking.total_amount_snapshot != null ? " · Tổng: " + new Intl.NumberFormat("vi-VN").format(Number(booking.total_amount_snapshot) || 0) + "đ" : "")) : "Không chọn khách sạn")}</div></td>
                 <td><div class="booking-note">${escapeHtml(booking.note || "-")}</div></td>
                 <td><div class="booking-date">${createdDate}</div></td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
