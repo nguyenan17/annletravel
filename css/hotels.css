@@ -14,3 +14,66 @@
 .booking-package-price .booking-package-total{grid-column:1/-1;padding-top:12px;border-top:1px solid #dce7ed}
 .booking-package-price .booking-package-total strong{font-size:25px;color:#087fb9}
 @media(max-width:520px){.booking-package-price{grid-template-columns:1fr}.booking-package-price .booking-package-total{grid-column:auto}}
+
+/* ANNLETRAVEL booking modal refresh */
+.booking-modal{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.booking-overlay{position:fixed;inset:0;background:rgba(8,26,40,.68);backdrop-filter:blur(5px)}
+.booking-modal-content{position:relative;z-index:1;width:min(100%,650px);max-height:calc(100vh - 40px);overflow-y:auto;background:#fff;border-radius:24px;padding:30px;box-shadow:0 28px 90px rgba(0,0,0,.28);color:#183348}
+.booking-modal-content .booking-close{position:absolute;right:17px;top:15px;width:38px;height:38px;border:0;border-radius:50%;background:#f1f5f8;color:#385164;font-size:25px;cursor:pointer;line-height:1}
+.booking-modal-heading{padding:4px 36px 20px 0}
+.booking-eyebrow{font-size:11px;letter-spacing:1.8px;font-weight:850;color:#0780b8}
+.booking-modal-heading h2{font-size:clamp(25px,4vw,32px);line-height:1.15;margin:9px 0;color:#12384f}
+.booking-modal-heading p{margin:0;color:#667987;font-size:13px;line-height:1.6}
+.booking-tour-summary{display:flex;gap:14px;padding:15px;background:linear-gradient(120deg,#eef8fc,#f7fbfd);border:1px solid #dcecf4;border-radius:15px;margin-bottom:24px}
+.booking-tour-summary-icon{display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:12px;background:#d8eff9;color:#0878a8;font-size:22px}
+.booking-tour-summary-copy{display:flex;flex-direction:column;gap:5px;min-width:0}
+.booking-tour-summary-copy strong{font-size:16px;color:#16394e;line-height:1.4}
+.booking-tour-summary-copy span{font-size:12px;color:#607786;line-height:1.45}
+.booking-form-redesigned{display:flex;flex-direction:column;gap:15px}
+.booking-form-section-title{display:flex;gap:11px;align-items:center;margin-top:2px}
+.booking-form-section-title>span{display:grid;place-items:center;width:31px;height:31px;border-radius:10px;background:#e6f5fb;color:#087eaf;font-size:12px;font-weight:850}
+.booking-form-section-title div{display:flex;flex-direction:column;gap:2px}
+.booking-form-section-title strong{font-size:15px;color:#17394d}
+.booking-form-section-title small{font-size:11px;color:#758692}
+.booking-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.booking-form-redesigned .form-group{margin:0;min-width:0}
+.booking-form-redesigned label{display:block;margin-bottom:7px;font-size:12px;font-weight:750;color:#344f60}
+.booking-form-redesigned label em{color:#e04e54;font-style:normal}
+.booking-form-redesigned label span{font-weight:450;color:#82919a}
+.booking-form-redesigned input,.booking-form-redesigned select,.booking-form-redesigned textarea{box-sizing:border-box;width:100%;min-height:46px;padding:12px 13px;border:1px solid #d8e2e8;border-radius:10px;background:#fff;color:#203b4d;font:inherit;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+.booking-form-redesigned textarea{resize:vertical;min-height:82px}
+.booking-form-redesigned input:focus,.booking-form-redesigned select:focus,.booking-form-redesigned textarea:focus{border-color:#1591c2;box-shadow:0 0 0 3px rgba(21,145,194,.12)}
+.booking-people-field{max-width:220px}
+.booking-hotel-picker{padding:0;border:0;background:transparent;margin:0}
+.booking-field-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.booking-field-heading label{margin:0}
+.booking-field-heading>span{font-size:10px;font-weight:750;color:#17744f;background:#eaf8f0;border-radius:20px;padding:6px 9px}
+.booking-hotel-card-list{display:grid;grid-template-columns:1fr;gap:9px}
+.booking-hotel-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px;border:1px solid #dce5eb;border-radius:13px;background:#fff;cursor:pointer;transition:border-color .18s,background .18s,box-shadow .18s;color:inherit}
+.booking-hotel-card:hover{border-color:#8bc7df}
+.booking-hotel-card.selected{border:1.5px solid #0787ba;background:#f1faff;box-shadow:0 0 0 2px rgba(7,135,186,.09)}
+.booking-hotel-card>img,.booking-hotel-card-placeholder{width:76px;height:70px;flex:0 0 76px;object-fit:cover;border-radius:9px;background:#edf5f8}
+.booking-hotel-card-placeholder{display:grid;place-items:center;font-size:25px}
+.booking-hotel-card-copy{display:flex;flex:1;flex-direction:column;gap:5px;min-width:0}
+.booking-hotel-card-copy strong{font-size:12px;line-height:1.45;color:#1b3d51}
+.booking-hotel-card-copy>span{font-size:10px;color:#74848f}
+.booking-hotel-card-copy b{font-size:16px;color:#087fb5}
+.booking-hotel-card-copy b small{font-size:10px;font-weight:500;color:#6b7d88;margin-left:4px}
+.booking-hotel-check{display:grid;place-items:center;width:22px;height:22px;flex:0 0 22px;border:1px solid #c9d7df;border-radius:50%;color:transparent;font-size:12px;font-weight:900}
+.booking-hotel-card.selected .booking-hotel-check{background:#0787ba;border-color:#0787ba;color:#fff}
+.booking-note{font-size:11px;line-height:1.6;color:#748590;margin:8px 0 0}
+.booking-no-hotel{display:flex;gap:10px;padding:13px;border:1px solid #e2eaf0;border-radius:12px;background:#f7fafc;color:#647783}
+.booking-no-hotel>span{font-weight:900;color:#1683ad}
+.booking-no-hotel p{margin:0;font-size:12px;line-height:1.6}
+.booking-no-hotel strong{color:#2c4c5e}
+.booking-price-panel{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:17px;border:1px solid #dcebf2;border-radius:15px;background:linear-gradient(135deg,#f3faff,#f8fbfd)}
+.booking-price-panel>div{display:flex;flex-direction:column;gap:6px}
+.booking-price-panel>div>span{font-size:11px;color:#687d89}
+.booking-price-panel>div>strong{font-size:17px;color:#1a4055}
+.booking-price-panel .booking-price-total{grid-column:1/-1;display:flex;flex-direction:row;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid #dce8ee}
+.booking-price-panel .booking-price-total>span{font-size:13px;font-weight:750;color:#26485c}
+.booking-price-panel .booking-price-total>strong{font-size:clamp(22px,4vw,27px);color:#0782b6;font-weight:900}
+.booking-price-panel>p{grid-column:1/-1;margin:0;font-size:10px;color:#778792}
+.booking-submit-button{display:flex!important;justify-content:center;align-items:center;gap:12px;width:100%;min-height:50px;border:0;border-radius:12px;font-weight:800;box-shadow:0 8px 18px rgba(0,126,181,.17)}
+.booking-privacy-note{text-align:center;margin:0;color:#89959d;font-size:10px;line-height:1.5}
+@media(max-width:540px){.booking-modal{padding:8px;align-items:flex-end}.booking-modal-content{max-height:calc(100vh - 16px);padding:22px 17px;border-radius:20px 20px 14px 14px}.booking-form-grid{grid-template-columns:1fr}.booking-people-field{max-width:none}.booking-tour-summary{padding:12px}.booking-hotel-card>img,.booking-hotel-card-placeholder{width:65px;height:62px;flex-basis:65px}.booking-price-panel{gap:10px;padding:13px}.booking-price-panel .booking-price-total{align-items:flex-start;gap:8px;flex-direction:column}}
