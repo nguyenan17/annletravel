@@ -67,6 +67,7 @@ function showAdminSection(sectionName, updateHash = true) {
         bookings: "adminSectionBookings",
         destinations: "adminSectionDestinations",
         services: "adminSectionServices",
+        hotels: "adminSectionHotels",
         tickets: "adminSectionTickets"
     };
 
@@ -87,6 +88,7 @@ function showAdminSection(sectionName, updateHash = true) {
         }
     }
 
+    if (sectionName === "hotels" && typeof window.initHotelManagement === "function") window.initHotelManagement();
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
