@@ -62,7 +62,15 @@
         'Thành tựu & dấu ấn': { en: 'Achievements & milestones', zh: '成就与里程碑', ko: '성과와 발자취', ja: '実績と歩み' },
         'Khách hàng nói gì?': { en: 'What our customers say', zh: '客户评价', ko: '고객 후기', ja: 'お客様の声' },
         'Cần tư vấn?': { en: 'Need advice?', zh: '需要咨询？', ko: '상담이 필요하신가요?', ja: 'ご相談ですか？' },
-        'Không biết nên chọn vé nào?': { en: 'Not sure which ticket to choose?', zh: '不知道该选择哪张票？', ko: '어떤 티켓을 선택해야 할지 모르시나요?', ja: 'どのチケットを選べばよいか分かりませんか？' }
+        'Không biết nên chọn vé nào?': { en: 'Not sure which ticket to choose?', zh: '不知道该选择哪张票？', ko: '어떤 티켓을 선택해야 할지 모르시나요?', ja: 'どのチケットを選べばよいか分かりませんか？' },
+        'Vé tàu & du thuyền': { en: 'Boat tickets & cruises', zh: '船票与游轮', ko: '보트 티켓 및 크루즈', ja: '船のチケット・クルーズ' },
+        'Vé tàu hỏa': { en: 'Train tickets', zh: '火车票', ko: '기차표', ja: '鉄道チケット' },
+        'Tàu thuyền & combo': { en: 'Boats & packages', zh: '船只与套餐', ko: '선박 및 패키지', ja: '船舶・パッケージ' },
+        'Gói vé & combo': { en: 'Tickets & packages', zh: '门票与套餐', ko: '티켓 및 패키지', ja: 'チケット・パッケージ' },
+        'Du thuyền ngủ đêm': { en: 'Overnight cruise', zh: '过夜游轮', ko: '야간 크루즈', ja: '宿泊クルーズ' },
+        'Khám phá đội tàu': { en: 'Explore our fleet', zh: '探索船队', ko: '선박 둘러보기', ja: '船舶を探す' },
+        'Xem tàu': { en: 'View vessel', zh: '查看船只', ko: '선박 보기', ja: '船を見る' },
+        'Chọn tàu và gói dịch vụ': { en: 'Choose a vessel and package', zh: '选择船只和套餐', ko: '선박 및 패키지 선택', ja: '船とパッケージを選択' }
     };
     const reverse = {};
     Object.keys(pairs).forEach(vi => Object.keys(pairs[vi]).forEach(lang => { (reverse[lang] ||= {})[pairs[vi][lang]] = vi; }));
