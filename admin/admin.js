@@ -176,6 +176,7 @@ async function showDashboard() {
 
     await loadTours();
     await loadBookings();
+    await loadTourVesselPackageOptions();
 }
 
 
@@ -552,6 +553,7 @@ addTourButton.addEventListener(
         document.getElementById(
             "tourId"
         ).value = "";
+        renderTourVesselPackageOptions([]);
 
         tourModal.classList.remove(
             "hidden"
@@ -788,6 +790,7 @@ window.editTour =
         tourModal.classList.remove(
             "hidden"
         );
+        loadTourVesselPackageOptions(tour.id);
     };
 
 function renderExistingGallery() {
@@ -1708,6 +1711,91 @@ async function deleteTourStorageImages(imageUrls = []) {
 }
 
 // =========================
+/* Reusable vessel package picker for tour create/edit */
+let adminVesselPackages = [];
+let adminVessels = [];
+let adminTourVesselOptions = [];
+
+function renderTourVesselPackageOptions(assignments = []) {
+    const root = document.getElementById("tourVesselPackageOptions");
+    if (!root) return;
+    if (!adminVesselPackages.length) {
+        root.innerHTML = '<p class="image-help">Chưa có gói tàu nào. Hãy tạo tàu và gói tại <a href="vessels.html" target="_blank" rel="noopener">Quản lý tàu thuyền & combo</a>.</p>';
+        return;
+    }
+    const byPackage = new Map((assignments || []).map(item => [String(item.vessel_package_id), item]));
+    root.innerHTML = adminVesselPackages.map(pkg => {
+        const vessel = adminVessels.find(v => String(v.id) === String(pkg.vessel_id));
+        const selected = byPackage.get(String(pkg.id));
+        const checked = !!selected;
+        const price = selected?.price_per_person == null ? "" : String(selected.price_per_person);
+        const money = Number(pkg.price_from || 0).toLocaleString("vi-VN");
+        return '<div class="tour-vessel-option"><div><label><input type="checkbox" class="tour-vessel-package-check" value="' + escapeHtml(pkg.id) + '"' + (checked ? ' checked' : '') + '><span>' + escapeHtml(pkg.name) + '<small>' + escapeHtml(vessel?.name || "Tàu") + ' · ' + escapeHtml(pkg.duration || "Chưa ghi thời lượng") + (pkg.meal_plan ? ' · ' + escapeHtml(pkg.meal_plan) : '') + ' · Giá mặc định ' + money + ' đ/người</small></span></label></div><div><label for="vessel-price-' + escapeHtml(pkg.id) + '">Giá riêng tour (đ/người)</label><input id="vessel-price-' + escapeHtml(pkg.id) + '" class="price-override tour-vessel-price" data-package-id="' + escapeHtml(pkg.id) + '" type="number" min="0" step="1000" placeholder="Dùng giá gói" value="' + escapeHtml(price) + '"></div></div>';
+    }).join("");
+}
+
+async function loadTourVesselPackageOptions(tourId = null) {
+    const root = document.getElementById("tourVesselPackageOptions");
+    if (!root) return;
+    try {
+        const [vesselResult, packageResult] = await Promise.all([
+            supabaseClient.from("vessels").select("id,name").eq("active", true).order("sort_order").order("name"),
+            supabaseClient.from("vessel_packages").select("*").eq("active", true).order("sort_order").order("name")
+        ]);
+        if (vesselResult.error) throw vesselResult.error;
+        if (packageResult.error) throw packageResult.error;
+        adminVessels = vesselResult.data || [];
+        adminVesselPackages = packageResult.data || [];
+        let assignments = [];
+        if (tourId) {
+            const { data, error } = await supabaseClient.from("tour_vessel_options").select("*").eq("tour_id", String(tourId)).order("sort_order");
+            if (error) throw error;
+            assignments = data || [];
+        }
+        adminTourVesselOptions = assignments;
+        renderTourVesselPackageOptions(assignments);
+    } catch (error) {
+        console.warn("Vessel package picker unavailable:", error);
+        root.innerHTML = '<p class="image-help">Chưa tải được danh mục tàu. Hãy kiểm tra đã chạy migration <code>20261021_vessel_catalogue_and_combos.sql</code> trong Supabase chưa. Lỗi: ' + escapeHtml(error.message || error) + '</p>';
+    }
+}
+
+async function saveTourVesselAssignments(tourId) {
+    const root = document.getElementById("tourVesselPackageOptions");
+    if (!root) return;
+    const selected = Array.from(root.querySelectorAll(".tour-vessel-package-check:checked")).map(check => {
+        const packageId = check.value;
+        const priceInput = root.querySelector('.tour-vessel-price[data-package-id="' + CSS.escape(packageId) + '"]');
+        return { vessel_package_id: packageId, price_per_person: priceInput && priceInput.value.trim() !== "" ? Number(priceInput.value) : null };
+    });
+    const { data: existing, error: loadError } = await supabaseClient.from("tour_vessel_options").select("id,vessel_package_id").eq("tour_id", String(tourId));
+    if (loadError) throw loadError;
+    const existingByPackage = new Map((existing || []).map(row => [String(row.vessel_package_id), row]));
+    const rows = selected.map((item, index) => ({
+        tour_id: String(tourId),
+        vessel_package_id: item.vessel_package_id,
+        price_per_person: item.price_per_person,
+        pricing_mode: "INCLUDED",
+        label: "",
+        note: "",
+        active: true,
+        sort_order: index * 10,
+        updated_at: new Date().toISOString()
+    }));
+    if (rows.length) {
+        const { error } = await supabaseClient.from("tour_vessel_options").upsert(rows, { onConflict: "tour_id,vessel_package_id" });
+        if (error) throw error;
+    }
+    const keep = new Set(selected.map(item => String(item.vessel_package_id)));
+    for (const row of existing || []) {
+        if (!keep.has(String(row.vessel_package_id))) {
+            const { error } = await supabaseClient.from("tour_vessel_options").delete().eq("id", row.id);
+            if (error) throw error;
+        }
+    }
+}
+
+// =========================
 // SAVE TOUR
 // =========================
 
@@ -1991,6 +2079,14 @@ tourForm.addEventListener(
                 );
             }
 
+
+            const savedTourId = editingTourId || tourData.id;
+            try {
+                await saveTourVesselAssignments(savedTourId);
+            } catch (vesselError) {
+                console.error("Save tour vessel packages error:", vesselError);
+                alert("Tour đã được lưu, nhưng chưa cập nhật được các gói tàu. Hãy kiểm tra migration tàu thuyền trong Supabase và sửa tour để thử lại.\\n\\n" + vesselError.message);
+            }
 
             closeModal();
 
