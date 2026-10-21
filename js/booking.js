@@ -76,6 +76,21 @@ async function submitBooking(event, tourId) {
             note = note ? note + "\n\n" + snapshot : snapshot;
         }
 
+        // Preserve selected vessel ticket/combo details with the booking request.
+        const vesselOption = window.selectedTourVesselPackage;
+        if (vesselOption && String(vesselOption.id || "")) {
+            const vesselSnapshot = [
+                "[LỰA CHỌN TÀU THUYỀN]",
+                "Tàu: " + String(vesselOption.vesselName || ""),
+                "Gói: " + String(vesselOption.packageName || ""),
+                "Loại gói: " + String(vesselOption.packageType || ""),
+                "Bữa ăn: " + String(vesselOption.mealPlan || "Không ghi rõ"),
+                "Giá tham khảo/người: " + new Intl.NumberFormat("vi-VN").format(Number(vesselOption.pricePerPerson || 0)) + "đ",
+                vesselOption.note ? "Ghi chú: " + String(vesselOption.note) : ""
+            ].filter(Boolean).join(" | ");
+            note = note ? note + "\\n\\n" + vesselSnapshot : vesselSnapshot;
+        }
+
         const bookingRpc = selectedTour?.unlimited_seats
             ? "create_booking_unlimited"
             : "create_booking";
