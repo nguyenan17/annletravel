@@ -88,7 +88,7 @@ async function submitBooking(event, tourId) {
                 "Giá tham khảo/người: " + new Intl.NumberFormat("vi-VN").format(Number(vesselOption.pricePerPerson || 0)) + "đ",
                 vesselOption.note ? "Ghi chú: " + String(vesselOption.note) : ""
             ].filter(Boolean).join(" | ");
-            note = note ? note + "\\n\\n" + vesselSnapshot : vesselSnapshot;
+            note = note ? note + "\n\n" + vesselSnapshot : vesselSnapshot;
         }
 
         const bookingRpc = selectedTour?.unlimited_seats
