@@ -143,5 +143,30 @@ with check (exists (
     select 1 from public.admin_users au where au.user_id = auth.uid()
 ));
 
+-- Keep publication server-controlled. Admin UI can approve/reject; it cannot mark content published.
+create or replace function public.guard_marketing_content_status()
+returns trigger
+language plpgsql
+as $
+begin
+    if new.status = 'published' and coalesce(auth.role(), '') <> 'service_role' then
+        raise exception 'Publishing is only allowed through the trusted server-side publisher';
+    end if;
+
+    if new.status = 'scheduled'
+       and old.status not in ('approved', 'scheduled')
+       and coalesce(auth.role(), '') <> 'service_role' then
+        raise exception 'Content must be approved before it can be scheduled';
+    end if;
+
+    return new;
+end;
+$;
+
+drop trigger if exists marketing_content_status_guard on public.marketing_content;
+create trigger marketing_content_status_guard
+before update of status on public.marketing_content
+for each row execute function public.guard_marketing_content_status();
+
 -- Deliberately no public read policy and no social-publishing trigger.
 -- Only a trusted server-side function/worker may use privileged credentials.
