@@ -471,8 +471,8 @@ function renderStats() {
 // =========================
 
 function renderTours() {
-    const search = (document.getElementById("tourAdminSearch")?.value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().trim();
-    const visibleTours = tours.filter(tour => !search || `${tour.name || ""} ${tour.destination || ""}`.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().includes(search));
+    const search = (document.getElementById("tourAdminSearch")?.value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const visibleTours = tours.filter(tour => !search || `${tour.name || ""} ${tour.destination || ""}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(search));
     const count = document.getElementById("tourAdminCount");
     if (count) count.textContent = `${visibleTours.length} / ${tours.length} tour`;
     if (visibleTours.length === 0) {
