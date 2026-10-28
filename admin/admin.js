@@ -471,7 +471,11 @@ function renderStats() {
 // =========================
 
 function renderTours() {
-    if (tours.length === 0) {
+    const search = (document.getElementById("tourAdminSearch")?.value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().trim();
+    const visibleTours = tours.filter(tour => !search || `${tour.name || ""} ${tour.destination || ""}`.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().includes(search));
+    const count = document.getElementById("tourAdminCount");
+    if (count) count.textContent = `${visibleTours.length} / ${tours.length} tour`;
+    if (visibleTours.length === 0) {
         tourTableBody.innerHTML = `
             <tr>
                 <td colspan="6">Chưa có tour nào.</td>
@@ -480,7 +484,7 @@ function renderTours() {
         return;
     }
 
-    tourTableBody.innerHTML = tours.map(tour => {
+    tourTableBody.innerHTML = visibleTours.map(tour => {
         const date = tour.is_daily ? "Hằng ngày" : (tour.departure ? new Intl.DateTimeFormat("vi-VN").format(new Date(tour.departure + "T00:00:00")) : "Chưa xác định");
         const seatsLabel = tour.unlimited_seats ? "Không giới hạn" : String(Number(tour.seats || 0));
         const price = Number(tour.price || 0).toLocaleString("vi-VN");
@@ -507,6 +511,8 @@ function renderTours() {
     }).join("");
 }
 
+
+document.getElementById("tourAdminSearch")?.addEventListener("input", renderTours);
 
 // =========================
 // ESCAPE HTML
@@ -1021,7 +1027,7 @@ function renderItinerary() {
 
                         <textarea
                             class="itinerary-description"
-                            placeholder="Mô tả lịch trình trong ngày..."
+                            placeholder="Mỗi dòng một hoạt động hoặc mốc giờ. Ví dụ: 08:00 – Đón khách tại Hà Nội\n10:30 – Đến điểm tham quan\n12:00 – Dùng bữa trưa"
                             oninput="updateItineraryItem(
                                 ${index},
                                 'description',
