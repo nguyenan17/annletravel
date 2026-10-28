@@ -308,9 +308,9 @@ function getTourDurationDays(tour) {
     const explicit = Number(tour?.duration_days || tour?.days || 0);
     if (explicit > 0) return explicit;
     const text = `${tour?.name || ""} ${tour?.short || ""} ${tour?.duration || ""}`.toLowerCase();
-    const nights = text.match(/(\\d+)\\s*n\\s*(\\d+)\\s*[đd]/i);
+    const nights = text.match(/(\d+)\s*n\s*(\d+)\s*[đd]/i);
     if (nights) return Number(nights[1]);
-    const days = text.match(/(\\d+)\\s*(?:ngày|day|days)\\b/i);
+    const days = text.match(/(\d+)\s*(?:ngày|day|days)\b/i);
     if (days) return Number(days[1]);
     if (/hằng ngày|hang ngay|daily/.test(text)) return 1;
     return 0;
@@ -326,8 +326,8 @@ function matchesTourDuration(tour, filter) {
 }
 function matchesTourKeyword(tour, keyword) {
     if (!keyword) return true;
-    const haystack = `${tour?.name || ""} ${tour?.destination || ""} ${tour?.short || ""}`.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
-    const needle = keyword.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().trim();
+    const haystack = `${tour?.name || ""} ${tour?.destination || ""} ${tour?.short || ""}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const needle = keyword.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
     return haystack.includes(needle);
 }
 
@@ -556,7 +556,7 @@ async function filterTours() {
 
         filteredTours =
             filteredTours.filter(tour =>
-                tour.destination === destination
+                String(tour.destination || "").toLocaleLowerCase("vi").includes(destination.toLocaleLowerCase("vi"))
             );
 
     }
@@ -1526,14 +1526,14 @@ async function loadTourItinerary(tourId) {
         container.innerHTML =
             data.map(item => {
                 const lines = String(item.description || "")
-                    .split(/\\r?\\n/)
+                    .split(/\r?\n/)
                     .map(line => line.trim())
                     .filter(Boolean);
-                const bulletLines = lines.filter(line => /^(?:[-•*]|\\d+[.)])\\s*/.test(line));
-                const plainLines = lines.filter(line => !/^(?:[-•*]|\\d+[.)])\\s*/.test(line));
+                const bulletLines = lines.filter(line => /^(?:[-•*]|\d+[.)])\s*/.test(line));
+                const plainLines = lines.filter(line => !/^(?:[-•*]|\d+[.)])\s*/.test(line));
                 const body = [
                     plainLines.map(line => `<p>${escapeHtml(line)}</p>`).join(""),
-                    bulletLines.length ? `<ul>${bulletLines.map(line => `<li>${escapeHtml(line.replace(/^(?:[-•*]|\\d+[.)])\\s*/, ""))}</li>`).join("")}</ul>` : ""
+                    bulletLines.length ? `<ul>${bulletLines.map(line => `<li>${escapeHtml(line.replace(/^(?:[-•*]|\d+[.)])\s*/, ""))}</li>`).join("")}</ul>` : ""
                 ].join("");
                 return `
                     <article class="itinerary-day">
