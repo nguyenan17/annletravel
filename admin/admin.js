@@ -478,7 +478,7 @@ function renderTours() {
     if (visibleTours.length === 0) {
         tourTableBody.innerHTML = `
             <tr>
-                <td colspan="6">Chưa có tour nào.</td>
+                <td colspan="6">${search ? "Không tìm thấy tour phù hợp." : "Chưa có tour nào."}</td>
             </tr>
         `;
         return;
