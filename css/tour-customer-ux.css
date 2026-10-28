@@ -1,0 +1,23 @@
+/* ANNLETRAVEL — simple, clear tour discovery and itinerary UX */
+.tour-quick-filter.filter-box{grid-template-columns:minmax(190px,.9fr) minmax(170px,.7fr) minmax(230px,1.2fr) auto;align-items:end}
+.tour-quick-filter .filter-item input[type=search]{height:46px;padding:0 14px;border:1px solid #dfe8ed;border-radius:10px;background:#fff;color:#253642;font-size:14px;min-width:0}
+.tour-quick-filter .filter-item input:focus,.tour-quick-filter .filter-item select:focus{border-color:#00a8e8;box-shadow:0 0 0 3px rgba(0,168,232,.1);outline:none}
+.tour-quick-filter>.btn{min-width:112px}
+#allTours .tour-card{overflow:hidden}
+#allTours .tour-content{display:flex;flex-direction:column;min-height:220px}
+#allTours .tour-card h3{line-height:1.35}
+#allTours .tour-meta{color:#5b6f7b}
+#allTours .tour-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:14px}
+#allTours .tour-price small{font-size:12px;color:#75848d}
+#allTours .tour-price strong{color:#0077b6}
+#tourDetail .booking-box{z-index:4}
+#tourDetail #tourItinerary .itinerary-day{scroll-margin-top:90px}
+#tourDetail #tourItinerary .itinerary-day p+p{margin-top:8px}
+#tourDetail #tourItinerary .itinerary-day ul{margin:10px 0 0;padding-left:19px;color:#526572}
+#tourDetail #tourItinerary .itinerary-day li{padding:3px 0;line-height:1.7}
+#tourDetail .detail-grid .tour-quick-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}
+#tourDetail .tour-quick-fact{padding:14px;border:1px solid #e1edf3;border-radius:13px;background:#fff}
+#tourDetail .tour-quick-fact small{display:block;color:#70818b;font-size:11px;margin-bottom:5px}
+#tourDetail .tour-quick-fact strong{display:block;color:#123c58;font-size:14px}
+@media(max-width:760px){.tour-quick-filter.filter-box{grid-template-columns:1fr 1fr;gap:10px;padding:14px}.tour-quick-filter .filter-item:nth-child(3){grid-column:1/-1}.tour-quick-filter>.btn{width:100%;grid-column:1/-1}.tour-list-section .section-heading{align-items:flex-start;gap:12px;flex-direction:column}}
+@media(max-width:420px){.tour-quick-filter.filter-box{grid-template-columns:1fr}.tour-quick-filter .filter-item:nth-child(3),.tour-quick-filter>.btn{grid-column:auto}}
