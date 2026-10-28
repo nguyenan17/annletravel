@@ -302,6 +302,36 @@ async function renderMonthlyTours() {
 
 
 // ================================
+// TOUR DURATION HELPERS
+// ================================
+function getTourDurationDays(tour) {
+    const explicit = Number(tour?.duration_days || tour?.days || 0);
+    if (explicit > 0) return explicit;
+    const text = `${tour?.name || ""} ${tour?.short || ""} ${tour?.duration || ""}`.toLowerCase();
+    const nights = text.match(/(\\d+)\\s*n\\s*(\\d+)\\s*[đd]/i);
+    if (nights) return Number(nights[1]);
+    const days = text.match(/(\\d+)\\s*(?:ngày|day|days)\\b/i);
+    if (days) return Number(days[1]);
+    if (/hằng ngày|hang ngay|daily/.test(text)) return 1;
+    return 0;
+}
+function matchesTourDuration(tour, filter) {
+    if (!filter) return true;
+    const days = getTourDurationDays(tour);
+    if (!days) return false;
+    if (filter === "1") return days === 1;
+    if (filter === "2-3") return days >= 2 && days <= 3;
+    if (filter === "4+") return days >= 4;
+    return true;
+}
+function matchesTourKeyword(tour, keyword) {
+    if (!keyword) return true;
+    const haystack = `${tour?.name || ""} ${tour?.destination || ""} ${tour?.short || ""}`.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+    const needle = keyword.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().trim();
+    return haystack.includes(needle);
+}
+
+// ================================
 // ALL TOURS PAGE
 // ================================
 
@@ -329,6 +359,8 @@ async function renderAllTours() {
 
     const price =
         params.get("price") || "";
+    const duration = params.get("duration") || "";
+    const keyword = params.get("q") || "";
 
 
     let filteredTours = data;
@@ -398,6 +430,8 @@ async function renderAllTours() {
     }
 
 
+    filteredTours = filteredTours.filter(tour => matchesTourDuration(tour, duration) && matchesTourKeyword(tour, keyword));
+
     // ================================
     // UPDATE FILTER UI
     // ================================
@@ -407,6 +441,8 @@ async function renderAllTours() {
 
     const priceSelect =
         document.getElementById("filterPrice");
+    const durationSelect = document.getElementById("filterDuration");
+    const keywordInput = document.getElementById("filterKeyword");
 
 
     if (destinationSelect) {
@@ -417,6 +453,8 @@ async function renderAllTours() {
     if (priceSelect) {
         priceSelect.value = price;
     }
+    if (durationSelect) durationSelect.value = duration;
+    if (keywordInput) keywordInput.value = keyword;
 
 
     // ================================
@@ -503,6 +541,8 @@ async function filterTours() {
 
     const sort =
         document.getElementById("filterSort")?.value || "";
+    const duration = document.getElementById("filterDuration")?.value || "";
+    const keyword = document.getElementById("filterKeyword")?.value || "";
 
 
     let filteredTours = [...data];
@@ -1484,26 +1524,24 @@ async function loadTourItinerary(tourId) {
 
 
         container.innerHTML =
-            data.map(item => `
-
-                <div class="itinerary-day">
-
-                    <h3>
-                        Ngày ${item.day}: ${item.title}
-                    </h3>
-
-                    ${item.description
-                    ? `
-                                <p style="white-space: pre-line">
-                                    ${escapeHtml(item.description)}
-                                </p>
-                              `
-                    : ""
-                }
-
-                </div>
-
-            `).join("");
+            data.map(item => {
+                const lines = String(item.description || "")
+                    .split(/\\r?\\n/)
+                    .map(line => line.trim())
+                    .filter(Boolean);
+                const bulletLines = lines.filter(line => /^(?:[-•*]|\\d+[.)])\\s*/.test(line));
+                const plainLines = lines.filter(line => !/^(?:[-•*]|\\d+[.)])\\s*/.test(line));
+                const body = [
+                    plainLines.map(line => `<p>${escapeHtml(line)}</p>`).join(""),
+                    bulletLines.length ? `<ul>${bulletLines.map(line => `<li>${escapeHtml(line.replace(/^(?:[-•*]|\\d+[.)])\\s*/, ""))}</li>`).join("")}</ul>` : ""
+                ].join("");
+                return `
+                    <article class="itinerary-day">
+                        <h3><span class="itinerary-day-label">NGÀY ${escapeHtml(item.day)}</span> ${escapeHtml(item.title || "")}</h3>
+                        <div class="itinerary-day-content">${body || '<p>Lịch trình chi tiết đang được cập nhật.</p>'}</div>
+                    </article>
+                `;
+            }).join("");
 
 
     } catch (error) {
