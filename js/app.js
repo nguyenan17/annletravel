@@ -375,9 +375,9 @@ async function renderAllTours() {
         filteredTours =
             filteredTours.filter(
                 tour =>
-                    tour.destination
-                        .toLowerCase()
-                        .includes(destination.toLowerCase())
+                    `${tour.destination || ""} ${tour.name || ""} ${tour.short || ""}`
+                        .toLocaleLowerCase("vi")
+                        .includes(destination.toLocaleLowerCase("vi"))
             );
 
     }
@@ -556,7 +556,7 @@ async function filterTours() {
 
         filteredTours =
             filteredTours.filter(tour =>
-                String(tour.destination || "").toLocaleLowerCase("vi").includes(destination.toLocaleLowerCase("vi"))
+                `${tour.destination || ""} ${tour.name || ""} ${tour.short || ""}`.toLocaleLowerCase("vi").includes(destination.toLocaleLowerCase("vi"))
             );
 
     }
